@@ -10,7 +10,6 @@ Fitting functions for analyzing processivities, etc.
 # ==================================================
 
 from typing import Callable, Tuple, List, Dict, Optional
-from collections import defaultdict
 
 import numpy as np
 from scipy.stats import linregress

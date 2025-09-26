@@ -10,7 +10,6 @@ Analysis functions for analyzing results, etc.
 # ==================================================
 
 from typing import Callable, Tuple, List, Dict, Optional
-from collections import defaultdict
 
 import numpy as np
 from scipy.optimize import curve_fit

@@ -10,7 +10,6 @@ Writing functions for writing results, etc.
 # ==================================================
 import os
 from typing import Callable, Tuple, List, Dict, Optional
-from collections import defaultdict
 from pathlib import Path
 
 import numpy as np

@@ -10,7 +10,6 @@ Modeling functions for generating results, etc.
 # ==================================================
 
 from typing import Callable, Tuple, List, Dict, Optional
-from collections import defaultdict
 
 import numpy as np
 

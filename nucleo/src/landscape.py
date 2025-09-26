@@ -10,7 +10,6 @@ Landscape functions for generating chromatin, etc.
 # ==================================================
 
 from typing import Callable, Tuple, List, Dict, Optional
-from collections import defaultdict
 
 import numpy as np
 
