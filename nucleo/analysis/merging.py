@@ -106,7 +106,7 @@ def merging_parquet_files(root_directory, nt, tmax, dt, alphao, alphaf, beta, Lm
     # Concatenate and write the final result
     if dataframes:
         merged_df = pl.concat(dataframes)
-        last_address = f'{root_directory}/ncl_output.parquet'
+        last_address = f"{root_directory}/ncl_output.parquet"
         merged_df.write_parquet(last_address)
         print(f"All files merged and saved to {last_address}.")
     else:
@@ -118,7 +118,7 @@ def merging_parquet_files(root_directory, nt, tmax, dt, alphao, alphaf, beta, Lm
 # 2.3 : Getting and ordering configurations
 
 
-def getting_and_ordering_configurations(data_frame): 
+def getting_and_ordering_configurations(data_frame, scenario_path = Path.home() / "Documents" / "PhD" / "Workspace" / "nucleo" / "outputs" / "2025-01-01_PSMN"): 
     """
     We're extracting the different configurations of modeling and ordering them for a proper representation
 
@@ -168,6 +168,9 @@ def getting_and_ordering_configurations(data_frame):
     # Print
     for config in sorted_combinations_configs:
         print(config)
+
+    with open(f"{scenario_path}/scenarios.json", "w") as f:
+        json.dump(sorted_combinations_configs,f)
 
     return sorted_combinations_configs
 
@@ -277,18 +280,24 @@ def compute_heatmap_data(df: pl.DataFrame, config_list: list, speed_cols: list, 
 # ─────────────────────────────────────────────
 
 
+# 3.0 : Root
+root = Path.home() / "Documents" / "PhD" / "Workspace" / "nucleo" / "outputs" / "2025-01-01_PSMN"
+root_parquet = root / "ncl_output.parquet"
+
+
 # 3.1 : Asking confirmation
 ask_confirmation_input()
 
 
 # 3.2 : Merging
-root = Path.home() / "Documents" / "PhD" / "Workspace" / "nucleo" / "outputs" / "2025-01-01_PSMN"
 merged_df = merging_parquet_files(root_directory=root, nt=10000, tmax=100, dt=1, alphao=0, alphaf=1, beta=0, Lmin=0, Lmax=50000, origin=10000, bps=1)
+merged_df = pl.read_parquet(root_parquet)
+print(merged_df.head(5))
 
 
 # 3.3 : Configurations
 print('\nConfigurations :')
-sorted_combinations_configs = getting_and_ordering_configurations(merged_df)
+sorted_combinations_configs = getting_and_ordering_configurations(merged_df, root)
 
 
 # 3.4 : Comuting heatmaps
