@@ -1593,7 +1593,7 @@ def choose_configuration(config: str) -> dict:
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
-                "nt": 1_00,
+                "nt": 1_000,
                 "path": "mrc_test"
             }
         },
