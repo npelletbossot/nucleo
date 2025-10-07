@@ -1,5 +1,5 @@
 """
-nucleo.proba_functions
+proba_functions
 ------------------------
 Probability functions for P(s) input, etc.
 """

@@ -58,6 +58,7 @@ def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: i
     Exécute les fonctions en parallèle avec ou sans barre de progression.
     """
     process = partial(process_run, chromatin=chromatin, time=time)
+    set_working_environment()
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(process, p) for p in params]
@@ -75,6 +76,8 @@ def run_sequential(params: list[dict], chromatin: dict, time: dict, folder_path=
     Exécute les fonctions séquentiellement (utile pour profiling ou debug).
     """
     process = partial(process_run, chromatin=chromatin, time=time)
+    set_working_environment()
+
 
     for p in tqdm(params, desc="Processing sequentially"):
         try:

@@ -237,6 +237,13 @@ def calculate_obs_and_linker_distribution(
 # 2.2 : Results
 
 
+def theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest):
+        p_alpha = (s*alphao + l*alphaf) / (l+s) * (1-lmbda)
+        t_alpha = (1 / rtot_bind) + (1 / rtot_rest)
+        x_alpha = mu
+        return p_alpha / t_alpha * x_alpha
+
+
 def calculate_main_results(results: np.ndarray, dt: float, alpha_0: float, nt: int) -> tuple:
     """
     Calculate main statistics and derived results for a matrix of trajectories.

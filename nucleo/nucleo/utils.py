@@ -129,10 +129,3 @@ def listoflist_into_matrix(listoflist: list) -> np.ndarray:
 
 def exp_decay(t, y0, tau):
     return y0 * np.exp(-t / tau)
-
-
-def theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest):
-        p_alpha = (s*alphao + l*alphaf) / (l+s) * (1-lmbda)
-        t_alpha = (1 / rtot_bind) + (1 / rtot_rest)
-        x_alpha = mu
-        return p_alpha / t_alpha * x_alpha

@@ -22,7 +22,7 @@ import pyarrow.parquet as pq
 # ─────────────────────────────────────────────
 
 
-def set_working_environment(base_dir: str = Path.home() / "Documents" / "PhD" / "Workspace" / "nucleo" / "outputs", subfolder: str = "") -> None:
+def set_working_environment(base_dir: str = Path.home() / "Documents" / "PhD" / "Workspace" / "outputs", subfolder: str = "") -> None:
     """
     Ensure the specified folder exists and change the current working directory to it.
         Check if the folder exists; if not, create it
