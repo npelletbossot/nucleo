@@ -10,6 +10,7 @@ Launching functions for simulations, etc.
 # ─────────────────────────────────────────────
 
 import numpy as np
+from pathlib import Path
 
 from itertools import product
 from functools import partial
@@ -58,7 +59,9 @@ def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: i
     Exécute les fonctions en parallèle avec ou sans barre de progression.
     """
     process = partial(process_run, chromatin=chromatin, time=time)
-    set_working_environment()
+    file_name = "nucleo"
+    file_name = "marcand"
+    set_working_environment(Path.cwd() / file_name / "outputs")
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(process, p) for p in params]
@@ -69,21 +72,6 @@ def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: i
                 future.result()
             except Exception as e:
                 print(f"Process failed with exception: {e}")
-
-
-def run_sequential(params: list[dict], chromatin: dict, time: dict, folder_path="") -> None:
-    """
-    Exécute les fonctions séquentiellement (utile pour profiling ou debug).
-    """
-    process = partial(process_run, chromatin=chromatin, time=time)
-    set_working_environment()
-
-
-    for p in tqdm(params, desc="Processing sequentially"):
-        try:
-            process(p)
-        except Exception as e:
-            print(f"Process failed with exception: {e}")
 
 
 def execute_in_parallel(config: str, execution_mode: str, slurm_params: dict) -> None:
@@ -106,13 +94,13 @@ def execute_in_parallel(config: str, execution_mode: str, slurm_params: dict) ->
 
     # Execution modes
     if execution_mode == 'PSMN':
-        run_parallel(task_params, chromatin, time, num_workers=slurm_params['num_cores_used'])
+        run_parallel(task_params, chromatin, time, num_workers=slurm_params['num_cores_used'], use_tqdm=False)
 
     elif execution_mode == 'PC':
         run_parallel(all_params, chromatin, time, num_workers=2, use_tqdm=True)
 
     elif execution_mode == 'SNAKEVIZ':
-        run_sequential(all_params, chromatin, time)
+        run_parallel(all_params, chromatin, time, num_workers=1, use_tqdm=False)
 
     else:
         raise ValueError(f"Unknown execution mode: {execution_mode}")
