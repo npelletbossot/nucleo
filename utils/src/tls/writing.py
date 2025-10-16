@@ -115,6 +115,8 @@ def writing_parquet(file:str, title: str, data_result: dict, data_info = False) 
         ValueError: If a value in the dictionary has an unsupported data type.
         Exception: If writing to the Parquet file fails for any reason.
     """
+    
+    os.path.join(Path.home() / "Documents" / "PhD" / "Workspace")
 
     # If you need to see the details od the data registered
     if data_info :

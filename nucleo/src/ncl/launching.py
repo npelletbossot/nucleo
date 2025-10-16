@@ -4,33 +4,79 @@ nucleo.launching_functions
 Launching functions for simulations, etc.
 """
 
-
 # ─────────────────────────────────────────────
-# 1 : Librairies
-# ─────────────────────────────────────────────
+# 1 : Libraries
+# ─────────────────────────────────────────────
 
-import numpy as np
+from __future__ import annotations
+
+import os
+import cProfile
+import pstats
+from enum import Enum
 from pathlib import Path
-
 from itertools import product
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from tqdm import tqdm
 from datetime import date
 
-from writing import set_working_environment
-from configs import choose_configuration
-from run import process_run
+import numpy as np
+from tqdm import tqdm
+
+from tls.writing import set_working_environment
+from ncl.configs import choose_configuration
+from ncl.run import process_run
 
 
 # ─────────────────────────────────────────────
-# 2 : Functions
-# ─────────────────────────────────────────────
+# 2 : Helpers & Enums
+# ─────────────────────────────────────────────
+
+class Mode(Enum):
+    PSMN = "PSMN"          # SLURM/cluster
+    PC = "PC"              # Local machine
+    SNAKEVIZ = "SNAKEVIZ"  # Local + profiling
 
 
-# 2.1 : Before launching
+def _detect_mode(execution_mode: str | None) -> Mode:
+    """
+    Priority:
+      1) explicit function arg `execution_mode`
+      2) env var EXECUTION_MODE
+      3) SLURM env auto-detection -> PSMN
+      4) default -> PC
+    """
+    # 1) Explicit
+    if execution_mode and execution_mode.upper() in Mode.__members__:
+        return Mode[execution_mode.upper()]
+
+    # 2) ENV
+    env_mode = os.getenv("EXECUTION_MODE", "").upper()
+    if env_mode in Mode.__members__:
+        return Mode[env_mode]
+
+    # 3) SLURM auto
+    slurm_markers = ("SLURM_JOB_ID", "SLURM_JOB_NAME", "SLURM_SUBMIT_DIR", "SLURM_CPUS_PER_TASK")
+    if any(k in os.environ for k in slurm_markers):
+        return Mode.PSMN
+
+    # 4) Default
+    return Mode.PC
 
 
+def _choose_num_workers(default_workers: int = 2) -> int:
+    """
+    Use SLURM_CPUS_PER_TASK if available, otherwise fallback.
+    """
+    return int(os.getenv("SLURM_CPUS_PER_TASK", default_workers))
+
+
+# ─────────────────────────────────────────────
+# 3 : Functions
+# ─────────────────────────────────────────────
+
+
+# 3.1 : Before launching
 def generate_param_combinations(cfg: dict) -> list[dict]:
     """
     Generates the list of parameter combinations from the configuration.
@@ -40,10 +86,14 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     rates = cfg['rates']
     meta = cfg['meta']
 
-    keys = ['alpha_choice', 's', 'l', 'bpmin', 'mu', 'theta', 'lmbda', 'alphao', 'alphaf', 'beta', 'rtot_bind', 'rtot_rest']
+    keys = [
+        'alpha_choice', 's', 'l', 'bpmin',
+        'mu', 'theta', 'lmbda', 'alphao', 'alphaf', 'beta',
+        'rtot_bind', 'rtot_rest'
+    ]
     values = product(
         geometry['alpha_choice'], geometry['s'], geometry['l'], geometry['bpmin'],
-        probas['mu'], probas['theta'], 
+        probas['mu'], probas['theta'],
         probas['lmbda'], probas['alphao'], probas['alphaf'], probas['beta'],
         rates['rtot_bind'], rates['rtot_rest']
     )
@@ -56,12 +106,9 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
 
 def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: int, use_tqdm: bool = False) -> None:
     """
-    Exécute les fonctions en parallèle avec ou sans barre de progression.
+    Runs processes in parallel with optional progress bar.
     """
     process = partial(process_run, chromatin=chromatin, time=time)
-    file_name = "nucleo"
-    file_name = "marcand"
-    set_working_environment(Path.cwd() / file_name / "outputs")
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(process, p) for p in params]
@@ -74,33 +121,61 @@ def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: i
                 print(f"Process failed with exception: {e}")
 
 
-def execute_in_parallel(config: str, execution_mode: str, slurm_params: dict) -> None:
+def execute_in_parallel(config: str,
+                        execution_mode: str | None = None,
+                        slurm_params: dict | None = None) -> None:
     """
     Launches multiple processes based on selected configuration and execution mode.
+    - Auto-detects SLURM (PSMN)
+    - Supports SNAKEVIZ profiling (cProfile -> snakeviz_profile.prof)
     """
+    mode = _detect_mode(execution_mode)
+    slurm_params = slurm_params or {}
+    
+    env_task_id   = int(os.getenv("SLURM_ARRAY_TASK_ID", os.getenv("SLURM_PROCID", "0")))
+    env_num_tasks = int(os.getenv("SLURM_ARRAY_TASK_COUNT", os.getenv("SLURM_NTASKS", "1")))
+    task_id       = int(slurm_params.get("task_id", env_task_id))
+    num_tasks     = int(slurm_params.get("num_tasks", env_num_tasks))
+    num_cores     = int(slurm_params.get("num_cores_used", _choose_num_workers()))
+
+
     cfg = choose_configuration(config)
-    chromatin = cfg["chromatin"]
-    time = cfg["time"]
+    project = cfg['project']
+    chromatin = cfg['chromatin']
+    time = cfg['time']
 
     all_params = generate_param_combinations(cfg)
 
-    # Split tasks by SLURM
-    task_id = slurm_params['task_id']
-    num_tasks = slurm_params['num_tasks']
-    task_params = np.array_split(all_params, num_tasks)[task_id]
-
-    folder_name = f"{cfg['meta']['path']}_{task_id}"
-    set_working_environment(subfolder = f"{str(date.today())}_{execution_mode} / {folder_name}")
-
-    # Execution modes
-    if execution_mode == 'PSMN':
-        run_parallel(task_params, chromatin, time, num_workers=slurm_params['num_cores_used'], use_tqdm=False)
-
-    elif execution_mode == 'PC':
-        run_parallel(all_params, chromatin, time, num_workers=2, use_tqdm=True)
-
-    elif execution_mode == 'SNAKEVIZ':
-        run_parallel(all_params, chromatin, time, num_workers=1, use_tqdm=False)
-
+    if mode == Mode.PSMN:
+        # Split équilibré par tâche SLURM
+        chunks = np.array_split(all_params, num_tasks)
+        this_params = list(chunks[task_id]) if num_tasks > 1 else all_params
+        num_workers = num_cores
+        base_dir = "/Xnfs/physbiochrom/npellet/nucleo_folder_Xnfs"
+        use_tqdm = False
+        task_suffix = str(task_id)
     else:
-        raise ValueError(f"Unknown execution mode: {execution_mode}")
+        this_params = all_params
+        num_workers = 2
+        base_dir = Path.home() / "Documents" / "PhD" / "Workspace"
+        use_tqdm = True
+        task_suffix = str(slurm_params.get('task_id', 0))
+
+    project_name   = project['project_name']
+    folder_name    = f"{cfg['meta']['path']}_{task_suffix}"
+    subfolder_name = f"{project_name}/outputs/{str(date.today())}_{mode.value}/{folder_name}"
+
+    set_working_environment(base_dir=base_dir, subfolder=subfolder_name)
+
+    if mode == Mode.SNAKEVIZ:
+        profile_path = Path("snakeviz_profile.prof")
+        pr = cProfile.Profile()
+        pr.enable()
+        try:
+            run_parallel(this_params, chromatin, time, num_workers=num_workers, use_tqdm=use_tqdm)
+        finally:
+            pr.disable()
+            pr.dump_stats(str(profile_path))
+            pstats.Stats(pr).sort_stats("cumtime").print_stats(30)
+    else:
+        run_parallel(this_params, chromatin, time, num_workers=num_workers, use_tqdm=use_tqdm)

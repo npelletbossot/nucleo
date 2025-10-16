@@ -12,16 +12,16 @@ Running functions for one simulation, etc.
 import gc
 import numpy as np
 
-from landscape import alpha_matrix_calculation
-from probabilities import proba_gamma
+from ncl.landscape import alpha_matrix_calculation
+from tls.probabilities import proba_gamma
 
-from models import gillespie_algorithm_one_step, gillespie_algorithm_two_steps
+from ncl.models import gillespie_algorithm_one_step, gillespie_algorithm_two_steps
 
-from utils import *
-from metrics import *
+from tls.utils import listoflist_into_matrix
+from ncl.metrics import *
 
-from fitting import fitting_in_two_steps
-from writing import inspect_data_types, writing_parquet
+from ncl.fitting import fitting_in_two_steps
+from tls.writing import inspect_data_types, writing_parquet
 
 
 # ─────────────────────────────────────────────

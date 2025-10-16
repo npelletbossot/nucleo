@@ -12,8 +12,8 @@ Analysis functions for analyzing results, etc.
 import numpy as np
 from scipy.optimize import curve_fit
 
-from utils import calculate_distribution, exp_decay
-from fitting import linear_fit
+from tls.utils import calculate_distribution, exp_decay
+from ncl.fitting import linear_fit
 
 
 # ─────────────────────────────────────────────
