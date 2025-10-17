@@ -20,7 +20,7 @@ import numpy as np
 # 2.1 : Generation
 
 
-def alpha_random(s:int, l:int, alphao:float, alphaf:float, L_min:int, Lmax:int, bps:int) -> np.ndarray:
+def alpha_random(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
     """
     Generates one random landscape
 
@@ -39,7 +39,7 @@ def alpha_random(s:int, l:int, alphao:float, alphaf:float, L_min:int, Lmax:int, 
     """
     np.random.seed()
 
-    alpha_array = np.full(int((Lmax-L_min)/bps), alphaf)    # creates a NumPy array of length Lmax filled with the value alphaf
+    alpha_array = np.full(int((Lmax-Lmin)/bps), alphaf)    # creates a NumPy array of length Lmax filled with the value alphaf
     T = int(Lmax / (l + s))                                 # how many blocks of size l + s can fit into the total length Lmax ; represents how many obstacle blocks can be inserted into the list
     max_pos = Lmax - (T * s)                                # determines the maximum possible position for obstacle blocks, taking into account the fact that each block occupies s positions 
 

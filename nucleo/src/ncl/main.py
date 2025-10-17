@@ -37,7 +37,7 @@ def main():
 # EXE_MODE = "PC"
 
 # Options: NU / BP / LSLOW / LSHIGH / MAP / SHORT_TEST / LONG_TEST
-CONFIG = "LONG_TEST"
+CONFIG = "SHORT_TEST"
 
 
 # ─────────────────────────────────────────────

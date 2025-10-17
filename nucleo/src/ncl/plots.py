@@ -25,17 +25,17 @@ fontsize = 16
 # - Fig1. Line 1 - #
 
 
-def plot_obstacle(s, l, origin, alpha_mean, text_size=fontsize, ax=None):
+def plot_obstacle(s, l, origin, alpha_mean, xmax = 1_000, text_size=fontsize, ax=None):
     ax.set_title(f'Mean obstacle for s={s} and l={l}', size=text_size)
-    ax.plot(alpha_mean, c='b', ls='-', label='mean obstacle', lw=0.10)
+    ax.plot(alpha_mean[0:xmax], c='b', ls='-', label='mean obstacle', lw=1)
     # ax.fill_between(np.arange(0, len(alpha_mean), 1), alpha_mean, step='post', color='b', alpha=0.3, label='accessible binding sites')
     ax.axvline(x=origin, c='r', ls='--', label=f'origin={origin}')
-    ax.set_xlabel('x (bp)', fontsize=text_size)
+    ax.set_xlabel('x (a.u.)', fontsize=text_size)
     ax.set_ylabel('alpha', fontsize=text_size)
-    ax.set_xlim([0, 50_000])
-    ax.set_ylim([0, 1])
+    ax.set_xlim([0, xmax])
+    ax.set_ylim([-0.10, 1.10])
     ax.grid(True, which='both')
-    ax.legend(fontsize=text_size, loc='upper right')
+    # ax.legend(fontsize=text_size, loc='upper right')
 
 
 def plot_obs_linker_distrib(obs_points, obs_distrib, link_points, link_distrib, text_size=16, ax=None):
@@ -76,7 +76,7 @@ def plot_probabilities(mu, theta, p, text_size=fontsize, ax=None):
     ax.set_xlim([0, 0+1000])
     ax.set_ylim([-0.005, 0.025])
     ax.set_ylabel('p(d)', size=text_size)
-    ax.set_xlabel('d', size=text_size)
+    ax.set_xlabel('d (a.u.)', size=text_size)
     ax.grid(True, which='both')
     ax.legend(fontsize=text_size, loc='upper right')
 
@@ -87,12 +87,12 @@ def plot_trajectories(tmax, times, results, results_mean, results_med, results_s
     # for _ in range(1, len(results)):
     #     ax.plot(results[_], drawstyle='steps-mid', lw=0.50, c='r')
     for i in range(9, 12):
-        ax.plot(results[i], drawstyle='steps-mid', lw=2, ls="--")
+        ax.plot(results[i], drawstyle='steps-mid', lw=2, ls="--", label=f"trajectory_{i-8}")
     # ax.errorbar(x=times, y=results_mean, yerr=results_std, c='b', ls='-', label=f'mean_trajectory', lw=1)
     ax.plot(times, results_mean, c='r', ls='-', label=f'mean_trajectory \nv_mean={np.round(v_mean,2)}', lw=2)
     # ax.plot(times, results_med, c='g', ls='--', label=f'med_trajectory', lw=1)
-    ax.set_xlabel('t', fontsize=text_size)
-    ax.set_ylabel('x (bp)', fontsize=text_size)
+    ax.set_xlabel('t (a.u.)', fontsize=text_size)
+    ax.set_ylabel('x (a.u.)', fontsize=text_size)
     ax.set_xlim([0, tmax])
     ax.set_ylim([0, 5_000])
     ax.grid(True, which='both')
@@ -149,7 +149,7 @@ def plot_speed_distribution(vi_points, vi_distrib, vi_mean, vi_med, vi_mp, text_
     ax.axvline(x=vi_med, label=f'vi_med = {np.round(vi_med,2)}', c='r', ls='--')
     ax.plot(vi_points, vi_distrib, c='b')
     ax.grid(True, which='both')
-    ax.set_xlabel('speeds', size=text_size)
+    ax.set_xlabel('speeds (a.u.)', size=text_size)
     ax.set_ylabel('distribution', size=text_size)
     ax.set_ylim([1e-5, 1e-1])
     ax.set_xlim([1e-1, 1e6])

@@ -81,8 +81,8 @@ def choose_configuration(config: str) -> dict:
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
-                "nt": 100,
-                "path": "nucleo_nu"
+                "nt": 10_000,
+                "path": f"{PROJECT["project_name"]}_nu"
             }
         },
 
@@ -107,7 +107,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": "nucleo_bp"
+                "path": f"{PROJECT["project_name"]}_bp"
             }
         },
 
@@ -132,7 +132,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": "nucleo_lslow"
+                "path": f"{PROJECT["project_name"]}_lslow"
             }
         },
 
@@ -157,7 +157,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": "nucleo_lshigh"
+                "path": f"{PROJECT["project_name"]}_lshigh"
             }
         },
 
@@ -182,7 +182,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 1_000,
-                "path": "nucleo_short_test"
+                "path": f"{PROJECT["project_name"]}_short_test"
             }
         },
         
@@ -208,7 +208,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 1_000,
-                "path": "nucleo_long_test"
+                "path": f"{PROJECT["project_name"]}_long_test"
             }
         },
 
@@ -234,7 +234,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 1_000,
-                "path": "nucleo_map"
+                "path": f"{PROJECT["project_name"]}_map"
             }
         }
         
