@@ -243,7 +243,7 @@ def choose_configuration(config: str) -> dict:
             "geometry": {
                 "alpha_choice": np.array(['ntrandom']),
                 "s": np.array([35], dtype=int),
-                "l": np.array([100, 67, 48, 34, 24, 17, 11, 7, 3, 0], dtype=int),
+                "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {

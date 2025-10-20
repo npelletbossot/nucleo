@@ -29,7 +29,7 @@ import polars as pl
 
 
 s = 35
-N = 10
+N = 100
 Lmin, Lmax = 0, 100  # bornes souhaitées pour l (entières)
 
 # d linéaire entre 1/(s+Lmax) et 1/(s+Lmin)
