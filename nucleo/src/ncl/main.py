@@ -16,7 +16,7 @@ from ncl.launching import execute_in_parallel
 
 # ─────────────────────────────────────────────
 # 2 : Functions
-#  ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
 
 def main():
     print('\n# --- Launched --- #\n')
@@ -31,18 +31,18 @@ def main():
 
 # ─────────────────────────────────────────────
 # 3 : Execution parameters
-#  ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
 
-# # Options: PSMN / PC / SNAKEVIZ
+# # Options: // PSMN / PC / SNAKEVIZ //
 # EXE_MODE = "PC"
 
-# Options: NU / BP / LSLOW / LSHIGH / MAP / SHORT_TEST / LONG_TEST
-CONFIG = "SHORT_TEST"
+# Options: // NU / BP / LSLOW / LSHIGH // SHORT_TEST / LONG_TEST // ACCESS / MAP //
+CONFIG = "ACCESS"
 
 
 # ─────────────────────────────────────────────
 # 4 : Entry point
-#  ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
 
 if __name__ == '__main__':
     main()

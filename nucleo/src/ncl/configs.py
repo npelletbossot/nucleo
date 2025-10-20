@@ -51,8 +51,8 @@ def choose_configuration(config: str) -> dict:
     }
 
     RATES = {
-        "rtot_bind": 1/6,   # Rate of binding
-        "rtot_rest": 1/6    # Rate of resting
+        "rtot_bind": 1/2,   # Rate of binding (1/6)
+        "rtot_rest": 1/2    # Rate of resting (1/6)
     }
 
     # ──────────────────────────────────
@@ -236,7 +236,33 @@ def choose_configuration(config: str) -> dict:
                 "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}_map"
             }
-        }
+        },
+        
+        
+        "ACCESS": {
+            "geometry": {
+                "alpha_choice": np.array(['ntrandom']),
+                "s": np.array([35], dtype=int),
+                "l": np.array([100, 67, 48, 34, 24, 17, 11, 7, 3, 0], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                "mu": np.array([60]),
+                "theta": np.array([30]),
+                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
+                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "beta": np.array([PROBAS["beta"]], dtype=float)
+            },
+            "rates": {
+                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+            },
+            "meta": {
+                "nt": 10_000,
+                "path": f"{PROJECT["project_name"]}_access"
+            }
+        },
         
     }
 
