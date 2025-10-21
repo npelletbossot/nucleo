@@ -195,7 +195,7 @@ def choose_configuration(config: str) -> dict:
                 "bpmin": np.array([0, 10], dtype=int)
             },
             "probas": {
-                "mu": np.arange(50, 550+1, 50),
+                "mu": np.arange(100+1, 550+1, 50),
                 "theta": np.arange(1, 100+1, 10),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
@@ -207,7 +207,7 @@ def choose_configuration(config: str) -> dict:
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
-                "nt": 1_000,
+                "nt": 100,
                 "path": f"{PROJECT["project_name"]}_long_test"
             }
         },
@@ -243,12 +243,13 @@ def choose_configuration(config: str) -> dict:
             "geometry": {
                 "alpha_choice": np.array(['ntrandom']),
                 "s": np.array([35], dtype=int),
-                "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
+                # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
+                "l": np.array([100, 82, 69, 58, 49, 42, 36, 31, 26, 22, 19, 16, 13, 11, 8, 6, 5, 3, 1, 0]),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
-                "mu": np.array([60]),
-                "theta": np.array([30]),
+                "mu": np.array([180]),
+                "theta": np.array([90]),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
