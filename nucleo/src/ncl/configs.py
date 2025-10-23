@@ -63,7 +63,7 @@ def choose_configuration(config: str) -> dict:
 
         "NU": {
             "geometry": {
-                "alpha_choice": np.array(['ntrandom', 'periodic', 'constantmean']),
+                "alpha_choice": np.array(['random', 'periodic', 'homogeneous']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -88,7 +88,7 @@ def choose_configuration(config: str) -> dict:
 
         "BP": {
             "geometry": {
-                "alpha_choice": np.array(['ntrandom']),
+                "alpha_choice": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([5, 10, 15], dtype=int)
@@ -113,7 +113,7 @@ def choose_configuration(config: str) -> dict:
 
         "LSLOW": {
             "geometry": {
-                "alpha_choice": np.array(['ntrandom']),
+                "alpha_choice": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([5, 15, 20, 25], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -138,7 +138,7 @@ def choose_configuration(config: str) -> dict:
 
         "LSHIGH": {
             "geometry": {
-                "alpha_choice": np.array(['ntrandom']),
+                "alpha_choice": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([50, 100, 150], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -163,7 +163,7 @@ def choose_configuration(config: str) -> dict:
 
         "SHORT_TEST": {
             "geometry": {
-                "alpha_choice": np.array(['ntrandom']),
+                "alpha_choice": np.array(['random', 'periodic', 'homogeneous']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10, 30, 50], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -189,7 +189,7 @@ def choose_configuration(config: str) -> dict:
         
         "LONG_TEST": {
             "geometry": {
-                "alpha_choice": np.array(['ntrandom', 'periodic']),
+                "alpha_choice": np.array(['random', 'periodic']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10, 50, 100, 150], dtype=int),
                 "bpmin": np.array([0, 10], dtype=int)
@@ -215,7 +215,7 @@ def choose_configuration(config: str) -> dict:
 
         "MAP": {
             "geometry": {
-                "alpha_choice": np.array(['constantmean']),
+                "alpha_choice": np.array(['homogeneous']),
                 "s": np.array([0], dtype=int),
                 "l": np.array([150], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -241,10 +241,10 @@ def choose_configuration(config: str) -> dict:
         
         "ACCESS": {
             "geometry": {
-                "alpha_choice": np.array(['ntrandom']),
+                "alpha_choice": np.array(['random']),
                 "s": np.array([35], dtype=int),
                 # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
-                "l": np.array([100, 82, 69, 58, 49, 42, 36, 31, 26, 22, 19, 16, 13, 11, 8, 6, 5, 3, 1, 0]),
+                "l": np.array([100, 83, 70, 59, 50, 43, 37, 32, 28, 24, 20, 17, 14, 12, 10, 8, 6, 4, 2, 1]),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {

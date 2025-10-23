@@ -68,7 +68,7 @@ theta_ryu_nm = 20  # nm Ryu
 ryu_nm_per_bp = 0.220
 mu_ryu_bp = mu_ryu_nm / ryu_nm_per_bp
 theta_ryu_bp = theta_ryu_nm / ryu_nm_per_bp
-print(f"\n mu_ryu_bp = {np.round(mu_ryu_bp)} \n theta_ryu_nm = {np.round(theta_ryu_bp)}")
+print(f"\n mu_ryu_bp = {np.round(mu_ryu_bp)} \n theta_ryu_bp = {np.round(theta_ryu_bp)}")
 
 # From bp_in_ryu to nm
 bp_per_nm = 3

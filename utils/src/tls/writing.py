@@ -129,6 +129,9 @@ def writing_parquet(file:str, title: str, data_result: dict, data_info = False) 
     # Prepare the data for Parquet
     prepared_data = {key: [prepare_value(value)] if not isinstance(value, list) else prepare_value(value)
                      for key, value in data_result.items()}
+    
+    prepared_data = {k: [prepare_value(v)] for k, v in data_result.items()}
+
 
     try:        
         table = pa.table(prepared_data)                                         # Create a PyArrow Table from the dictionary

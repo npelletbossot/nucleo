@@ -318,7 +318,7 @@ def calculate_position_histogram(results: list, Lmax: int, origin: int, tmax: in
         if total_count != 0:
             histograms_list[t] = np.divide(histograms_list[t], total_count)
         else:
-            histograms_list[t] = np.zeros_like(histograms_list[t])
+            histograms_list[t] = np.zeros_like(histograms_list[t], dtype=np.float64)
 
     # Convert the list of histograms to a NumPy array and transpose it
     histograms_array = np.copy(histograms_list).T
@@ -369,18 +369,20 @@ def calculate_timejump_distribution(t_matrix : np.ndarray, last_bin: float = 1e5
     tbj_bins = np.arange(0, last_bin + 1, 1)
 
     # Flatten t_matrix and compute time differences
-    tbj_list = np.diff(np.concatenate(t_matrix))               # Differences between jumps
-
+    flat = np.concatenate(t_matrix) if len(t_matrix) else np.array([], dtype=np.float64)
+    tbj_list = np.diff(flat)
+    
     # Create histogram
-    tbj_distrib, _ = np.histogram(tbj_list, bins=tbj_bins)     # Compute histogram
+    tbj_distrib, _ = np.histogram(tbj_list, bins=tbj_bins)
+    tbj_distrib = tbj_distrib.astype(np.float64)
 
-    # Normalize the distribution
-    if np.sum(tbj_distrib) != 0:
-        tbj_distrib = tbj_distrib / np.sum(tbj_distrib)  
+    # Normalizing with proper data type
+    s = tbj_distrib.sum()
+    if s != 0:
+        tbj_distrib = tbj_distrib / s
     else:
-        tbj_distrib = np.zeros_like(tbj_distrib)
+        tbj_distrib = np.zeros_like(tbj_distrib, dtype=np.float64)
 
-    # Return bin edges (excluding the last) and normalized distribution
     return tbj_bins[:-1], tbj_distrib
 
 
@@ -516,15 +518,15 @@ def calculate_instantaneous_statistics(
         dt_array[i] = dt[valid_speed]
         vi_array[i] = dv[valid_speed]
 
-    # # Concatenate arrays for all trajectories
-    # dx_array = np.concatenate(dx_array)
-    # dt_array = np.concatenate(dt_array)
-    # vi_array = np.concatenate(vi_array)
+    # Datas
+    dx_list = [arr for arr in dx_array if arr is not None and len(arr) > 0]
+    dt_list = [arr for arr in dt_array if arr is not None and len(arr) > 0]
+    vi_list = [arr for arr in vi_array if arr is not None and len(arr) > 0]
 
-    # Concatenate all valid segments
-    dx_array = np.concatenate([arr for arr in dx_array if arr is not None and len(arr) > 0])
-    dt_array = np.concatenate([arr for arr in dt_array if arr is not None and len(arr) > 0])
-    vi_array = np.concatenate([arr for arr in vi_array if arr is not None and len(arr) > 0])
+    # Float
+    dx_array = np.concatenate(dx_list).astype(np.float64) if dx_list else np.array([], dtype=np.float64)
+    dt_array = np.concatenate(dt_list).astype(np.float64) if dt_list else np.array([], dtype=np.float64)
+    vi_array = np.concatenate(vi_list).astype(np.float64) if vi_list else np.array([], dtype=np.float64)
 
     # Calculate distributions for Δx, Δt, and speeds
     dx_points, dx_distrib = calculate_distribution(dx_array, first_bin, last_bin, bin_width)
@@ -533,23 +535,23 @@ def calculate_instantaneous_statistics(
 
     # Compute statistics (mean, median, most probable values)
     if vi_distrib.size > 0:
-        dx_mean = np.mean(dx_array)
-        dx_med = np.median(dx_array)
-        dx_mp = dx_points[np.argmax(dx_distrib)]
+        dx_mean = float(np.mean(dx_array)) if dx_array.size else 0.0
+        dx_med = float(np.median(dx_array)) if dx_array.size else 0.0
+        dx_mp  = float(dx_points[np.argmax(dx_distrib)]) if dx_distrib.size else 0.0
 
-        dt_mean = np.mean(dt_array)
-        dt_med = np.median(dt_array)
-        dt_mp = dt_points[np.argmax(dt_distrib)]
+        dt_mean = float(np.mean(dt_array)) if dt_array.size else 0.0
+        dt_med  = float(np.median(dt_array)) if dt_array.size else 0.0
+        dt_mp   = float(dt_points[np.argmax(dt_distrib)]) if dt_distrib.size else 0.0
 
-        vi_mean = np.mean(vi_array)
-        vi_med = np.median(vi_array)
-        vi_mp = vi_points[np.argmax(vi_distrib)]
+        vi_mean = float(np.mean(vi_array)) if vi_array.size else 0.0
+        vi_med  = float(np.median(vi_array)) if vi_array.size else 0.0
+        vi_mp   = float(vi_points[np.argmax(vi_distrib)]) if vi_distrib.size else 0.0
 
     # Default values if distributions are empty
     else:
-        dx_mean, dx_med, dx_mp = 0.0, 0.0, 0.0
-        dt_mean, dt_med, dt_mp = 0.0, 0.0, 0.0
-        vi_mean, vi_med, vi_mp = 0.0, 0.0, 0.0
+        dx_mean = dx_med = dx_mp = 0.0
+        dt_mean = dt_med = dt_mp = 0.0
+        vi_mean = vi_med = vi_mp = 0.0
 
     # Return results
     return (

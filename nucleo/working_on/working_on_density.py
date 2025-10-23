@@ -51,8 +51,9 @@ paths = [str(p) for p in root.glob("*/**/*.parquet")] or [str(p) for p in root.g
 df_merged = pl.scan_parquet(paths).collect()
 df_sorted = df_merged.sort(by="l", descending=False)
 
-print(df_sorted.head)
-print(df_sorted.columns)
+# print(df_sorted.head)
+# print(df_sorted.columns)
+# print(df_sorted.row(0))
 
 # Values
 vi_med = df_sorted["vi_med"].to_numpy()
@@ -64,6 +65,25 @@ l      = df_sorted["l"].to_numpy()          # plusieurs l
 d      = 1 / (s + l)                        # plusieurs d
 
 # Plot
+plt.figure(figsize=(8,6))
+plt.plot(df_sorted["results_mean"][0], label=f"results_mean_0__l={l[0]}")
+plt.plot(df_sorted["results_mean"][1], label=f"results_mean_1__l={l[1]}")
+plt.plot(df_sorted["results_mean"][2], label=f"results_mean_2__l={l[2]}")
+plt.plot(df_sorted["results_mean"][3], label=f"results_mean_3__l={l[3]}")
+plt.legend()
+plt.show()
+
+
+print(df_sorted["l"])
+print(df_sorted["v_mean"])
+print(df_sorted["vi_med"])
+
+
+for line in range(len(l)):
+    print(np.count_nonzero(df_sorted["vi_distrib"][line].to_numpy()))
+
+
+# Plot
 plot = "density"
 plt.figure(figsize=(8,6))
 plt.title(f"mu={mu} - theta={th}")
@@ -71,7 +91,7 @@ if plot == "density":
     plt.scatter(d, vi_med, label="vi_med")
     plt.scatter(d, v_mean, label="v_mean")
     plt.xlabel("density")
-else : 
+elif plot == "linker": 
     plt.scatter(l, vi_med, label="vi_med")
     plt.scatter(l, v_mean, label="v_mean")
 plt.grid(True, which="both")
@@ -83,13 +103,15 @@ plt.show()
 # 4 : Speeds in function of linker and density
 # ─────────────────────────────────────────────
 
+# 700 - 300
+
 # Values
 tmax  = df_sorted["tmax"].to_numpy()[0]
 dt    = df_sorted["dt"].to_numpy()[0]
 results_list = df_sorted["results_mean"].to_list()
 
 # Plot
-cmap = plt.cm.prism
+cmap = plt.cm.jet
 norm = plt.Normalize(vmin=min(l), vmax=max(l))
 plt.figure(figsize=(8,6))
 plt.title(f"mu={mu} - theta={th}")

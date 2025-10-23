@@ -59,18 +59,20 @@ def checking_inputs(
     - tmax (int): Maximum simulation time (must be > 0).
     - dt (float): Time resolution step (must be > 0).
     - origin (int): Starting index of the simulation (must be in [0, Lmax)).
-    - alpha_choice (str): Mode for alpha distribution (must be one of {"constantmean", "periodic", "ntrandom"}).
+    - alpha_choice (str): Mode for alpha distribution (must be one of {"homogeneous", "periodic", "random"}).
 
     Raises:
     - ValueError: If any of the parameter constraints are violated.
     """
 
     # Obstacles
-    if alpha_choice not in {"constantmean", "periodic", "ntrandom"}:
-        raise ValueError(f"Invalid alpha_choice: {alpha_choice}. Must be 'constantmean', 'periodic', or 'ntrandom'.")
+    if alpha_choice not in {"homogeneous", "periodic", "random"}:
+        raise ValueError(f"Invalid alpha_choice: {alpha_choice}. Must be 'homogeneous', 'periodic', or 'random'.")
     for name, value in [("s", s), ("l", l), ("bpmin", bpmin)]:
         if not isinstance(value, np.integer) or value < 0:
             raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
+    if l == 0:
+        raise ValueError("You cannot set l=0, there is absolutly accessible places.")
 
     # Probabilities
     if not isinstance(mu, np.integer) or mu < 0:
@@ -113,7 +115,7 @@ def sw_nucleo(
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float, 
-    algorithm_choice = "two_steps",
+    algorithm_choice = "one_step",
     saving = "data"
     ) -> None:
     """
@@ -209,7 +211,7 @@ def sw_nucleo(
     x_matrix = listoflist_into_matrix(x_matrix)
     t_matrix = listoflist_into_matrix(t_matrix)
 
-    # ------------------- Analysis 1 : General results + Jump size + Time size + First pass times ------------------- #
+    # ------------------- Analysis 1 : General results ------------------- #
 
     # General results
     results_mean, results_med, results_std, v_mean, v_med = calculate_main_results(
@@ -218,6 +220,8 @@ def sw_nucleo(
     vf, Cf, wf, vf_std, Cf_std, wf_std, xt_over_t, G, bound_low, bound_high = fitting_in_two_steps(
         times, results_mean, results_std
     )
+    
+    # ------------------- Analysis 2 : Jump size + Time size + First pass times ------------------- #
 
     # Jump size distribution
     xbj_points, xbj_distrib = calculate_jumpsize_distribution(
@@ -230,7 +234,7 @@ def sw_nucleo(
     # First pass times
     fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bin_fpt)    
 
-    # ------------------- Analysis 2 : Speeds + Rates ------------------- #
+    # ------------------- Analysis 3 : Speeds ------------------- #
 
     # Instantaneous speeds
     dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
@@ -238,24 +242,27 @@ def sw_nucleo(
     vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
         t_matrix, x_matrix, nt
     )
+    
+    # ------------------- Analysis 4 : Rates and Taus ------------------- #
+    
+    if algorithm_choice == "two_steps":
 
-    # Rates and Taus
-    dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
-        t_matrix, x_matrix, t_fb, t_lb, t_bw
-    )
-    tau_forwards, tau_reverses = calculate_dwell_times(
-        dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
-    )
+        # Dwell times
+        dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
+            t_matrix, x_matrix, t_fb, t_lb, t_bw
+        )
+        tau_forwards, tau_reverses = calculate_dwell_times(
+            dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+        )
+
+        # Rates and Taus
+        v_th = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest)
+        fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
+        tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
+        rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+        v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
 
     # ------------------- Working area ------------------- #
-
-    # Currently studying speeds in order to verify  
-    # The definition is maybe not good + we are not using here what we found eralier on dweel times
-    v_th = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest)
-    fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
-    tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-    rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-    v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
 
     # # Nucleosomic profile close to : "Determinants of nucleosome organization in primary human cells"
     # plt.figure(figsize=(8,6))

@@ -89,25 +89,29 @@ def calculate_distribution(
             - distrib (np.ndarray): Normalized distribution (sum equals 1).
     """
 
-    # # Remove NaN values
-    # data = data[~np.isnan(data)]
+    # Everything in float
+    arr = np.asarray(arr, dtype=np.float64)
+    arr = arr[np.isfinite(arr)]
 
     # Handle empty data array
     if data.size == 0: 
         return np.array([]), np.array([])
 
     # Points and not bins
-    bins_array = np.arange(first_bin, int(last_bin) + bin_width, bin_width)
-    distrib, bins_edges = np.histogram(data, bins=bins_array)
-
-    # Normalizing without generating NaNs
-    if np.sum(distrib) > 0:
-        distrib = distrib / np.sum(distrib)
+    bins = np.arange(first_bin, last_bin + bin_width, bin_width, dtype=np.float64)
+    counts, edges = np.histogram(arr, bins=bins, dtype=np.float64)
+    
+    # Normalizing
+    counts = counts.astype(np.float64)
+    total = counts.sum()
+    if total > 0.0:
+        distrib = counts / total
     else:
-        distrib = np.zeros_like(distrib)
+        distrib = np.zeros_like(counts, dtype=np.float64)
 
-    points = (bins_edges[:-1] + bins_edges[1:]) / 2
-
+    # Points = centers
+    points = (edges[:-1] + edges[1:]) / 2.0
+    
     # Return the bin centers and the normalized distribution
     return points, distrib
 

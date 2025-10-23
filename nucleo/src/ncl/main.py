@@ -36,7 +36,7 @@ def main():
 # # Options: // PSMN / PC / SNAKEVIZ //
 # EXE_MODE = "PC"
 
-# Options: // NU / BP / LSLOW / LSHIGH // SHORT_TEST / LONG_TEST // ACCESS / MAP //
+# Options: // NU / BP / LSLOW / LSHIGH -- SHORT_TEST / LONG_TEST -- ACCESS / MAP //
 CONFIG = "ACCESS"
 
 
