@@ -1,0 +1,7 @@
+matplotlib
+numpy
+pathlib
+polars
+pyarrow
+scipy
+tqdm
