@@ -1,0 +1,13 @@
+GIT
+git add .
+git commit -m "Week 41 day 2"
+git status
+git push
+
+
+PSMN
+ssh npellet@ssh.psmn.ens-lyon.fr
+rsync -avz --progress --relative   /home/nicolas/Documents/PhD/Workspace/./nucleo/src/   /home/nicolas/Documents/PhD/Workspace/./utils/src/   npellet@allo-psmn.psmn.ens-lyon.fr:/Xnfs/physbiochrom/npellet/nucleo_folder_Xnfs/
+
+ 	
+

@@ -1,0 +1,8 @@
+pyproject.toml
+src/ploop.egg-info/PKG-INFO
+src/ploop.egg-info/SOURCES.txt
+src/ploop.egg-info/dependency_links.txt
+src/ploop.egg-info/requires.txt
+src/ploop.egg-info/top_level.txt
+src/plp/__init__.py
+src/plp/looping_model.py

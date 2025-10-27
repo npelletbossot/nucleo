@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: marcand
+Version: 0.1.0
+Summary: My PhD tools for marcand simulations
+Author-email: Nicolas PELLET <nicolas.pellet@ens-lyon.fr>
+Requires-Python: >=3.10
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: tqdm
+Requires-Dist: pyarrow
+Requires-Dist: polars
+Requires-Dist: nucleo@ file:///home/nicolas/Documents/PhD/Workspace/nucleo
+Requires-Dist: ploop@ file:///home/nicolas/Documents/PhD/Workspace/ploop
+Requires-Dist: utils@ file:///home/nicolas/Documents/PhD/Workspace/utils
