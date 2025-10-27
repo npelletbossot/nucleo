@@ -37,8 +37,10 @@ def main():
 # EXE_MODE = "PC"
 
 # Options: // NU / BP / LSLOW / LSHIGH -- SHORT_TEST / LONG_TEST -- ACCESS / MAP //
-CONFIG = "ACCESS"
+CONFIG = "SHORT_TEST"
 
+# SHORT_TEST :  Processing:  89% | 8/9 [00:14<00:00,  1.02it/s]Process failed with exception: too many indices for array: array is 1-dimensional, but 2 were indexed
+# Modification des obstacles peutetre ?
 
 # ─────────────────────────────────────────────
 # 4 : Entry point
