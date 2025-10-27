@@ -25,9 +25,9 @@ fontsize = 16
 # - Fig1. Line 1 - #
 
 
-def plot_obstacle(s, l, origin, alpha_mean, xmax = 1_000, text_size=fontsize, ax=None):
+def plot_obstacle(s, l, origin, alpha_mean, xmin = 10_000, xmax = 1_000, text_size=fontsize, ax=None):
     ax.set_title(f'Mean obstacle for s={s} and l={l}', size=text_size)
-    ax.plot(alpha_mean[0:xmax], c='b', ls='-', label='mean obstacle', lw=1)
+    ax.plot(alpha_mean[xmin:xmin+xmax], c='b', ls='-', label='mean obstacle', lw=1)
     # ax.fill_between(np.arange(0, len(alpha_mean), 1), alpha_mean, step='post', color='b', alpha=0.3, label='accessible binding sites')
     ax.axvline(x=origin, c='r', ls='--', label=f'origin={origin}')
     ax.set_xlabel('x (a.u.)', fontsize=text_size)
@@ -68,6 +68,17 @@ def plot_obs_linker_distrib(obs_points, obs_distrib, link_points, link_distrib, 
     ax2.grid(True)
     ax2.legend(fontsize=text_size)
     return fig
+
+
+def plot_linker_view(link_view, xmax = 5_000, text_size=fontsize, ax=None):
+    ax.set_title(f'Linker view as an obstacle', size=text_size)
+    ax.plot(link_view, label="link_view", ls="-", color="orange")
+    ax.set_xlabel('x (a.u.)', fontsize=text_size)
+    ax.set_ylabel('alpha', fontsize=text_size)
+    ax.set_xlim(0, xmax)
+    ax.set_ylim([-0.10, 1.10])
+    ax.grid(True, which='both')
+    ax.legend(fontsize=text_size, loc='upper right')
 
 
 def plot_probabilities(mu, theta, p, text_size=fontsize, ax=None):
