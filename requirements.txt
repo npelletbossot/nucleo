@@ -5,3 +5,8 @@ polars
 pyarrow
 scipy
 tqdm
+
+ncl
+mrc
+plp
+tls
