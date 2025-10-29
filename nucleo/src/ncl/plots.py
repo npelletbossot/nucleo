@@ -105,7 +105,7 @@ def plot_trajectories(tmax, times, results, results_mean, results_med, results_s
     ax.set_xlabel('t (a.u.)', fontsize=text_size)
     ax.set_ylabel('x (a.u.)', fontsize=text_size)
     ax.set_xlim([0, tmax])
-    ax.set_ylim([0, 5_000])
+    ax.set_ylim([0, 7_000])
     ax.grid(True, which='both')
     ax.legend(fontsize=text_size, loc='upper left')
 
