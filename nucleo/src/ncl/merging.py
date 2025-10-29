@@ -132,18 +132,18 @@ def getting_and_ordering_configurations(data_frame, scenario_path = Path.home() 
     df = data_frame                             # More convinient
     filtered_combinations = df.filter(
         ~(
-            ((pl.col("alpha_choice") == 'periodic') | (pl.col("alpha_choice") == 'constant_mean')) &
+            ((pl.col("landscape") == 'periodic') | (pl.col("landscape") == 'homogeneous')) &
             (pl.col("bpmin") == 5)
         )
     )
 
-    # Getting the unique combinations of 's', 'l', 'bpmin' and 'alpha_choice'
-    unique_combinations = filtered_combinations.select(['s', 'l', 'bpmin', 'alpha_choice']).unique()
+    # Getting the unique combinations of 's', 'l', 'bpmin' and 'landscape'
+    unique_combinations = filtered_combinations.select(['s', 'l', 'bpmin', 'landscape']).unique()
 
-    # Ordering it by alpha_choice in priority
-    alpha_order = pl.when(pl.col("alpha_choice") == 'constant_mean').then(1)\
-                    .when(pl.col("alpha_choice") == 'periodic').then(2)\
-                    .when(pl.col("alpha_choice") == 'nt_random').then(3)\
+    # Ordering it by landscape in priority
+    alpha_order = pl.when(pl.col("landscape") == 'homogeneous').then(1)\
+                    .when(pl.col("landscape") == 'periodic').then(2)\
+                    .when(pl.col("landscape") == 'random').then(3)\
                     .otherwise(4)
     unique_combinations = unique_combinations.with_columns(
         alpha_order.alias("alpha_order")
@@ -158,7 +158,7 @@ def getting_and_ordering_configurations(data_frame, scenario_path = Path.home() 
     # Convertiing it into a list of dict
     sorted_combinations_configs = sorted_combinations.rows()
     sorted_combinations_configs = [
-        {"s": row[0], "l": row[1], "bpmin": row[2], "alpha_choice": row[3]} 
+        {"s": row[0], "l": row[1], "bpmin": row[2], "landscape": row[3]} 
         for row in sorted_combinations_configs
     ]
 
@@ -202,7 +202,7 @@ def compute_heatmap_data(df: pl.DataFrame, config_list: list, speed_cols: list, 
             (pl.col('s') == config['s']) &
             (pl.col('l') == config['l']) &
             (pl.col('bpmin') == config['bpmin']) &
-            (pl.col('alpha_choice') == config['alpha_choice'])
+            (pl.col('landscape') == config['landscape'])
         )
 
         if df_filtered.is_empty():

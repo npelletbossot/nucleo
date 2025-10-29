@@ -79,7 +79,7 @@ def alpha_periodic(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int,
     return alpha_array
 
 
-def alpha_constant(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
+def alpha_homogeneous(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
     """Generates one flat pattern
 
     Args:
@@ -102,12 +102,12 @@ def alpha_constant(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int,
     return alpha_array
 
 
-def alpha_matrix_calculation(alpha_choice:str, s:int, l:int, bpmin:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int, nt:int) -> np.ndarray:
+def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int, nt:int) -> np.ndarray:
     """
     Calculation of the matrix of obstacles, each line corresponding to a trajectory
 
     Args:
-        alpha_choice (str): Choice of the alpha configuration ('random', 'periodic', 'homogeneous').
+        landscape (str): Choice of the alpha configuration ('random', 'periodic', 'homogeneous').
         s (int): Value of s, nucleosome size.
         l (int): Value of l, linker length.
         bpmin (int): Minimum base pair threshold.
@@ -128,22 +128,22 @@ def alpha_matrix_calculation(alpha_choice:str, s:int, l:int, bpmin:int, alphao:f
 
     alpha_functions = {'periodic', 'one_random', 'random', 'homogeneous'}
     
-    if alpha_choice not in alpha_functions:
-        raise ValueError(f"Unknown alpha_choice: {alpha_choice}")
+    if landscape not in alpha_functions:
+        raise ValueError(f"Unknown landscape: {landscape}")
     
-    elif alpha_choice == 'periodic' :
+    elif landscape == 'periodic' :
         alpha_array = alpha_periodic(s, l, alphao, alphaf, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
 
-    elif alpha_choice == 'one_random' :
+    elif landscape == 'one_random' :
         alpha_array = alpha_random(s, l, alphao, alphaf, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
     
-    elif alpha_choice == 'homogeneous' :
-        alpha_array = alpha_constant(s, l, alphao, alphaf, Lmin, Lmax, bps)
+    elif landscape == 'homogeneous' :
+        alpha_array = alpha_homogeneous(s, l, alphao, alphaf, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
 
-    elif alpha_choice == 'random':
+    elif landscape == 'random':
         alpha_matrix = np.empty((nt, int((Lmax - Lmin) / bps)))
         for i in range(nt):
             alpha_matrix[i] = alpha_random(s, l, alphao, alphaf, Lmin, Lmax, bps)

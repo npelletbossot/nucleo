@@ -33,7 +33,7 @@ from tls.writing import inspect_data_types, writing_parquet
 
 
 def checking_inputs(
-    alpha_choice, s, l, bpmin, 
+    landscape, s, l, bpmin, 
     mu, theta, lmbda, alphao, alphaf, beta,
     nt,
     Lmin, Lmax, bps, origin,
@@ -59,15 +59,15 @@ def checking_inputs(
     - tmax (int): Maximum simulation time (must be > 0).
     - dt (float): Time resolution step (must be > 0).
     - origin (int): Starting index of the simulation (must be in [0, Lmax)).
-    - alpha_choice (str): Mode for alpha distribution (must be one of {"homogeneous", "periodic", "random"}).
+    - landscape (str): Mode for alpha distribution (must be one of {"homogeneous", "periodic", "random"}).
 
     Raises:
     - ValueError: If any of the parameter constraints are violated.
     """
 
     # Obstacles
-    if alpha_choice not in {"homogeneous", "periodic", "random"}:
-        raise ValueError(f"Invalid alpha_choice: {alpha_choice}. Must be 'homogeneous', 'periodic', or 'random'.")
+    if landscape not in {"homogeneous", "periodic", "random"}:
+        raise ValueError(f"Invalid landscape: {landscape}. Must be 'homogeneous', 'periodic', or 'random'.")
     for name, value in [("s", s), ("l", l), ("bpmin", bpmin)]:
         if not isinstance(value, np.integer) or value < 0:
             raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
@@ -108,21 +108,21 @@ def checking_inputs(
 
 
 def sw_nucleo(
-    alpha_choice: str, s: int, l: int, bpmin: int,
+    landscape: str, s: int, l: int, bpmin: int,
     mu: float, theta: float, 
     lmbda: float, alphao: float, alphaf: float, beta: float, 
     rtot_bind: float, rtot_rest: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float, 
-    algorithm_choice = "one_step",
+    algorithm_choice = "two_steps",
     saving = "data"
     ) -> None:
     """
     Simulates condensin dynamics along chromatin with specified parameters.
 
     Args:
-        alpha_choice (str): Choice of the alpha configuration ('ntrandom', 'periodic', 'constantmean').
+        landscape (str): Choice of the alpha configuration ('ntrandom', 'periodic', 'constantmean').
         s (int): Nucleosome size.
         l (int): Linker length.
         bpmin (int): Minimum base pair threshold.
@@ -156,10 +156,10 @@ def sw_nucleo(
 
     # Title & Folder    
     title = (
-            f"alphachoice={alpha_choice}_s={s}_l={l}_bpmin={bpmin}_"
-            f"mu={mu}_theta={theta}_"
+            f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
+            f"mu={mu}__theta={theta}__"
             # f"lmbda={lmbda:.2e}_rtotbind={rtot_bind:.2e}_rtotrest={rtot_rest:.2e}_"
-            f"nt={nt}"
+            f"nt={nt}__"
             )
 
     # Chromatin
@@ -179,88 +179,144 @@ def sw_nucleo(
     x_bins = np.arange(x_fb, x_lb, x_bw)
     t_bins = np.arange(t_fb, t_lb, t_bw)
 
-    # ------------------- Simulation ------------------- #
 
-    # Chromatin : Landscape + Obstacles and Linkers
-    alpha_matrix, alpha_mean = alpha_matrix_calculation(
-        alpha_choice, s, l, bpmin, alphao, alphaf, Lmin, Lmax, bps, nt
-    )
-    obs_points, obs_distrib, link_points, link_distrib = calculate_obs_and_linker_distribution(
-        alpha_matrix[0], alphao, alphaf
-    )
-    link_view = calculate_linker_landscape(
-        alpha_matrix, alpha_choice, nt, alphaf, Lmin, Lmax
-    )
-
-    # Probabilities
-    p = proba_gamma(mu, theta, L)
-
-    # Gillespie simulation
-    if algorithm_choice == "one_step":
-        results, t_matrix, x_matrix = gillespie_algorithm_one_step(
-            nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
-        )
-    elif algorithm_choice == "two_steps":
-        results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-            alpha_matrix, p, beta, lmbda, rtot_bind, rtot_rest, nt, tmax, dt, L, origin
-        )
-    else:
-        raise ValueError("Invalid algorithm choice")   
-
-    # Clean datas
-    x_matrix = listoflist_into_matrix(x_matrix)
-    t_matrix = listoflist_into_matrix(t_matrix)
-
-    # ------------------- Analysis 1 : General results ------------------- #
-
-    # General results
-    results_mean, results_med, results_std, v_mean, v_med = calculate_main_results(
-        results, dt, alpha_0, nt
-    )
-    vf, Cf, wf, vf_std, Cf_std, wf_std, xt_over_t, G, bound_low, bound_high = fitting_in_two_steps(
-        times, results_mean, results_std
-    )
+    # ------------------- Input 1 - Landscape ------------------- #
     
-    # ------------------- Analysis 2 : Jump size + Time size + First pass times ------------------- #
+    try:
 
-    # Jump size distribution
-    xbj_points, xbj_distrib = calculate_jumpsize_distribution(
-        x_matrix, x_fb, x_lb, x_bw
-    )
-
-    # Time size distribution
-    tbj_points, tbj_distrib = calculate_timejump_distribution(t_matrix)
-
-    # First pass times
-    fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bin_fpt)    
-
-    # ------------------- Analysis 3 : Speeds ------------------- #
-
-    # Instantaneous speeds
-    dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
-    dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
-    vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
-        t_matrix, x_matrix, nt
-    )
-    
-    # ------------------- Analysis 4 : Rates and Taus ------------------- #
-    
-    if algorithm_choice == "two_steps":
-
-        # Dwell times
-        dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
-            t_matrix, x_matrix, t_fb, t_lb, t_bw
+        # Chromatin : Landscape Generation
+        alpha_matrix, alpha_mean = alpha_matrix_calculation(
+            landscape, s, l, bpmin, alphao, alphaf, Lmin, Lmax, bps, nt
         )
-        tau_forwards, tau_reverses = calculate_dwell_times(
-            dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+        
+        # Chromatin : Obstacles Linkers Distribution
+        obs_points, obs_distrib, link_points, link_distrib = calculate_obs_and_linker_distribution(
+            alpha_matrix[0], alphao, alphaf
+        )
+        
+        # Chromatin : Linker Profile
+        link_view = calculate_linker_landscape(
+            alpha_matrix, landscape, nt, alphaf, Lmin, Lmax
+        )
+    
+    except Exception as e:
+        print(f"Error in Input 1 - Landscape : {e}")
+        
+
+    # ------------------- Input 2 - Probability ------------------- #
+
+    try:
+        
+        # Probabilities
+        p = proba_gamma(mu, theta, L)
+    
+    except Exception as e:
+        print(f"Error in Input 2 - Probability : {e}")
+    
+    
+    # ------------------- Simulations ------------------- #
+
+    try:
+        
+        # Gillespie One-Step
+        if algorithm_choice == "one_step":
+            results, t_matrix, x_matrix = gillespie_algorithm_one_step(
+                nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
+            )
+            
+        # Gillespie Two-Steps
+        elif algorithm_choice == "two_steps":
+            results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
+                alpha_matrix, p, beta, lmbda, rtot_bind, rtot_rest, nt, tmax, dt, L, origin
+            )
+            
+        # Else
+        else:
+            raise ValueError("Invalid algorithm choice")   
+
+        # Clean datas
+        x_matrix = listoflist_into_matrix(x_matrix)
+        t_matrix = listoflist_into_matrix(t_matrix)
+        
+    except Exception as e:
+        print(f"Error in Simulations: {e}")
+
+
+    # ------------------- Analysis 1 - General results ------------------- #
+    
+    try:
+
+        # Main Results
+        results_mean, results_med, results_std, v_mean, v_med = calculate_main_results(
+            results, dt, alpha_0, nt
+        )
+        
+        # Fits
+        vf, Cf, wf, vf_std, Cf_std, wf_std, xt_over_t, G, bound_low, bound_high = fitting_in_two_steps(
+            times, results_mean, results_std
+        )
+    
+    except Exception as e:
+        print(f"Error in Analysis 1 - General results: {e}")
+        
+    
+    # ------------------- Analysis 2 - Jump size + Time size + First pass times ------------------- #
+    
+    try:
+
+        # Jump Size Distribution
+        xbj_points, xbj_distrib = calculate_jumpsize_distribution(
+            x_matrix, x_fb, x_lb, x_bw
         )
 
-        # Rates and Taus
-        v_th = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest)
-        fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
-        tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-        rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-        v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
+        # Time Size Distribution
+        tbj_points, tbj_distrib = calculate_timejump_distribution(t_matrix)
+
+        # First Pass Times
+        fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bin_fpt) 
+        
+    except Exception as e:
+        print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e}")
+        
+
+    # ------------------- Analysis 3 - Speeds ------------------- #
+    
+    try:
+
+        # Instantaneous Speeds
+        dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
+        dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
+        vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
+            t_matrix, x_matrix, nt
+        )
+        
+    except Exception as e:
+        print(f"Error in Analysis 3 - Speeds : {e}")
+        
+    
+    # ------------------- Analysis 4 - Rates and Taus ------------------- #
+    
+    try:
+    
+        if algorithm_choice == "two_steps":
+
+            # Dwell times
+            dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
+                t_matrix, x_matrix, t_fb, t_lb, t_bw
+            )
+            tau_forwards, tau_reverses = calculate_dwell_times(
+                dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+            )
+
+            # Rates and Taus
+            v_th = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest)
+            fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
+            tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
+            rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+            v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
+            
+    except Exception as e:
+        print(f"Error in Analysis 4 - Rates and Taus : {e}")
 
     # ------------------- Working area ------------------- #
 
@@ -277,7 +333,7 @@ def sw_nucleo(
     if saving == "data":
         data_result = {
             # --- Principal Parameters --- #
-            'alpha_choice'   : alpha_choice,
+            'landscape'      : landscape,
             's'              : s,
             'l'              : l,
             'bpmin'          : bpmin,
@@ -362,7 +418,7 @@ def sw_nucleo(
     elif saving == "map":
         data_result = {
             # --- Principal Parameters --- #
-            'alpha_choice'   : alpha_choice,
+            'landscape'      : landscape,
             's'              : s,
             'l'              : l,
             'bpmin'          : bpmin,
@@ -422,7 +478,7 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         time (dict): Dict with tmax, dt.
     """
     checking_inputs(
-        alpha_choice=params['alpha_choice'],
+        landscape=params['landscape'],
         s=params['s'],
         l=params['l'],
         bpmin=params['bpmin'],
@@ -442,7 +498,7 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
     )
 
     sw_nucleo(
-        params['alpha_choice'],
+        params['landscape'],
         params['s'], params['l'], params['bpmin'],
         params['mu'], params['theta'],
         params['lmbda'], params['alphao'], params['alphaf'], params['beta'],

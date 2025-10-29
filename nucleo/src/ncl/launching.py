@@ -87,12 +87,12 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     meta = cfg['meta']
 
     keys = [
-        'alpha_choice', 's', 'l', 'bpmin',
+        'landscape', 's', 'l', 'bpmin',
         'mu', 'theta', 'lmbda', 'alphao', 'alphaf', 'beta',
         'rtot_bind', 'rtot_rest'
     ]
     values = product(
-        geometry['alpha_choice'], geometry['s'], geometry['l'], geometry['bpmin'],
+        geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'],
         probas['mu'], probas['theta'],
         probas['lmbda'], probas['alphao'], probas['alphaf'], probas['beta'],
         rates['rtot_bind'], rates['rtot_rest']
@@ -163,7 +163,7 @@ def execute_in_parallel(config: str,
 
     project_name   = project['project_name']
     folder_name    = f"{cfg['meta']['path']}_{task_suffix}"
-    subfolder_name = f"{project_name}/outputs/{str(date.today())}_{mode.value}/{folder_name}"
+    subfolder_name = f"{project_name}/outputs/{str(date.today())}__{mode.value}/{folder_name}"
 
     set_working_environment(base_dir=base_dir, subfolder=subfolder_name)
 

@@ -63,7 +63,7 @@ def choose_configuration(config: str) -> dict:
 
         "NU": {
             "geometry": {
-                "alpha_choice": np.array(['random', 'periodic', 'homogeneous']),
+                "landscape": np.array(['random', 'periodic', 'homogeneous']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -82,13 +82,13 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}_nu"
+                "path": f"{PROJECT["project_name"]}__nu"
             }
         },
 
         "BP": {
             "geometry": {
-                "alpha_choice": np.array(['random']),
+                "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([5, 10, 15], dtype=int)
@@ -107,13 +107,13 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}_bp"
+                "path": f"{PROJECT["project_name"]}__bp"
             }
         },
 
         "LSLOW": {
             "geometry": {
-                "alpha_choice": np.array(['random']),
+                "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([5, 15, 20, 25], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -132,13 +132,13 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}_lslow"
+                "path": f"{PROJECT["project_name"]}__lslow"
             }
         },
 
         "LSHIGH": {
             "geometry": {
-                "alpha_choice": np.array(['random']),
+                "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([50, 100, 150], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -157,13 +157,13 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}_lshigh"
+                "path": f"{PROJECT["project_name"]}__lshigh"
             }
         },
 
-        "SHORT_TEST": {
+        "SHORTTEST": {
             "geometry": {
-                "alpha_choice": np.array(['random', 'periodic', 'homogeneous']),
+                "landscape": np.array(['random', 'periodic', 'homogeneous']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10, 30, 50], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -182,14 +182,14 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 1_000,
-                "path": f"{PROJECT["project_name"]}_short_test"
+                "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },
         
         
-        "LONG_TEST": {
+        "LONGTEST": {
             "geometry": {
-                "alpha_choice": np.array(['random', 'periodic']),
+                "landscape": np.array(['random', 'periodic']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10, 50, 100, 150], dtype=int),
                 "bpmin": np.array([0, 10], dtype=int)
@@ -208,14 +208,14 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 100,
-                "path": f"{PROJECT["project_name"]}_long_test"
+                "path": f"{PROJECT["project_name"]}__longtest"
             }
         },
 
 
         "MAP": {
             "geometry": {
-                "alpha_choice": np.array(['homogeneous']),
+                "landscape": np.array(['homogeneous']),
                 "s": np.array([0], dtype=int),
                 "l": np.array([150], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -234,14 +234,14 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 1_000,
-                "path": f"{PROJECT["project_name"]}_map"
+                "path": f"{PROJECT["project_name"]}__map"
             }
         },
         
         
         "ACCESS": {
             "geometry": {
-                "alpha_choice": np.array(['random']),
+                "landscape": np.array(['random']),
                 "s": np.array([35], dtype=int),
                 # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
                 "l": np.array([100, 83, 70, 59, 50, 43, 37, 32, 28, 24, 20, 17, 14, 12, 10, 8, 6, 4, 2, 1]),
@@ -261,7 +261,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}_access"
+                "path": f"{PROJECT["project_name"]}__access"
             }
         },
         

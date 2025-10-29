@@ -83,7 +83,7 @@ def find_interval_containing_value(
         return tuple(intervals_array[mask][0])
 
 
-def calculate_linker_landscape(data, alpha_choice ,nt, alphaf, Lmin, Lmax, view_size=10_000, threshold=10_000):
+def calculate_linker_landscape(data, landscape ,nt, alphaf, Lmin, Lmax, view_size=10_000, threshold=10_000):
     """
     Calculate the average landscape around linker regions for multiple trajectories.
 
@@ -97,7 +97,7 @@ def calculate_linker_landscape(data, alpha_choice ,nt, alphaf, Lmin, Lmax, view_
     data : np.ndarray
         A 2D array of shape (nt, Lmax) containing alpha values for each trajectory.
         Each row corresponds to the landscape of one trajectory.
-    alpha_choice : str
+    landscape : str
         The scenario.
     nt : int
         Number of trajectories to process. Must match the number of rows in `data`.
@@ -121,7 +121,7 @@ def calculate_linker_landscape(data, alpha_choice ,nt, alphaf, Lmin, Lmax, view_
     Raises
     ------
     ValueError
-        If 'constantmean' linker does not really exist. 
+        If 'homogeneous' linker does not really exist. 
         If `threshold` is larger than half of Lmax.
         If `view_size` is larger than 10,000.
         If `data` contains only one trajectory or is not a matrix.
@@ -136,7 +136,7 @@ def calculate_linker_landscape(data, alpha_choice ,nt, alphaf, Lmin, Lmax, view_
     """
 
     # Conditions on inputs
-    if alpha_choice == "constantmean":
+    if landscape == "homogeneous":
         view_mean = np.array(data[0][threshold:threshold+view_size], dtype=float)
         return view_mean
     if threshold > Lmax // 2:
