@@ -115,7 +115,7 @@ def sw_nucleo(
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float, 
-    algorithm_choice = "two_steps",
+    formalism = "one_step",
     saving = "data"
     ) -> None:
     """
@@ -219,13 +219,13 @@ def sw_nucleo(
     try:
         
         # Gillespie One-Step
-        if algorithm_choice == "one_step":
+        if formalism == "one_step":
             results, t_matrix, x_matrix = gillespie_algorithm_one_step(
                 nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
             )
             
         # Gillespie Two-Steps
-        elif algorithm_choice == "two_steps":
+        elif formalism == "two_steps":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
                 alpha_matrix, p, beta, lmbda, rtot_bind, rtot_rest, nt, tmax, dt, L, origin
             )
@@ -298,7 +298,10 @@ def sw_nucleo(
     
     try:
     
-        if algorithm_choice == "two_steps":
+        if formalism == "two_steps":
+            
+            # Nature of jumps
+            x_forrward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
 
             # Dwell times
             dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
@@ -355,6 +358,8 @@ def sw_nucleo(
             # --- Time Parameters --- #
             'tmax'           : tmax,
             'dt'             : dt,
+            
+            # --- Simulation --- #
             'nt'             : nt,
 
             # --- Chromatin --- #

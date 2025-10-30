@@ -1,0 +1,8 @@
+SimSteps 100000
+StepsToSave	100000
+Annealing	1
+BindingEnergy	-8.0
+StartTemperature 600.0
+EndTemperature 0.1
+NucLength 147
+SmoothingSigma	20.0

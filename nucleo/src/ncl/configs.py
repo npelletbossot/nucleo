@@ -54,6 +54,10 @@ def choose_configuration(config: str) -> dict:
         "rtot_bind": 1/2,   # Rate of binding (1/6)
         "rtot_rest": 1/2    # Rate of resting (1/6)
     }
+    
+    FORMALISM = {
+        "formalism_name": "onestep"
+    }
 
     # ──────────────────────────────────
     # Presets for study configurations
@@ -274,5 +278,6 @@ def choose_configuration(config: str) -> dict:
         **presets[config],
         "project": PROJECT,
         "chromatin": CHROMATIN,
-        "time": TIME
+        "time": TIME,
+        "formalism": FORMALISM
     }
