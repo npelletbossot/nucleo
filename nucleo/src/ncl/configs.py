@@ -248,7 +248,9 @@ def choose_configuration(config: str) -> dict:
                 "landscape": np.array(['random']),
                 "s": np.array([35], dtype=int),
                 # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
-                "l": np.array([100, 83, 70, 59, 50, 43, 37, 32, 28, 24, 20, 17, 14, 12, 10, 8, 6, 4, 2, 1]),
+                "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
+                               49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
+                               8, 7, 6, 5, 4, 3, 2, 1]),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
