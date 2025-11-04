@@ -200,7 +200,7 @@ def sw_nucleo(
         )
     
     except Exception as e:
-        print(f"Error in Input 1 - Landscape : {e}")
+        print(f"Error in Input 1 - Landscape : {e} for {title}")
         
 
     # ------------------- Input 2 - Probability ------------------- #
@@ -211,7 +211,7 @@ def sw_nucleo(
         p = proba_gamma(mu, theta, L)
     
     except Exception as e:
-        print(f"Error in Input 2 - Probability : {e}")
+        print(f"Error in Input 2 - Probability : {e} for {title}")
     
     
     # ------------------- Simulations ------------------- #
@@ -239,7 +239,7 @@ def sw_nucleo(
         t_matrix = listoflist_into_matrix(t_matrix)
         
     except Exception as e:
-        print(f"Error in Simulations: {e}")
+        print(f"Error in Simulations: {e} for {title}")
 
 
     # ------------------- Analysis 1 - General results ------------------- #
@@ -257,7 +257,7 @@ def sw_nucleo(
         )
     
     except Exception as e:
-        print(f"Error in Analysis 1 - General results: {e}")
+        print(f"Error in Analysis 1 - General results: {e} for {title}")
         
     
     # ------------------- Analysis 2 - Jump size + Time size + First pass times ------------------- #
@@ -276,7 +276,7 @@ def sw_nucleo(
         fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bin_fpt) 
         
     except Exception as e:
-        print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e}")
+        print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e} for {title}")
         
 
     # ------------------- Analysis 3 - Speeds ------------------- #
@@ -291,7 +291,7 @@ def sw_nucleo(
         )
         
     except Exception as e:
-        print(f"Error in Analysis 3 - Speeds : {e}")
+        print(f"Error in Analysis 3 - Speeds : {e} for {title}")
         
     
     # ------------------- Analysis 4 - Rates and Taus ------------------- #
@@ -319,7 +319,7 @@ def sw_nucleo(
             v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
             
     except Exception as e:
-        print(f"Error in Analysis 4 - Rates and Taus : {e}")
+        print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
 
     # ------------------- Working area ------------------- #
 
@@ -332,140 +332,145 @@ def sw_nucleo(
 
 
     # ------------------- Writing ------------------- #
+    
+    try:
 
-    if saving == "data":
-        data_result = {
-            # --- Principal Parameters --- #
-            'landscape'      : landscape,
-            's'              : s,
-            'l'              : l,
-            'bpmin'          : bpmin,
-            'mu'             : mu,
-            'theta'          : theta,
-            'alphao'         : alphao,
-            'alphaf'         : alphaf,
-            'beta'           : beta,
-            'lmbda'          : lmbda,
-            'rtot_bind'      : rtot_bind,
-            'rtot_rest'      : rtot_rest,
+        if saving == "data":
+            data_result = {
+                # --- Principal Parameters --- #
+                'landscape'      : landscape,
+                's'              : s,
+                'l'              : l,
+                'bpmin'          : bpmin,
+                'mu'             : mu,
+                'theta'          : theta,
+                'alphao'         : alphao,
+                'alphaf'         : alphaf,
+                'beta'           : beta,
+                'lmbda'          : lmbda,
+                'rtot_bind'      : rtot_bind,
+                'rtot_rest'      : rtot_rest,
 
-            # --- Chromatin Parameters --- #
-            'Lmin'           : Lmin,
-            'Lmax'           : Lmax,
-            'bps'            : bps,
-            'origin'         : origin,
+                # --- Chromatin Parameters --- #
+                'Lmin'           : Lmin,
+                'Lmax'           : Lmax,
+                'bps'            : bps,
+                'origin'         : origin,
 
-            # --- Time Parameters --- #
-            'tmax'           : tmax,
-            'dt'             : dt,
-            
-            # --- Simulation --- #
-            'nt'             : nt,
+                # --- Time Parameters --- #
+                'tmax'           : tmax,
+                'dt'             : dt,
+                
+                # --- Simulation --- #
+                'nt'             : nt,
 
-            # --- Chromatin --- #
-            'alpha_mean'     : alpha_mean,
-            'obs_points'     : obs_points,
-            'obs_distrib'    : obs_distrib,
-            'link_points'    : link_points,
-            'link_distrib'   : link_distrib,
-            'link_view'      : link_view,
+                # --- Chromatin --- #
+                'alpha_mean'     : alpha_mean,
+                'obs_points'     : obs_points,
+                'obs_distrib'    : obs_distrib,
+                'link_points'    : link_points,
+                'link_distrib'   : link_distrib,
+                'link_view'      : link_view,
 
-            # --- Results --- #
-            'results'        : results,
-            'results_mean'   : results_mean,
-            'results_med'    : results_med,
-            'results_std'    : results_std,
-            'v_mean'         : v_mean,
-            'v_med'          : v_med,
-            'vf'             : vf,
-            'Cf'             : Cf,
-            'wf'             : wf,
-            'vf_std'         : vf_std,
-            'Cf_std'         : Cf_std,
-            'wf_std'         : wf_std,
+                # --- Results --- #
+                'results'        : results,
+                'results_mean'   : results_mean,
+                'results_med'    : results_med,
+                'results_std'    : results_std,
+                'v_mean'         : v_mean,
+                'v_med'          : v_med,
+                'vf'             : vf,
+                'Cf'             : Cf,
+                'wf'             : wf,
+                'vf_std'         : vf_std,
+                'Cf_std'         : Cf_std,
+                'wf_std'         : wf_std,
 
-            # --- Between Jumps --- #
-            'xbj_points'     : xbj_points,
-            'xbj_distrib'    : xbj_distrib,
-            'tbj_points'     : tbj_points,
-            'tbj_distrib'    : tbj_distrib,
+                # --- Between Jumps --- #
+                'xbj_points'     : xbj_points,
+                'xbj_distrib'    : xbj_distrib,
+                'tbj_points'     : tbj_points,
+                'tbj_distrib'    : tbj_distrib,
 
-            # --- First Passage Time --- #
-            'bin_fpt'        : bin_fpt,
-            'fpt_distrib_2D' : fpt_distrib_2D,
-            'fpt_number'     : fpt_number,
+                # --- First Passage Time --- #
+                'bin_fpt'        : bin_fpt,
+                'fpt_distrib_2D' : fpt_distrib_2D,
+                'fpt_number'     : fpt_number,
 
-            # --- Instantaneous statistics --- #
-            'dx_points'      : dx_points,
-            'dx_distrib'     : dx_distrib,
-            'dx_mean'        : dx_mean,
-            'dx_med'         : dx_med,
-            'dx_mp'          : dx_mp,
-            'dt_points'      : dt_points,
-            'dt_distrib'     : dt_distrib,
-            'dt_mean'        : dt_mean,
-            'dt_med'         : dt_med,
-            'dt_mp'          : dt_mp,
-            'vi_points'      : vi_points,
-            'vi_distrib'     : vi_distrib,
-            'vi_mean'        : vi_mean,
-            'vi_med'         : vi_med,
-            'vi_mp'          : vi_mp,
+                # --- Instantaneous statistics --- #
+                'dx_points'      : dx_points,
+                'dx_distrib'     : dx_distrib,
+                'dx_mean'        : dx_mean,
+                'dx_med'         : dx_med,
+                'dx_mp'          : dx_mp,
+                'dt_points'      : dt_points,
+                'dt_distrib'     : dt_distrib,
+                'dt_mean'        : dt_mean,
+                'dt_med'         : dt_med,
+                'dt_mp'          : dt_mp,
+                'vi_points'      : vi_points,
+                'vi_distrib'     : vi_distrib,
+                'vi_mean'        : vi_mean,
+                'vi_med'         : vi_med,
+                'vi_mp'          : vi_mp,
 
-            # --- Fits --- #
-            'alpha_0'        : alpha_0,
-            'xt_over_t'      : xt_over_t,
-            'G'              : G,
-            'bound_low'      : bound_low,
-            'bound_high'     : bound_high,
-        }
+                # --- Fits --- #
+                'alpha_0'        : alpha_0,
+                'xt_over_t'      : xt_over_t,
+                'G'              : G,
+                'bound_low'      : bound_low,
+                'bound_high'     : bound_high,
+            }
 
-    elif saving == "map":
-        data_result = {
-            # --- Principal Parameters --- #
-            'landscape'      : landscape,
-            's'              : s,
-            'l'              : l,
-            'bpmin'          : bpmin,
-            'mu'             : mu,
-            'theta'          : theta,
-            'alphao'         : alphao,
-            'alphaf'         : alphaf,
-            'beta'           : beta,
-            'lmbda'          : lmbda,
-            'rtot_bind'      : rtot_bind,
-            'rtot_rest'      : rtot_rest,
+        elif saving == "map":
+            data_result = {
+                # --- Principal Parameters --- #
+                'landscape'      : landscape,
+                's'              : s,
+                'l'              : l,
+                'bpmin'          : bpmin,
+                'mu'             : mu,
+                'theta'          : theta,
+                'alphao'         : alphao,
+                'alphaf'         : alphaf,
+                'beta'           : beta,
+                'lmbda'          : lmbda,
+                'rtot_bind'      : rtot_bind,
+                'rtot_rest'      : rtot_rest,
 
-            # --- Chromatin Parameters --- #
-            'Lmin'           : Lmin,
-            'Lmax'           : Lmax,
-            'bps'            : bps,
-            'origin'         : origin,
+                # --- Chromatin Parameters --- #
+                'Lmin'           : Lmin,
+                'Lmax'           : Lmax,
+                'bps'            : bps,
+                'origin'         : origin,
 
-            # --- Time Parameters --- #
-            'tmax'           : tmax,
-            'dt'             : dt,
-            'nt'             : nt,
+                # --- Time Parameters --- #
+                'tmax'           : tmax,
+                'dt'             : dt,
+                'nt'             : nt,
 
-            # --- Speeds and Taus --- #
-            'v_mean'         : v_mean,
-            'v_th'           : v_th,
-            'v_fit'          : v_fit,
-            'tau_forwards'   : tau_forwards,
-            'tau_reverses'   : tau_reverses,
-        }
+                # --- Speeds and Taus --- #
+                'v_mean'         : v_mean,
+                'v_th'           : v_th,
+                'v_fit'          : v_fit,
+                'tau_forwards'   : tau_forwards,
+                'tau_reverses'   : tau_reverses,
+            }
 
 
-    # Types of data registered if needed
-    inspect_data_types(data_result, launch=False)
+        # Types of data registered if needed
+        inspect_data_types(data_result, launch=False)
 
-    # Writing data
-    writing_parquet(file=path, title=title, data_result=data_result)
+        # Writing data
+        writing_parquet(file=path, title=title, data_result=data_result)
 
-    # Clean raw datas
-    del alpha_matrix
-    del data_result
-    gc.collect()
+        # Clean raw datas
+        del alpha_matrix
+        del data_result
+        gc.collect()
+        
+    except Exception as e:
+        print(f"Error in Writing : {e} for {title}")
 
     return None
 

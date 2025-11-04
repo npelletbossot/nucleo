@@ -245,12 +245,13 @@ def choose_configuration(config: str) -> dict:
         
         "ACCESS": {
             "geometry": {
-                "landscape": np.array(["random"]),
+                "landscape": np.array(["periodic", "random"]),
                 "s": np.array([35], dtype=int),
                 # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
-                "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
-                               49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
-                               8, 7, 6, 5, 4, 3, 2, 1]),
+                # "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
+                #                49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
+                #                8, 7, 6, 5, 4, 3, 2, 1]),
+                "l": np.arange(10, 450+1, 10, dtype=int), 
                 "bpmin": np.array([0, 5, 10, 15, 20], dtype=int)
             },
             "probas": {
