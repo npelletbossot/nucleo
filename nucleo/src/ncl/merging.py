@@ -38,7 +38,7 @@ def ask_confirmation_input():
 # 2.2 : Merging into one file
 
 
-def merging_parquet_files(root_directory, nt, tmax, dt, alphao, alphaf, beta, Lmin, Lmax, origin, bps, SimulationData):
+def merging_parquet_files(root_directory, nt, tmax, dt, alphaf, alphao, beta, Lmin, Lmax, origin, bps, SimulationData):
     """
     Merges all the .parquet files from our simulations while filtering only columns of types str, i64, and f64.
 
@@ -69,8 +69,8 @@ def merging_parquet_files(root_directory, nt, tmax, dt, alphao, alphaf, beta, Lm
                 if (f"nt_{nt}_" in folder_name and 
                     f"tmax_{tmax}" in folder_name and 
                     f"dt_{dt}" in folder_name and 
-                    f"alphao_{alphao}" in folder_name and 
                     f"alphaf_{alphaf}" in folder_name and 
+                    f"alphao_{alphao}" in folder_name and 
                     f"beta_{beta}" in folder_name and 
                     f"Lmin_{Lmin}" in folder_name and 
                     f"Lmax_{Lmax}" in folder_name and 
@@ -237,8 +237,8 @@ def compute_heatmap_data(df: pl.DataFrame, config_list: list, speed_cols: list, 
                 for mu in mu_values:
                     values = df_filtered.filter((pl.col('mu') == mu) & (pl.col('theta') == theta))[speed_col].mean()
                     norm_mu = mu
-                    norm_th = ((df_filtered['alphao'][0] * df_filtered['s'][0] +
-                                df_filtered['alphaf'][0] * df_filtered['l'][0]) /
+                    norm_th = ((df_filtered['alphaf'][0] * df_filtered['l'][0] +
+                                df_filtered['alphao'][0] * df_filtered['s'][0]) /
                                 (df_filtered['l'][0] + df_filtered['s'][0])) * mu
 
                     if speed_col in {'v_mean', 'vi_med', 'vi_mp', 'vf'}:
@@ -290,7 +290,7 @@ ask_confirmation_input()
 
 
 # 3.2 : Merging
-merged_df = merging_parquet_files(root_directory=root, nt=10000, tmax=100, dt=1, alphao=0, alphaf=1, beta=0, Lmin=0, Lmax=50000, origin=10000, bps=1)
+merged_df = merging_parquet_files(root_directory=root, nt=10000, tmax=100, dt=1, alphaf=1, alphao=0, beta=0, Lmin=0, Lmax=50000, origin=10000, bps=1)
 merged_df = pl.read_parquet(root_parquet)
 print(merged_df.head(5))
 

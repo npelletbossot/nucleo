@@ -36,7 +36,7 @@ from tls.writing import inspect_data_types, writing_parquet
 
 def checking_inputs(
     landscape, s, l, bpmin, 
-    mu, theta, lmbda, alphao, alphaf, beta,
+    mu, theta, lmbda, alphaf, alphao, beta,
     nt,
     Lmin, Lmax, bps, origin,
     tmax, dt
@@ -48,8 +48,8 @@ def checking_inputs(
     - s (int): Nucleosome lenght (must be 150).
     - l (int): Linker DNA length (must be ≤ s).
     - bpmin (int): Minimum base pair value to bind (must be ≤ 10).
-    - alphao (float): Obstacle alpha parameter (must be in [0, 1]).
     - alphaf (float): Linker alpha parameter (must be in [0, 1]).
+    - alphao (float): Obstacle alpha parameter (must be in [0, 1]).
     - alphar (float): FACT alpha parameter (must be in [0, 1]).
     - Lmin (int): Minimum condensin position (must be 0).
     - Lmax (int): Maximum condensin position (must be > Lmin).
@@ -81,7 +81,7 @@ def checking_inputs(
         raise ValueError(f"Invalid value for mu: must be an int >= 0. Got {mu}.")
     if not isinstance(theta, np.integer) or theta < 0:
         raise ValueError(f"Invalid value for theta: must be an int >= 0. Got {theta}.")
-    for name, value in zip(["lmbda", "alphao", "alphaf", "beta"], [lmbda, alphao, alphaf, beta]):
+    for name, value in zip(["lmbda", "alphaf", "alphao", "beta"], [lmbda, alphaf, alphao, beta]):
         if not (0 <= value <= 1):
             raise ValueError(f"{name} must be between 0 and 1. Got {value}.")
 
@@ -110,13 +110,14 @@ def checking_inputs(
 
 
 def sw_nucleo(
-    landscape: str, s: int, l: int, bpmin: int, ratio: float,
+    landscape: str, s: int, l: int, bpmin: int,
     mu: float, theta: float, 
-    lmbda: float, alphao: float, alphaf: float, beta: float,
+    lmbda: float, alphaf: float, alphao: float, beta: float,
     rtot_bind: float, rtot_rest: float,
+    parameter: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
-    tmax: float, dt: float, 
+    tmax: float, dt: float,
     formalism = "one_step",
     saving = "data"
     ) -> None:
@@ -131,8 +132,8 @@ def sw_nucleo(
         mu (float): Mean value for the distribution used in the simulation.
         theta (float): Standard deviation for the distribution used in the simulation.
         lmbda (float): Lambda parameter for the simulation.
-        alphao (float): Acceptance probability on nucleosome sites.
         alphaf (float): Acceptance probability on linker sites.
+        alphao (float): Acceptance probability on nucleosome sites.
         beta (float): Unfolding probability.
         rtot_bind (float): Reaction rate for binding (inverse of characteristic time).
         rtot_rest (float): Reaction rate for resting (inverse of characteristic time).
@@ -160,8 +161,8 @@ def sw_nucleo(
     title = (
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
-            f"ratio={ratio}__"
             # f"lmbda={lmbda:.2e}_rtotbind={rtot_bind:.2e}_rtotrest={rtot_rest:.2e}_"
+            f"parameter={parameter}__"
             f"nt={nt}__"
             )
 
@@ -189,7 +190,7 @@ def sw_nucleo(
 
         # Chromatin : Landscape Generation
         alpha_matrix, alpha_mean = alpha_matrix_calculation(
-            landscape, s, l, bpmin, alphao, alphaf, Lmin, Lmax, bps, nt
+            landscape, s, l, bpmin, alphaf, alphao, Lmin, Lmax, bps, nt
         )
             
         # Destroying obstacle
@@ -198,13 +199,13 @@ def sw_nucleo(
             first_point = 10_000
             last_point = 20_000
             for i in range(len(alpha_matrix)):
-                alpha_matrix[i][first_point:last_point] = destroy_obstacles(alpha_matrix[i], ratio, alphaf, alphao, first_point, last_point)
+                alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], parameter, alphaf, alphao, first_point, last_point)
         alpha_mean = np.mean(alpha_matrix, axis=0)
 
         
         # Chromatin : Obstacles Linkers Distribution
         obs_points, obs_distrib, link_points, link_distrib = calculate_obs_and_linker_distribution(
-            alpha_matrix[0], alphao, alphaf
+            alpha_matrix[0], alphaf, alphao
         )
         
         # Chromatin : Linker Profile
@@ -355,15 +356,17 @@ def sw_nucleo(
                 's'              : s,
                 'l'              : l,
                 'bpmin'          : bpmin,
-                'ratio'          : ratio,
                 'mu'             : mu,
                 'theta'          : theta,
-                'alphao'         : alphao,
                 'alphaf'         : alphaf,
+                'alphao'         : alphao,
                 'beta'           : beta,
                 'lmbda'          : lmbda,
                 'rtot_bind'      : rtot_bind,
                 'rtot_rest'      : rtot_rest,
+                
+                # --- Working Parameter --- #
+                'parameter'      : parameter, 
 
                 # --- Chromatin Parameters --- #
                 'Lmin'           : Lmin,
@@ -445,8 +448,8 @@ def sw_nucleo(
                 'bpmin'          : bpmin,
                 'mu'             : mu,
                 'theta'          : theta,
-                'alphao'         : alphao,
                 'alphaf'         : alphaf,
+                'alphao'         : alphao,
                 'beta'           : beta,
                 'lmbda'          : lmbda,
                 'rtot_bind'      : rtot_bind,
@@ -509,8 +512,8 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         mu=params['mu'],
         theta=params['theta'],
         lmbda=params['lmbda'],
-        alphao=params['alphao'],
         alphaf=params['alphaf'],
+        alphao=params['alphao'],
         beta=params['beta'],
         nt=params['nt'],
         Lmin=chromatin["Lmin"],
@@ -523,10 +526,11 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
 
     sw_nucleo(
         params['landscape'],
-        params['s'], params['l'], params['bpmin'], params['ratio'],
+        params['s'], params['l'], params['bpmin'],
         params['mu'], params['theta'],
-        params['lmbda'], params['alphao'], params['alphaf'], params['beta'],
+        params['lmbda'], params['alphaf'], params['alphao'], params['beta'],
         params['rtot_bind'], params['rtot_rest'],
+        params['parameter'],
         params['nt'], params['path'],
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
         time["tmax"], time["dt"]

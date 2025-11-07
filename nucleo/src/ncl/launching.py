@@ -81,23 +81,33 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     """
     Generates the list of parameter combinations from the configuration.
     """
+    
+    # Every specific compartments
     geometry = cfg['geometry']
     probas = cfg['probas']
     rates = cfg['rates']
     meta = cfg['meta']
+    work = cfg['work']
 
+    # The keys must be in arrays
     keys = [
-        'landscape', 's', 'l', 'bpmin', 'ratio',
-        'mu', 'theta', 'lmbda', 'alphao', 'alphaf', 'beta',
-        'rtot_bind', 'rtot_rest'
+        'landscape', 's', 'l', 'bpmin',
+        'mu', 'theta', 'lmbda', 'alphaf', 'alphao', 'beta',
+        'rtot_bind', 'rtot_rest',
+        'parameter'
+        
     ]
+    
+    # All combinations
     values = product(
-        geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'], geometry['ratio'],
+        geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'],
         probas['mu'], probas['theta'],
-        probas['lmbda'], probas['alphao'], probas['alphaf'], probas['beta'],
-        rates['rtot_bind'], rates['rtot_rest']
+        probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
+        rates['rtot_bind'], rates['rtot_rest'],
+        work['parameter']
+   
     )
-
+    
     return [
         dict(zip(keys, vals)) | {"nt": meta['nt'], "path": meta['path']}
         for vals in values
@@ -143,6 +153,7 @@ def execute_in_parallel(config: str,
     project = cfg['project']
     chromatin = cfg['chromatin']
     time = cfg['time']
+    work = cfg['work']
 
     all_params = generate_param_combinations(cfg)
 

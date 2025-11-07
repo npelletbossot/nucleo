@@ -126,7 +126,7 @@ def calculate_linker_landscape(data, landscape ,nt, alphaf, Lmin, Lmax, view_siz
 
 
 def calculate_obs_and_linker_distribution(
-    alpha_array: np.ndarray, alphao: float, alphaf: float, step: int = 10
+    alpha_array: np.ndarray, alphaf: float, alphao: float, step: int = 10
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Process a 1D alpha array to calculate lengths of linker and obstacle sequences
@@ -134,8 +134,8 @@ def calculate_obs_and_linker_distribution(
 
     Args:
         alpha_array (np.ndarray): 1D array representing linkers (alphaf) and obstacles (alphao).
-        alphao (float): Value representing the obstacles.
         alphaf (float): Value representing the linkers.
+        alphao (float): Value representing the obstacles.
         step (int): Step size for the distribution calculation (default is 1).
 
     Returns:

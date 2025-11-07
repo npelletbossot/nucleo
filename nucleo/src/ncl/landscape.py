@@ -20,7 +20,7 @@ import numpy as np
 # 2.1 : Patterns
 
 
-def alpha_random(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
+def alpha_random(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
     """
     Generates one random landscape
 
@@ -28,8 +28,8 @@ def alpha_random(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, b
     Args:
         s (int): Value of s, nucleosome size.
         l (int): Value of l, linker length.
-        alphao (float): Probability of beeing accepted on nucleosome sites.
         alphaf (float): Probability of beeing accepted on linker sites.
+        alphao (float): Probability of beeing accepted on nucleosome sites.
         Lmin (int): First point of chromatin.
         Lmax (int): Last point of chromatin.
         bps (int): Number of base pairs per site.
@@ -55,14 +55,14 @@ def alpha_random(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, b
     return alpha_array
 
 
-def alpha_periodic(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
+def alpha_periodic(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
     """Generates one periodic pattern
 
     Args:
         s (int): Value of s, nucleosome size.
         l (int): Value of l, linker length.
-        alphao (float): Probability of beeing accepted on nucleosome sites.
-        alphaf (float): Probability of beeing accepted on linker sites.
+        alphaf (float): Probability of beeing accepted on nucleosome sites.
+        alphao (float): Probability of beeing accepted on linker sites.
         Lmin (int): First point of chromatin.
         Lmax (int): Last point of chromatin.
         bps (int): Number of base pairs per site.
@@ -79,7 +79,7 @@ def alpha_periodic(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int,
     return alpha_array
 
 
-def alpha_homogeneous(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
+def alpha_homogeneous(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
     """Generates one flat pattern
 
     Args:
@@ -105,7 +105,7 @@ def alpha_homogeneous(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:i
 # 2.2 Generation
 
 
-def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int, nt:int) -> np.ndarray:
+def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, bps:int, nt:int) -> np.ndarray:
     """
     Calculation of the matrix of obstacles, each line corresponding to a trajectory
 
@@ -114,8 +114,8 @@ def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphao:floa
         s (int): Value of s, nucleosome size.
         l (int): Value of l, linker length.
         bpmin (int): Minimum base pair threshold.
-        alphao (float): Probability of beeing accepted on linker sites.
-        alphaf (float): Probability of beeing accepted on nucleosome sites.
+        alphaf (float): Probability of beeing accepted on linker sites.
+        alphao (float): Probability of beeing accepted on nucleosome sites.
         Lmin (int): First point of chromatin.
         Lmax (int): Last point of chromatin.
         bps (int): Number of base pairs per site.
@@ -135,24 +135,24 @@ def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphao:floa
         raise ValueError(f"Unknown landscape: {landscape}")
     
     elif landscape == 'periodic' :
-        alpha_array = alpha_periodic(s, l, alphao, alphaf, Lmin, Lmax, bps)
+        alpha_array = alpha_periodic(s, l, alphaf, alphao, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
 
     elif landscape == 'one_random' :
-        alpha_array = alpha_random(s, l, alphao, alphaf, Lmin, Lmax, bps)
+        alpha_array = alpha_random(s, l, alphaf, alphao, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
     
     elif landscape == 'homogeneous' :
-        alpha_array = alpha_homogeneous(s, l, alphao, alphaf, Lmin, Lmax, bps)
+        alpha_array = alpha_homogeneous(s, l, alphaf, alphao, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
 
     elif landscape == 'random':
         alpha_matrix = np.empty((nt, int((Lmax - Lmin) / bps)))
         for i in range(nt):
-            alpha_matrix[i] = alpha_random(s, l, alphao, alphaf, Lmin, Lmax, bps)
+            alpha_matrix[i] = alpha_random(s, l, alphaf, alphao, Lmin, Lmax, bps)
 
     # Values
-    alpha_matrix = np.array([binding_length(alpha, alphao, alphaf, bpmin) for alpha in alpha_matrix], dtype=float)
+    alpha_matrix = np.array([binding_length(alpha_list, alphaf, alphao, bpmin) for alpha_list in alpha_matrix], dtype=float)
     alpha_mean = np.mean(alpha_matrix, axis=0)
     
     return alpha_matrix, alpha_mean
@@ -161,7 +161,7 @@ def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphao:floa
 # 2.3 Binding minimal size
 
 
-def binding_length(alpha_list: np.ndarray, alphao: float, alphaf: float, bpmin: int) -> np.ndarray:
+def binding_length(alpha_list: np.ndarray, alphaf: float, alphao: float, bpmin: int) -> np.ndarray:
     """
     Modifies sequences of consecutive `alphaf` values in an array if their length is less than `bpmin`.
 
@@ -282,43 +282,43 @@ def find_interval_containing_value(
         return tuple(intervals_array[mask][0])
 
 
-def destroy_obstacles(array: np.ndarray, ratio: float, alphao: float, alphaf: float, begin:int, end: int) -> np.ndarray:
+def destroy_obstacles(array: np.ndarray, ratio: float, alphaf: float, alphao: float, begin: int, end: int) -> np.ndarray:
     """
-    Randomly destroys a fraction of obstacles in a given 1D landscape array.
-    And on a given zone : from begin to end.
+    Randomly destroys a fraction of obstacles in a given 1D landscape array
+    within a specified region [begin:end].
 
     Args:
-        array (np.ndarray): 1D array representing landscape.
-        ratio (float): 
-        alphao (float): Value representing the obstacles.
-        alphaf (float): Value representing the linkers.
-        begin (int): First point to consider.
-        end (int): Last point to consider.
+        array (np.ndarray): 1D array representing the landscape.
+        ratio (float): Fraction of obstacles to destroy (between 0 and 1).
+        alphaf (float): Value representing the linkers (after destruction).
+        alphao (float): Value representing the obstacles (before destruction).
+        begin (int): First point (inclusive) to consider for destruction.
+        end (int): Last point (exclusive) to consider for destruction.
 
     Returns:
-        array_new (np.ndarray): 1D array representing landscape with destroyed obstacles.
+        np.ndarray: A copy of `array` with some obstacles destroyed in [begin:end].
     """
+    if not 0 <= ratio <= 1:
+        raise ValueError(f"Ratio must be between 0 and 1, got {ratio}")
+    
+    # Looking for obstacles in the propre region
+    region = array[begin:end].copy()
+    couples = find_blocks(region, alphao)
+    if not couples:
+        return array
 
-    if ratio > 1:
-        raise ValueError(f"You cannot give a ratio superior to 1 and you gave ratio={ratio}")
-    
-    # Looking for obstacles
-    couples = find_blocks(array[begin:end], alphao)
-    if len(couples) == 0:
-        return np.copy(array)  # nothing to destroy
-    
     # Number of obstacles to destroy
     n_obs_destroyed = int(np.floor(ratio * len(couples)))
+    if n_obs_destroyed == 0:
+        return array
 
     # Random choice of the obstacles destroyed
     places = np.random.choice(len(couples), size=n_obs_destroyed, replace=False)
-
-    # Copy the original array
-    array_new = np.copy(array[begin:end])
     
     # Destroy the selected obstacles
     for idx in places:
-        start, end = couples[idx]
-        array_new[start:end] = alphaf
+        start, stop = couples[idx]
+        region[start:stop] = alphaf
 
-    return array_new
+    array[begin:end] = region
+    return array

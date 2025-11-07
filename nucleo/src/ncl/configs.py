@@ -45,8 +45,8 @@ def choose_configuration(config: str) -> dict:
 
     PROBAS = {
         "lmbda": 0.40,      # Probability of in vitro condensin to reverse
-        "alphao": 0.00,     # Probability of binding if obstacle
         "alphaf": 1.00,     # Probability of binding if linker
+        "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to undinb
     }
 
@@ -57,6 +57,11 @@ def choose_configuration(config: str) -> dict:
     
     FORMALISM = {
         "formalism_name": "onestep"
+    }
+    
+    WORK = {
+        # "parameter": np.array([0], dtype=float)
+        "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }
 
     # ──────────────────────────────────
@@ -76,8 +81,8 @@ def choose_configuration(config: str) -> dict:
                 "mu": np.arange(100, 605, 5),
                 "theta": np.arange(1, 101, 1),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
@@ -101,8 +106,8 @@ def choose_configuration(config: str) -> dict:
                 "mu": np.arange(100, 605, 5),
                 "theta": np.arange(1, 101, 1),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
@@ -126,8 +131,8 @@ def choose_configuration(config: str) -> dict:
                 "mu": np.arange(100, 605, 5),
                 "theta": np.arange(1, 101, 1),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
@@ -151,8 +156,8 @@ def choose_configuration(config: str) -> dict:
                 "mu": np.arange(100, 605, 5),
                 "theta": np.arange(1, 101, 1),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
@@ -202,8 +207,8 @@ def choose_configuration(config: str) -> dict:
                 "mu": np.arange(100+1, 550+1, 50),
                 "theta": np.arange(1, 100+1, 10),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
@@ -228,8 +233,8 @@ def choose_configuration(config: str) -> dict:
                 "mu": np.array([300]),
                 "theta": np.array([50]),
                 "lmbda": np.arange(0.10, 0.90, 0.20),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
@@ -258,8 +263,8 @@ def choose_configuration(config: str) -> dict:
                 "mu": np.array([180]),
                 "theta": np.array([90]),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
@@ -282,8 +287,7 @@ def choose_configuration(config: str) -> dict:
                 #                49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
                 #                8, 7, 6, 5, 4, 3, 2, 1]),
                 "l": np.arange(10, 450+1, 10, dtype=int), 
-                "bpmin": np.array([0], dtype=int),
-                "ratio": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float)
+                "bpmin": np.array([0], dtype=int)
             },
             "probas": {
                 "mu": np.array([180]),
@@ -299,7 +303,7 @@ def choose_configuration(config: str) -> dict:
 
             },
             "meta": {
-                "nt": 10_000,
+                "nt": 100,
                 "path": f"{PROJECT["project_name"]}__accessperiodic"
             }
         },
@@ -314,5 +318,6 @@ def choose_configuration(config: str) -> dict:
         "project": PROJECT,
         "chromatin": CHROMATIN,
         "time": TIME,
-        "formalism": FORMALISM
+        "formalism": FORMALISM,
+        "work": WORK,
     }
