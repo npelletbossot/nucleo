@@ -87,12 +87,12 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     meta = cfg['meta']
 
     keys = [
-        'landscape', 's', 'l', 'bpmin',
+        'landscape', 's', 'l', 'bpmin', 'ratio',
         'mu', 'theta', 'lmbda', 'alphao', 'alphaf', 'beta',
         'rtot_bind', 'rtot_rest'
     ]
     values = product(
-        geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'],
+        geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'], geometry['ratio'],
         probas['mu'], probas['theta'],
         probas['lmbda'], probas['alphao'], probas['alphaf'], probas['beta'],
         rates['rtot_bind'], rates['rtot_rest']

@@ -14,6 +14,7 @@ from scipy.optimize import curve_fit
 
 from tls.utils import calculate_distribution, exp_decay
 from ncl.fitting import linear_fit
+from ncl.landscape import find_blocks
 
 
 # ─────────────────────────────────────────────
@@ -22,65 +23,6 @@ from ncl.fitting import linear_fit
 
 
 # 2.1 : Landscape
-
-
-def find_blocks(array: np.ndarray, alpha_value: float) -> list[tuple[int, int]]:
-    """
-    Identify contiguous regions in the array where values are equal (or close) to a given value.
-    Can be used to find obstacles and linkers !
-
-    Parameters
-    ----------
-    array : np.ndarray
-        The array representing the full environment.
-    
-    value : float
-        The value considered as an obstacle (using approximate comparison).
-
-    Returns
-    -------
-    list[tuple[int, int]]
-        A list of intervals (start_index, end_index) for each contiguous obstacle block.
-    """
-    array = np.asarray(array)
-    is_block = np.isclose(array, alpha_value, atol=1e-8)
-    diff = np.diff(is_block.astype(int))
-    starts = np.where(diff == 1)[0] + 1
-    ends = np.where(diff == -1)[0] + 1
-
-    if is_block[0]:
-        starts = np.insert(starts, 0, 0)
-    if is_block[-1]:
-        ends = np.append(ends, len(array))
-
-    return list(zip(starts, ends))
-
-
-def find_interval_containing_value(
-    intervals: list[tuple[int, int]], value: int
-) -> tuple[int, int]:
-    """
-    Return the first interval (start, end) that contains the specified value.
-
-    Parameters
-    ----------
-    intervals : list[tuple[int, int]]
-        A list of intervals (start, end) sorted or unsorted.
-    
-    value : int
-        The index or position to locate within the intervals.
-
-    Returns
-    -------
-    Optional[tuple[int, int]]
-        The interval that contains the value, or None if not found.
-    """
-    intervals_array = np.array(intervals)
-    mask = (intervals_array[:, 0] <= value) & (value < intervals_array[:, 1])
-
-    
-    if np.any(mask):
-        return tuple(intervals_array[mask][0])
 
 
 def calculate_linker_landscape(data, landscape ,nt, alphaf, Lmin, Lmax, view_size=10_000, threshold=10_000):

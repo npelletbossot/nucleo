@@ -243,9 +243,9 @@ def choose_configuration(config: str) -> dict:
         },
         
         
-        "ACCESS": {
+        "ACCESSRANDOM": {
             "geometry": {
-                "landscape": np.array(["periodic", "random"]),
+                "landscape": np.array(["random"]),
                 "s": np.array([35], dtype=int),
                 # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
                 # "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
@@ -268,7 +268,39 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__access"
+                "path": f"{PROJECT["project_name"]}__accessrandom"
+            }
+        },
+        
+        
+        "ACCESSPERIODIC": {
+            "geometry": {
+                "landscape": np.array(["periodic"]),
+                "s": np.array([35], dtype=int),
+                # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
+                # "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
+                #                49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
+                #                8, 7, 6, 5, 4, 3, 2, 1]),
+                "l": np.arange(10, 450+1, 10, dtype=int), 
+                "bpmin": np.array([0], dtype=int),
+                "ratio": np.arange(0.00, 1.00, 0.10, dtype=float)
+            },
+            "probas": {
+                "mu": np.array([180]),
+                "theta": np.array([90]),
+                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
+                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "beta": np.array([PROBAS["beta"]], dtype=float)
+            },
+            "rates": {
+                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+
+            },
+            "meta": {
+                "nt": 10_000,
+                "path": f"{PROJECT["project_name"]}__accessperiodic"
             }
         },
         

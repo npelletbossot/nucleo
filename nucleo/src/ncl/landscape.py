@@ -17,7 +17,7 @@ import numpy as np
 # ─────────────────────────────────────────────
 
 
-# 2.1 : Generation
+# 2.1 : Patterns
 
 
 def alpha_random(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
@@ -102,6 +102,9 @@ def alpha_homogeneous(s:int, l:int, alphao:float, alphaf:float, Lmin:int, Lmax:i
     return alpha_array
 
 
+# 2.2 Generation
+
+
 def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphao:float, alphaf:float, Lmin:int, Lmax:int, bps:int, nt:int) -> np.ndarray:
     """
     Calculation of the matrix of obstacles, each line corresponding to a trajectory
@@ -150,9 +153,12 @@ def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphao:floa
 
     # Values
     alpha_matrix = np.array([binding_length(alpha, alphao, alphaf, bpmin) for alpha in alpha_matrix], dtype=float)
-    mean_alpha = np.mean(alpha_matrix, axis=0)
+    alpha_mean = np.mean(alpha_matrix, axis=0)
     
-    return alpha_matrix, mean_alpha
+    return alpha_matrix, alpha_mean
+
+
+# 2.3 Binding minimal size
 
 
 def binding_length(alpha_list: np.ndarray, alphao: float, alphaf: float, bpmin: int) -> np.ndarray:
@@ -196,11 +202,123 @@ def binding_length(alpha_list: np.ndarray, alphao: float, alphaf: float, bpmin: 
     diffs = np.diff(np.concatenate(([0], mask.astype(int), [0])))
     starts = np.where(diffs == 1)[0]    # Start of sequences
     ends = np.where(diffs == -1)[0]     # End of sequences
+    
+    # Trying because of the case bpmin covering everything
+    try:
+        # Iterate over sequences and replace if the length is less than `bpmin`
+        for start, end in zip(starts, ends):
+            length = end - start
+            if length < bpmin:
+                alpha_array[start:end] = alphao
 
-    # Iterate over sequences and replace if the length is less than `bpmin`
-    for start, end in zip(starts, ends):
-        length = end - start
-        if length < bpmin:
-            alpha_array[start:end] = alphao
-
+    # If nothing accessible
+    except Exception:
+        # Only zeros
+        alpha_array = np.zeros_like(alpha_array, dtype=int)
+        
+    # Return in both cases
     return alpha_array
+
+
+# 2.4 : Tools
+
+
+def find_blocks(array: np.ndarray, alpha_value: float) -> list[tuple[int, int]]:
+    """
+    Identify contiguous regions in the array where values are equal (or close) to a given value.
+    Can be used to find obstacles and linkers !
+
+    Parameters
+    ----------
+    array : np.ndarray
+        The array representing the full environment.
+    
+    value : float
+        The value considered as an obstacle (using approximate comparison).
+
+    Returns
+    -------
+    list[tuple[int, int]]
+        A list of intervals (start_index, end_index) for each contiguous obstacle block.
+    """
+    array = np.asarray(array)
+    is_block = np.isclose(array, alpha_value, atol=1e-8)
+    diff = np.diff(is_block.astype(int))
+    starts = np.where(diff == 1)[0] + 1
+    ends = np.where(diff == -1)[0] + 1
+
+    if is_block[0]:
+        starts = np.insert(starts, 0, 0)
+    if is_block[-1]:
+        ends = np.append(ends, len(array))
+
+    return list(zip(starts, ends))
+
+
+def find_interval_containing_value(
+    intervals: list[tuple[int, int]], value: int
+) -> tuple[int, int]:
+    """
+    Return the first interval (start, end) that contains the specified value.
+
+    Parameters
+    ----------
+    intervals : list[tuple[int, int]]
+        A list of intervals (start, end) sorted or unsorted.
+    
+    value : int
+        The index or position to locate within the intervals.
+
+    Returns
+    -------
+    Optional[tuple[int, int]]
+        The interval that contains the value, or None if not found.
+    """
+    intervals_array = np.array(intervals)
+    mask = (intervals_array[:, 0] <= value) & (value < intervals_array[:, 1])
+
+    
+    if np.any(mask):
+        return tuple(intervals_array[mask][0])
+
+
+def destroy_obstacles(array: np.ndarray, ratio: float, alphao: float, alphaf: float, begin:int, end: int) -> np.ndarray:
+    """
+    Randomly destroys a fraction of obstacles in a given 1D landscape array.
+    And on a given zone : from begin to end.
+
+    Args:
+        array (np.ndarray): 1D array representing landscape.
+        ratio (float): 
+        alphao (float): Value representing the obstacles.
+        alphaf (float): Value representing the linkers.
+        begin (int): First point to consider.
+        end (int): Last point to consider.
+
+    Returns:
+        array_new (np.ndarray): 1D array representing landscape with destroyed obstacles.
+    """
+
+    if ratio > 1:
+        raise ValueError(f"You cannot give a ratio superior to 1 and you gave ratio={ratio}")
+    
+    # Looking for obstacles
+    couples = find_blocks(array[begin:end], alphao)
+    if len(couples) == 0:
+        return np.copy(array)  # nothing to destroy
+    
+    # Number of obstacles to destroy
+    n_obs_destroyed = int(np.floor(ratio * len(couples)))
+
+    # Random choice of the obstacles destroyed
+    places = np.random.choice(len(couples), size=n_obs_destroyed, replace=False)
+
+    # Copy the original array
+    array_new = np.copy(array[begin:end])
+    
+    # Destroy the selected obstacles
+    for idx in places:
+        start, end = couples[idx]
+        array_new[start:end] = alphaf
+
+    return array_new

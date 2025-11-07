@@ -13,6 +13,8 @@ import gc
 import numpy as np
 
 from ncl.landscape import alpha_matrix_calculation
+from ncl.landscape import destroy_obstacles
+
 from tls.probabilities import proba_gamma
 
 from ncl.models import gillespie_algorithm_one_step, gillespie_algorithm_two_steps
@@ -108,9 +110,9 @@ def checking_inputs(
 
 
 def sw_nucleo(
-    landscape: str, s: int, l: int, bpmin: int,
+    landscape: str, s: int, l: int, bpmin: int, ratio: float,
     mu: float, theta: float, 
-    lmbda: float, alphao: float, alphaf: float, beta: float, 
+    lmbda: float, alphao: float, alphaf: float, beta: float,
     rtot_bind: float, rtot_rest: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
@@ -158,6 +160,7 @@ def sw_nucleo(
     title = (
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
+            f"ratio={ratio}__"
             # f"lmbda={lmbda:.2e}_rtotbind={rtot_bind:.2e}_rtotrest={rtot_rest:.2e}_"
             f"nt={nt}__"
             )
@@ -188,6 +191,16 @@ def sw_nucleo(
         alpha_matrix, alpha_mean = alpha_matrix_calculation(
             landscape, s, l, bpmin, alphao, alphaf, Lmin, Lmax, bps, nt
         )
+            
+        # Destroying obstacle
+        destroy = True
+        if destroy:
+            first_point = 10_000
+            last_point = 20_000
+            for i in range(len(alpha_matrix)):
+                alpha_matrix[i][first_point:last_point] = destroy_obstacles(alpha_matrix[i], ratio, alphaf, alphao, first_point, last_point)
+        alpha_mean = np.mean(alpha_matrix, axis=0)
+
         
         # Chromatin : Obstacles Linkers Distribution
         obs_points, obs_distrib, link_points, link_distrib = calculate_obs_and_linker_distribution(
@@ -301,7 +314,7 @@ def sw_nucleo(
         if formalism == "two_steps":
             
             # Nature of jumps
-            x_forrward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
+            x_forward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
 
             # Dwell times
             dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
@@ -342,6 +355,7 @@ def sw_nucleo(
                 's'              : s,
                 'l'              : l,
                 'bpmin'          : bpmin,
+                'ratio'          : ratio,
                 'mu'             : mu,
                 'theta'          : theta,
                 'alphao'         : alphao,
@@ -509,7 +523,7 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
 
     sw_nucleo(
         params['landscape'],
-        params['s'], params['l'], params['bpmin'],
+        params['s'], params['l'], params['bpmin'], params['ratio'],
         params['mu'], params['theta'],
         params['lmbda'], params['alphao'], params['alphaf'], params['beta'],
         params['rtot_bind'], params['rtot_rest'],
