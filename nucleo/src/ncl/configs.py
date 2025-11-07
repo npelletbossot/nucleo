@@ -283,7 +283,7 @@ def choose_configuration(config: str) -> dict:
                 #                8, 7, 6, 5, 4, 3, 2, 1]),
                 "l": np.arange(10, 450+1, 10, dtype=int), 
                 "bpmin": np.array([0], dtype=int),
-                "ratio": np.arange(0.00, 1.00, 0.10, dtype=float)
+                "ratio": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float)
             },
             "probas": {
                 "mu": np.array([180]),
