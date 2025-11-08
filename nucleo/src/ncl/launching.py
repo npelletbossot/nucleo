@@ -33,9 +33,9 @@ from ncl.run import process_run
 # ─────────────────────────────────────────────
 
 class Mode(Enum):
-    PSMN = "PSMN"          # SLURM/cluster
-    PC = "PC"              # Local machine
-    SNAKEVIZ = "SNAKEVIZ"  # Local + profiling
+    PSMN        = "PSMN"        # SLURM/cluster
+    PC          = "PC"          # Local machine
+    SNAKEVIZ    = "SNAKEVIZ"    # Local + profiling
 
 
 def _detect_mode(execution_mode: str | None) -> Mode:
@@ -83,11 +83,11 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     """
     
     # Every specific compartments
-    geometry = cfg['geometry']
-    probas = cfg['probas']
-    rates = cfg['rates']
-    meta = cfg['meta']
-    work = cfg['work']
+    geometry    = cfg['geometry']
+    probas      = cfg['probas']
+    rates       = cfg['rates']
+    meta        = cfg['meta']
+    work        = cfg['work']
 
     # The keys must be in arrays
     keys = [
@@ -148,28 +148,26 @@ def execute_in_parallel(config: str,
     num_tasks     = int(slurm_params.get("num_tasks", env_num_tasks))
     num_cores     = int(slurm_params.get("num_cores_used", _choose_num_workers()))
 
+    cfg         = choose_configuration(config)
+    project     = cfg['project']
+    chromatin   = cfg['chromatin']
+    time        = cfg['time']
 
-    cfg = choose_configuration(config)
-    project = cfg['project']
-    chromatin = cfg['chromatin']
-    time = cfg['time']
-    work = cfg['work']
-
-    all_params = generate_param_combinations(cfg)
+    all_params  = generate_param_combinations(cfg)
 
     if mode == Mode.PSMN:
         # Split équilibré par tâche SLURM
-        chunks = np.array_split(all_params, num_tasks)
+        chunks      = np.array_split(all_params, num_tasks)
         this_params = list(chunks[task_id]) if num_tasks > 1 else all_params
         num_workers = num_cores
-        base_dir = "/Xnfs/physbiochrom/npellet/nucleo_folder_Xnfs"
-        use_tqdm = False
+        base_dir    = "/Xnfs/physbiochrom/npellet/nucleo_folder_Xnfs"
+        use_tqdm    = False
         task_suffix = str(task_id)
     else:
         this_params = all_params
         num_workers = 2
-        base_dir = Path.home() / "Documents" / "PhD" / "Workspace"
-        use_tqdm = True
+        base_dir    = Path.home() / "Documents" / "PhD" / "Workspace"
+        use_tqdm    = True
         task_suffix = str(slurm_params.get('task_id', 0))
 
     project_name   = project['project_name']

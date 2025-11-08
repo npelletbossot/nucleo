@@ -303,7 +303,7 @@ def choose_configuration(config: str) -> dict:
 
             },
             "meta": {
-                "nt": 100,
+                "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__accessperiodic"
             }
         },
