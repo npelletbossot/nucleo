@@ -376,33 +376,35 @@ def gillespie_algorithm_two_steps(
             t_bind = - np.log(np.random.rand())/rtot_bind       # Random time of bind or abortion
             r0_bind = np.random.rand()                          # Random event of bind or abortion
 
-            # Condition on time for tentative
+            # Binding : whatever happens loop extrusion spends time trying to bind event if it fails  
             if np.isinf(t_bind) == True:
                 t = 1e308
-
-            # Binding : whatever happens loop extrusion spends time trying to bind event if it fails  
             t += t_bind
 
-            # Acquisition 1
+            # Acquisition 1 : Binding
             t_list.append(t)
             x_list.append(x-ox)
+            
+            # Resting : whatever happens loop extrusion needs to rest after an attempt event if it fails  
+            t_rest = - np.log(np.random.rand())/rtot_rest
+            if np.isinf(t_rest) == True:
+                t_rest = 1e308
+            t += t_rest
       
-            # Binding : Loop Extrusion does occur - it will have to rest
-            if r0_bind < r_bind * (1-lmbda):
-                LE = True
-                t_rest = - np.log(np.random.rand())/rtot_rest
+            # Here is the problem ....
+            
+            # # Binding : Loop Extrusion does occur
+            # if r0_bind < r_bind: # * (1-lmbda):
+            #     LE = True
 
-                if np.isinf(t_rest) == True:
-                    t_rest = 1e308
+            # # Binding : Loop Extrusion does not occur
+            # else : 
+            #     LE = False
+            #     x = prev_x
+            
+            # Here ....
 
-                t += t_rest
-
-            # Binding : Loop Extrusion does not occur - it will not have to rest
-            else : 
-                LE = False
-                x = prev_x
-
-            # Acquisition 2
+            # Acquisition 2 : Resting
             t_list.append(t)
             x_list.append(x-ox)
 

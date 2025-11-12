@@ -149,41 +149,63 @@ def calculate_obs_and_linker_distribution(
     mask_o = alpha_array == alphao
     mask_l = alpha_array == alphaf
 
-    # Find lengths of obstacle sequences
+    # Obstacles
     diffs_o = np.diff(np.concatenate(([0], mask_o.astype(int), [0])))
     starts_o = np.where(diffs_o == 1)[0]
     ends_o = np.where(diffs_o == -1)[0]
     counts_o = ends_o - starts_o
 
-    # Find lengths of linker sequences
+    if counts_o.size > 0:
+        mean_o = float(np.mean(counts_o))
+        points_o, distrib_o = calculate_distribution(
+            data=counts_o,
+            first_bin=0,
+            last_bin=np.max(counts_o) + step,
+            bin_width=step
+        )
+    else:
+        mean_o = 0.0
+        points_o, distrib_o = np.array([]), np.array([])
+
+    # Linkers
     diffs_l = np.diff(np.concatenate(([0], mask_l.astype(int), [0])))
     starts_l = np.where(diffs_l == 1)[0]
     ends_l = np.where(diffs_l == -1)[0]
     counts_l = ends_l - starts_l
 
-    # Handle empty counts
-    if counts_o.size == 0:
-        points_o, distrib_o = np.array([]), np.array([])
+    if counts_l.size > 0:
+        mean_l = float(np.mean(counts_l))
+        points_l, distrib_l = calculate_distribution(
+            data=counts_l,
+            first_bin=0,
+            last_bin=np.max(counts_l) + step,
+            bin_width=step
+        )
     else:
-        points_o, distrib_o = calculate_distribution(data=counts_o, first_bin=0, last_bin=np.max(counts_o)+step, bin_width=step)
-
-    if counts_l.size == 0:
+        mean_l = 0.0
         points_l, distrib_l = np.array([]), np.array([])
-    else:
-        points_l, distrib_l = calculate_distribution(data=counts_l, first_bin=0, last_bin=np.max(counts_l)+step, bin_width=step)
 
-    # Returns the distribution on one array !
-    return points_o, distrib_o, points_l, distrib_l
+    return mean_o, points_o, distrib_o, mean_l, points_l, distrib_l
 
 
 # 2.2 : Results
 
 
-def theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest):
-        p_alpha = (s*alphao + l*alphaf) / (l+s) * (1-lmbda)
-        t_alpha = (1 / rtot_bind) + (1 / rtot_rest)
-        x_alpha = mu
-        return p_alpha / t_alpha * x_alpha
+def theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest, formalism):
+    p_alpha = (s*alphao + l*alphaf) / (l+s)
+    x_alpha = mu
+
+    if formalism == "1":
+        return p_alpha * x_alpha
+    
+    elif formalism == "2":
+        eps = 1e-12
+        denom = (1 / (rtot_bind + eps)) + (1 / (rtot_rest + eps))
+        return p_alpha * x_alpha * (1 - lmbda) / denom
+    
+    else:
+        raise ValueError(f"Unknown formalism: {formalism}")
+
 
 
 def calculate_main_results(results: np.ndarray, dt: float, alpha_0: float, nt: int) -> tuple:

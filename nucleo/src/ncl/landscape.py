@@ -153,9 +153,8 @@ def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphaf:floa
 
     # Values
     alpha_matrix = np.array([binding_length(alpha_list, alphaf, alphao, bpmin) for alpha_list in alpha_matrix], dtype=float)
-    alpha_mean = np.mean(alpha_matrix, axis=0)
     
-    return alpha_matrix, alpha_mean
+    return alpha_matrix
 
 
 # 2.3 Binding minimal size

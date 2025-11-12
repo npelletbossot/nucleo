@@ -94,8 +94,7 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
         'landscape', 's', 'l', 'bpmin',
         'mu', 'theta', 'lmbda', 'alphaf', 'alphao', 'beta',
         'rtot_bind', 'rtot_rest',
-        'parameter'
-        
+        'formalism', 'parameter'
     ]
     
     # All combinations
@@ -104,8 +103,7 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
         probas['mu'], probas['theta'],
         probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
         rates['rtot_bind'], rates['rtot_rest'],
-        work['parameter']
-   
+        work['formalism'], work['parameter']
     )
     
     return [
@@ -165,7 +163,7 @@ def execute_in_parallel(config: str,
         task_suffix = str(task_id)
     else:
         this_params = all_params
-        num_workers = 2
+        num_workers = 12
         base_dir    = Path.home() / "Documents" / "PhD" / "Workspace"
         use_tqdm    = True
         task_suffix = str(slurm_params.get('task_id', 0))

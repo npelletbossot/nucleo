@@ -44,22 +44,21 @@ def choose_configuration(config: str) -> dict:
     }
 
     PROBAS = {
-        "lmbda": 0.40,      # Probability of in vitro condensin to reverse
+        "lmbda": 0.00,      # Probability of in vitro condensin to reverse and not beeing accepted
         "alphaf": 1.00,     # Probability of binding if linker
         "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to undinb
     }
 
     RATES = {
-        "rtot_bind": 1/2,   # Rate of binding (1/6)
-        "rtot_rest": 1/2    # Rate of resting (1/6)
-    }
-    
-    FORMALISM = {
-        "formalism_name": "onestep"
+        # "rtot_bind": 1/2,   # Rate of binding (1/6)
+        # "rtot_rest": 1/2    # Rate of resting (1/6)
+        "rtot_bind": 1,     # Rate of binding (1/6)
+        "rtot_rest": 1      # Rate of resting (1/6)
     }
     
     WORK = {
+        "formalism": "1", # Either 1 (one_step) or 2 (two_steps)
         # "parameter": np.array([0], dtype=float)
         "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }
@@ -172,14 +171,17 @@ def choose_configuration(config: str) -> dict:
 
         "SHORTTEST": {
             "geometry": {
-                "landscape": np.array(['random', 'periodic', 'homogeneous']),
+                # "landscape": np.array(['homogeneous']),
+                # "landscape": np.array(['periodic']),
+                "landscape": np.array(['random', 'periodic']),
+                # "landscape": np.array(['homogeneous', 'periodic', 'random']),
                 "s": np.array([150], dtype=int),
-                "l": np.array([10, 30, 50], dtype=int),
+                "l": np.array([30], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
-                "mu": np.array([300]),
-                "theta": np.array([50]),
+                "mu": np.array([180]),
+                "theta": np.array([90]),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
@@ -256,7 +258,7 @@ def choose_configuration(config: str) -> dict:
                 # "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
                 #                49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
                 #                8, 7, 6, 5, 4, 3, 2, 1]),
-                "l": np.arange(10, 450+1, 10, dtype=int), 
+                "l": np.arange(10, 450+1, 20, dtype=int), 
                 "bpmin": np.array([0, 5, 10, 15, 20], dtype=int)
             },
             "probas": {
@@ -286,7 +288,7 @@ def choose_configuration(config: str) -> dict:
                 # "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
                 #                49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
                 #                8, 7, 6, 5, 4, 3, 2, 1]),
-                "l": np.arange(10, 450+1, 10, dtype=int), 
+                "l": np.arange(10, 35*5 + 10, 10, dtype=int), 
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
@@ -303,7 +305,7 @@ def choose_configuration(config: str) -> dict:
 
             },
             "meta": {
-                "nt": 10_000,
+                "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__accessperiodic"
             }
         },
@@ -318,6 +320,5 @@ def choose_configuration(config: str) -> dict:
         "project": PROJECT,
         "chromatin": CHROMATIN,
         "time": TIME,
-        "formalism": FORMALISM,
         "work": WORK,
     }

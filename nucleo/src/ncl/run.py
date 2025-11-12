@@ -114,11 +114,10 @@ def sw_nucleo(
     mu: float, theta: float, 
     lmbda: float, alphaf: float, alphao: float, beta: float,
     rtot_bind: float, rtot_rest: float,
-    parameter: float,
+    formalism: str, parameter: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
-    formalism = "one_step",
     saving = "data"
     ) -> None:
     """
@@ -159,10 +158,11 @@ def sw_nucleo(
 
     # Title & Folder    
     title = (
+            f"formalism={formalism}__"
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
-            # f"lmbda={lmbda:.2e}_rtotbind={rtot_bind:.2e}_rtotrest={rtot_rest:.2e}_"
-            f"parameter={parameter}__"
+            f"lmbda={lmbda:.2e}_rtotbind={rtot_bind:.2e}_rtotrest={rtot_rest:.2e}_"
+            f"parameter={parameter:.2e}__"
             f"nt={nt}__"
             )
 
@@ -188,27 +188,29 @@ def sw_nucleo(
     
     try:
 
-        # Chromatin : Landscape Generation
-        alpha_matrix, alpha_mean = alpha_matrix_calculation(
+        # Chromatin Generation : Landscape
+        alpha_matrix = alpha_matrix_calculation(
             landscape, s, l, bpmin, alphaf, alphao, Lmin, Lmax, bps, nt
         )
             
-        # Destroying obstacle
+        # Chromatin Generation : Destroying Obstacles
         destroy = True
         if destroy:
-            first_point = 10_000
-            last_point = 20_000
+            first_point = Lmin
+            last_point = Lmax
             for i in range(len(alpha_matrix)):
                 alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], parameter, alphaf, alphao, first_point, last_point)
+                
+        # Chromatin Analysis : Mean Landscape
         alpha_mean = np.mean(alpha_matrix, axis=0)
 
         
-        # Chromatin : Obstacles Linkers Distribution
-        obs_points, obs_distrib, link_points, link_distrib = calculate_obs_and_linker_distribution(
+        # Chromatin Analysis : Obstacles Linkers Distribution
+        obs_mean, obs_points, obs_distrib, link_mean, link_points, link_distrib = calculate_obs_and_linker_distribution(
             alpha_matrix[0], alphaf, alphao
         )
         
-        # Chromatin : Linker Profile
+        # Chromatin Analysis : Linker Profile
         link_view = calculate_linker_landscape(
             alpha_matrix, landscape, nt, alphaf, Lmin, Lmax
         )
@@ -233,20 +235,20 @@ def sw_nucleo(
     try:
         
         # Gillespie One-Step
-        if formalism == "one_step":
+        if formalism == "1":
             results, t_matrix, x_matrix = gillespie_algorithm_one_step(
                 nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
             )
             
         # Gillespie Two-Steps
-        elif formalism == "two_steps":
+        elif formalism == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
                 alpha_matrix, p, beta, lmbda, rtot_bind, rtot_rest, nt, tmax, dt, L, origin
             )
             
         # Else
         else:
-            raise ValueError("Invalid algorithm choice")   
+            raise ValueError(f"Invalid algorithm choice got : {formalism} instead of 1 or 2.")   
 
         # Clean datas
         x_matrix = listoflist_into_matrix(x_matrix)
@@ -269,6 +271,10 @@ def sw_nucleo(
         vf, Cf, wf, vf_std, Cf_std, wf_std, xt_over_t, G, bound_low, bound_high = fitting_in_two_steps(
             times, results_mean, results_std
         )
+        
+        # Theoretical
+        v_th_pure = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest, formalism)
+        v_th_dest = theoretical_speed(alphaf, alphao, obs_mean, link_mean, mu, lmbda, rtot_bind, rtot_rest, formalism)
     
     except Exception as e:
         print(f"Error in Analysis 1 - General results: {e} for {title}")
@@ -310,30 +316,30 @@ def sw_nucleo(
     
     # ------------------- Analysis 4 - Rates and Taus ------------------- #
     
-    try:
+    # try:
     
-        if formalism == "two_steps":
+    #     # if formalism == "2":
             
-            # Nature of jumps
-            x_forward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
+    #     # Nature of jumps
+    #     x_forward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
 
-            # Dwell times
-            dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
-                t_matrix, x_matrix, t_fb, t_lb, t_bw
-            )
-            tau_forwards, tau_reverses = calculate_dwell_times(
-                dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
-            )
+    #     # Dwell times
+    #     dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
+    #         t_matrix, x_matrix, t_fb, t_lb, t_bw
+    #     )
+    #     tau_forwards, tau_reverses = calculate_dwell_times(
+    #         dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+    #     )
 
-            # Rates and Taus
-            v_th = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest)
-            fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
-            tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-            rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-            v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
+    #     # Rates and Taus
+    #     fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
+    #     tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
+    #     rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+    #     v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
+    #     print(v_fit)
             
-    except Exception as e:
-        print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
+    # except Exception as e:
+    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
 
     # ------------------- Working area ------------------- #
 
@@ -351,6 +357,10 @@ def sw_nucleo(
 
         if saving == "data":
             data_result = {
+                
+                # --- Formalism --- #
+                'formalism'      : formalism,                
+                
                 # --- Principal Parameters --- #
                 'landscape'      : landscape,
                 's'              : s,
@@ -383,11 +393,17 @@ def sw_nucleo(
 
                 # --- Chromatin --- #
                 'alpha_mean'     : alpha_mean,
+                'obs_mean'       : obs_mean,
                 'obs_points'     : obs_points,
                 'obs_distrib'    : obs_distrib,
+                'link_mean'      : link_mean,
                 'link_points'    : link_points,
                 'link_distrib'   : link_distrib,
                 'link_view'      : link_view,
+                
+                # # --- Massive Datas --- #
+                # 't_matrix'       : t_matrix,
+                # 'x_matrix'       : x_matrix,
 
                 # --- Results --- #
                 'results'        : results,
@@ -396,6 +412,8 @@ def sw_nucleo(
                 'results_std'    : results_std,
                 'v_mean'         : v_mean,
                 'v_med'          : v_med,
+                'v_th_pure'      : v_th_pure,
+                'v_th_dest'      : v_th_dest,
                 'vf'             : vf,
                 'Cf'             : Cf,
                 'wf'             : wf,
@@ -437,10 +455,25 @@ def sw_nucleo(
                 'G'              : G,
                 'bound_low'      : bound_low,
                 'bound_high'     : bound_high,
+                
+                # # --- Forwards / Reverses --- #
+                # 'v_fit'          : v_fit,
+                # 'tau_forwards'   : tau_forwards,
+                # 'tau_reverses'   : tau_reverses,
+                # 'rtot_bind_fit'  : rtot_bind_fit,
+                # 'rtot_rest_fit'  : rtot_rest_fit
+                
+                # --- Work --- #
+                'parameter'      : parameter,
+
             }
 
-        elif saving == "map":
+        elif saving == "test":
             data_result = {
+                
+                # --- Formalism --- #
+                'formalism'      : formalism,
+                
                 # --- Principal Parameters --- #
                 'landscape'      : landscape,
                 's'              : s,
@@ -455,23 +488,14 @@ def sw_nucleo(
                 'rtot_bind'      : rtot_bind,
                 'rtot_rest'      : rtot_rest,
 
-                # --- Chromatin Parameters --- #
-                'Lmin'           : Lmin,
-                'Lmax'           : Lmax,
-                'bps'            : bps,
-                'origin'         : origin,
-
-                # --- Time Parameters --- #
-                'tmax'           : tmax,
-                'dt'             : dt,
-                'nt'             : nt,
-
                 # --- Speeds and Taus --- #
                 'v_mean'         : v_mean,
                 'v_th'           : v_th,
                 'v_fit'          : v_fit,
                 'tau_forwards'   : tau_forwards,
                 'tau_reverses'   : tau_reverses,
+                'rtot_bind_fit'  : rtot_bind_fit,
+                'rtot_rest_fit'  : rtot_rest_fit
             }
 
 
@@ -530,7 +554,7 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         params['mu'], params['theta'],
         params['lmbda'], params['alphaf'], params['alphao'], params['beta'],
         params['rtot_bind'], params['rtot_rest'],
-        params['parameter'],
+        params['formalism'], params['parameter'],
         params['nt'], params['path'],
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
         time["tmax"], time["dt"]
