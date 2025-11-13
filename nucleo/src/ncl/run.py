@@ -200,20 +200,20 @@ def sw_nucleo(
             last_point = Lmax
             for i in range(len(alpha_matrix)):
                 alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], parameter, alphaf, alphao, first_point, last_point)
-                
-        # Chromatin Analysis : Mean Landscape
-        alpha_mean = np.mean(alpha_matrix, axis=0)
 
-        
         # Chromatin Analysis : Obstacles Linkers Distribution
-        obs_mean, obs_points, obs_distrib, link_mean, link_points, link_distrib = calculate_obs_and_linker_distribution(
+        s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = calculate_obs_and_linker_distribution(
             alpha_matrix[0], alphaf, alphao
         )
         
         # Chromatin Analysis : Linker Profile
-        link_view = calculate_linker_landscape(
+        l_view = calculate_linker_landscape(
             alpha_matrix, landscape, nt, alphaf, Lmin, Lmax
         )
+        
+        # Chromatin Analysis : Mean Landscape
+        alpha_mean_sim  = np.mean(alpha_matrix, axis=0)
+        alpha_mean_eff  = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean)
     
     except Exception as e:
         print(f"Error in Input 1 - Landscape : {e} for {title}")
@@ -273,8 +273,8 @@ def sw_nucleo(
         )
         
         # Theoretical
-        v_th_pure = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest, formalism)
-        v_th_dest = theoretical_speed(alphaf, alphao, obs_mean, link_mean, mu, lmbda, rtot_bind, rtot_rest, formalism)
+        v_th_sim    = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest, formalism)
+        v_th_eff    = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_bind, rtot_rest, formalism)
     
     except Exception as e:
         print(f"Error in Analysis 1 - General results: {e} for {title}")
@@ -392,14 +392,15 @@ def sw_nucleo(
                 'nt'             : nt,
 
                 # --- Chromatin --- #
-                'alpha_mean'     : alpha_mean,
-                'obs_mean'       : obs_mean,
-                'obs_points'     : obs_points,
-                'obs_distrib'    : obs_distrib,
-                'link_mean'      : link_mean,
-                'link_points'    : link_points,
-                'link_distrib'   : link_distrib,
-                'link_view'      : link_view,
+                's_mean'         : s_mean,
+                's_points'       : s_points,
+                's_distrib'      : s_distrib,
+                'l_mean'         : l_mean,
+                'l_points'       : l_points,
+                'l_distrib'      : l_distrib,
+                'l_view'         : l_view,
+                'alpha_mean_sim' : alpha_mean_sim,
+                'alpha_mean_eff' : alpha_mean_eff,
                 
                 # # --- Massive Datas --- #
                 # 't_matrix'       : t_matrix,
@@ -412,8 +413,8 @@ def sw_nucleo(
                 'results_std'    : results_std,
                 'v_mean'         : v_mean,
                 'v_med'          : v_med,
-                'v_th_pure'      : v_th_pure,
-                'v_th_dest'      : v_th_dest,
+                'v_th_sim'       : v_th_sim,
+                'v_th_eff'       : v_th_eff,
                 'vf'             : vf,
                 'Cf'             : Cf,
                 'wf'             : wf,

@@ -191,21 +191,29 @@ def calculate_obs_and_linker_distribution(
 # 2.2 : Results
 
 
-def theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest, formalism):
-    p_alpha = (s*alphao + l*alphaf) / (l+s)
-    x_alpha = mu
+def calculate_alpha_mean(alphaf: float, alphao: float, s: int, l: int) -> float:
+    """Calculate the weighted average of alpha."""
+    return (alphaf*l + alphao*s) / (l+s)
+
+
+def calculate_theoretical_speed(
+    alphaf: float, alphao: float, s: int, l: int, 
+    mu: float, lmbda: float, rtot_bind: float, rtot_rest: float, 
+    formalism: str
+    ) -> float:
+    """Calculate the theoretical average speed."""
+    alpha_mean = calculate_alpha_mean(alphaf, alphao, s, l)
 
     if formalism == "1":
-        return p_alpha * x_alpha
+        return alpha_mean * mu
     
     elif formalism == "2":
         eps = 1e-12
         denom = (1 / (rtot_bind + eps)) + (1 / (rtot_rest + eps))
-        return p_alpha * x_alpha * (1 - lmbda) / denom
+        return alpha_mean * mu * (1 - lmbda) / denom
     
     else:
         raise ValueError(f"Unknown formalism: {formalism}")
-
 
 
 def calculate_main_results(results: np.ndarray, dt: float, alpha_0: float, nt: int) -> tuple:
