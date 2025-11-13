@@ -489,14 +489,12 @@ def sw_nucleo(
                 'rtot_bind'      : rtot_bind,
                 'rtot_rest'      : rtot_rest,
 
-                # --- Speeds and Taus --- #
-                'v_mean'         : v_mean,
-                'v_th'           : v_th,
-                'v_fit'          : v_fit,
-                'tau_forwards'   : tau_forwards,
-                'tau_reverses'   : tau_reverses,
-                'rtot_bind_fit'  : rtot_bind_fit,
-                'rtot_rest_fit'  : rtot_rest_fit
+                # # --- Speeds and Taus --- #
+                # 'v_mean'         : v_mean,
+                # 'tau_forwards'   : tau_forwards,
+                # 'tau_reverses'   : tau_reverses,
+                # 'rtot_bind_fit'  : rtot_bind_fit,
+                # 'rtot_rest_fit'  : rtot_rest_fit
             }
 
 
