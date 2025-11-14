@@ -145,6 +145,7 @@ def calculate_obs_and_linker_distribution(
             - points_l (np.ndarray): Centers of bins for linker lengths.
             - distrib_l (np.ndarray): Normalized distribution of linker lengths.
     """
+    
     # Masks for obstacles and linkers
     mask_o = alpha_array == alphao
     mask_l = alpha_array == alphaf
@@ -165,7 +166,7 @@ def calculate_obs_and_linker_distribution(
         )
     else:
         mean_o = 0.0
-        points_o, distrib_o = np.array([]), np.array([])
+        points_o, distrib_o = np.array([0.0]), np.array([0.0])
 
     # Linkers
     diffs_l = np.diff(np.concatenate(([0], mask_l.astype(int), [0])))
@@ -183,7 +184,7 @@ def calculate_obs_and_linker_distribution(
         )
     else:
         mean_l = 0.0
-        points_l, distrib_l = np.array([]), np.array([])
+        points_l, distrib_l = np.array([0.0]), np.array([0.0])
 
     return mean_o, points_o, distrib_o, mean_l, points_l, distrib_l
 

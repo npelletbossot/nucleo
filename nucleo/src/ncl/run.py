@@ -66,44 +66,53 @@ def checking_inputs(
     Raises:
     - ValueError: If any of the parameter constraints are violated.
     """
-
-    # Obstacles
-    if landscape not in {"homogeneous", "periodic", "random"}:
-        raise ValueError(f"Invalid landscape: {landscape}. Must be 'homogeneous', 'periodic', or 'random'.")
-    for name, value in [("s", s), ("l", l), ("bpmin", bpmin)]:
-        if not isinstance(value, np.integer) or value < 0:
-            raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
-    if l == 0:
-        raise ValueError("You cannot set l=0, there is absolutly accessible places.")
-
-    # Probabilities
-    if not isinstance(mu, np.integer) or mu < 0:
-        raise ValueError(f"Invalid value for mu: must be an int >= 0. Got {mu}.")
-    if not isinstance(theta, np.integer) or theta < 0:
-        raise ValueError(f"Invalid value for theta: must be an int >= 0. Got {theta}.")
-    for name, value in zip(["lmbda", "alphaf", "alphao", "beta"], [lmbda, alphaf, alphao, beta]):
-        if not (0 <= value <= 1):
-            raise ValueError(f"{name} must be between 0 and 1. Got {value}.")
-
-    # Chromatin
-    if Lmin != 0:
-        raise ValueError(f"Lmin must be 0. Got {Lmin}.")
-    if Lmax <= Lmin:
-        raise ValueError(f"Lmax must be greater than Lmin. Got Lmax={Lmax}, Lmin={Lmin}.")
-    if not isinstance(bps, int) or bps < 0:
-        raise ValueError(f"Invalid value for bps: must be an int >= 0. Got {bps}.")
-    if not (0 <= origin < Lmax):
-        raise ValueError(f"origin must be within [0, Lmax). Got origin={origin}, Lmax={Lmax}.")
     
-    # Trajectories
-    if not isinstance(nt, int) or nt < 0:
-        raise ValueError(f"Invalid value for nt: must be an int >= 0. Got {nt}.")
+    try:
 
-    # Times
-    if not isinstance(tmax, int) or tmax < 0:
-        raise ValueError(f"Invalid value for tmax: must be an int >= 0. Got {tmax}.")
-    if dt <= 0:
-        raise ValueError(f"dt must be positive. Got {dt}.")
+        # Obstacles
+        if landscape not in {"homogeneous", "periodic", "random"}:
+            raise ValueError(f"Invalid landscape: {landscape}. Must be 'homogeneous', 'periodic', or 'random'.")
+        for name, value in [("s", s), ("l", l), ("bpmin", bpmin)]:
+            if not isinstance(value, np.integer) or value < 0:
+                raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
+        if l == 0:
+            raise ValueError("You cannot set l=0, there is absolutly accessible places.")
+
+        # Probabilities
+        if not isinstance(mu, np.integer) or mu < 0:
+            raise ValueError(f"Invalid value for mu: must be an int >= 0. Got {mu}.")
+        if not isinstance(theta, np.integer) or theta < 0:
+            raise ValueError(f"Invalid value for theta: must be an int >= 0. Got {theta}.")
+        for name, value in zip(["lmbda", "alphaf", "alphao", "beta"], 
+                            [lmbda, alphaf, alphao, beta]):
+            if not ((0 <= value).all() and (value <= 1).all()):
+                raise ValueError(
+                    f"{name} must be between 0 and 1. "
+                    f"Got array with min={value.min()}, max={value.max()}."
+                )
+
+        # Chromatin
+        if Lmin != 0:
+            raise ValueError(f"Lmin must be 0. Got {Lmin}.")
+        if Lmax <= Lmin:
+            raise ValueError(f"Lmax must be greater than Lmin. Got Lmax={Lmax}, Lmin={Lmin}.")
+        if not isinstance(bps, int) or bps < 0:
+            raise ValueError(f"Invalid value for bps: must be an int >= 0. Got {bps}.")
+        if not (0 <= origin < Lmax):
+            raise ValueError(f"origin must be within [0, Lmax). Got origin={origin}, Lmax={Lmax}.")
+        
+        # Trajectories
+        if not isinstance(nt, int) or nt < 0:
+            raise ValueError(f"Invalid value for nt: must be an int >= 0. Got {nt}.")
+
+        # Times
+        if not isinstance(tmax, int) or tmax < 0:
+            raise ValueError(f"Invalid value for tmax: must be an int >= 0. Got {tmax}.")
+        if dt <= 0:
+            raise ValueError(f"dt must be positive. Got {dt}.")
+        
+    except Exception as e:
+        print(f"The error is in the checking_inputs() function and is : {e}")
 
 
 # 2.2 : Stochastic Walker
@@ -165,6 +174,7 @@ def sw_nucleo(
             f"parameter={parameter:.2e}__"
             f"nt={nt}__"
             )
+    
 
     # Chromatin
     L = np.arange(Lmin, Lmax, bps)
@@ -402,9 +412,9 @@ def sw_nucleo(
                 'alpha_mean_sim' : alpha_mean_sim,
                 'alpha_mean_eff' : alpha_mean_eff,
                 
-                # # --- Massive Datas --- #
-                # 't_matrix'       : t_matrix,
-                # 'x_matrix'       : x_matrix,
+                # --- Raw Datas --- #
+                't_matrix'       : t_matrix,
+                'x_matrix'       : x_matrix,
 
                 # --- Results --- #
                 'results'        : results,

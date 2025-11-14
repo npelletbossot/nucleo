@@ -58,9 +58,9 @@ def choose_configuration(config: str) -> dict:
     }
     
     WORK = {
-        "formalism": "1", # Either 1 (one_step) or 2 (two_steps)
-        # "parameter": np.array([0], dtype=float)
-        "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
+        "formalism": "2", # Either 1 (one_step) or 2 (two_steps)
+        "parameter": np.array([0], dtype=float)
+        # "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }
 
     # ──────────────────────────────────
@@ -69,6 +69,8 @@ def choose_configuration(config: str) -> dict:
 
     presets = {
 
+        # STATIC
+        
         "NU": {
             "geometry": {
                 "landscape": np.array(['random', 'periodic', 'homogeneous']),
@@ -169,20 +171,22 @@ def choose_configuration(config: str) -> dict:
             }
         },
 
+        # TESTS
+
         "SHORTTEST": {
             "geometry": {
-                # "landscape": np.array(['homogeneous']),
+                "landscape": np.array(['homogeneous']),
                 # "landscape": np.array(['periodic']),
-                "landscape": np.array(['random', 'periodic']),
+                # "landscape": np.array(['random', 'periodic']),
                 # "landscape": np.array(['homogeneous', 'periodic', 'random']),
-                "s": np.array([150], dtype=int),
+                "s": np.array([0, 30], dtype=int),
                 "l": np.array([30], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
                 "mu": np.array([180]),
                 "theta": np.array([90]),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
+                "lmbda": np.array([0.00, 0.50, 1.00], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
@@ -223,6 +227,7 @@ def choose_configuration(config: str) -> dict:
             }
         },
 
+        # ACCESSIBILITY
 
         "MAP": {
             "geometry": {
@@ -248,7 +253,6 @@ def choose_configuration(config: str) -> dict:
                 "path": f"{PROJECT["project_name"]}__map"
             }
         },
-        
         
         "ACCESSRANDOM": {
             "geometry": {
@@ -278,7 +282,6 @@ def choose_configuration(config: str) -> dict:
                 "path": f"{PROJECT["project_name"]}__accessrandom"
             }
         },
-        
         
         "ACCESSPERIODIC": {
             "geometry": {

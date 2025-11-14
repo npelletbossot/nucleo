@@ -100,12 +100,11 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     # All combinations
     values = product(
         geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'],
-        probas['mu'], probas['theta'],
-        probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
+        probas['mu'], probas['theta'], probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
         rates['rtot_bind'], rates['rtot_rest'],
         work['formalism'], work['parameter']
     )
-    
+        
     return [
         dict(zip(keys, vals)) | {"nt": meta['nt'], "path": meta['path']}
         for vals in values
