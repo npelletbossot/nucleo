@@ -179,14 +179,14 @@ def choose_configuration(config: str) -> dict:
                 # "landscape": np.array(['periodic']),
                 # "landscape": np.array(['random', 'periodic']),
                 # "landscape": np.array(['homogeneous', 'periodic', 'random']),
-                "s": np.array([0, 30], dtype=int),
-                "l": np.array([30], dtype=int),
+                "s": np.array([35], dtype=int),
+                "l": np.array([10, 35], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
                 "mu": np.array([180]),
                 "theta": np.array([90]),
-                "lmbda": np.array([0.00, 0.50, 1.00], dtype=float),
+                "lmbda": np.array([0.00, 0.25, 0.50, 0.75, 1.00], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
@@ -196,7 +196,7 @@ def choose_configuration(config: str) -> dict:
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
-                "nt": 1_000,
+                "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },

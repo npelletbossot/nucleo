@@ -394,7 +394,7 @@ def gillespie_algorithm_two_steps(
             # Here is the problem ....
             
             # Binding : Loop Extrusion does occur
-            if r0_bind < r_bind: # * (1-lmbda):
+            if r0_bind < r_bind * (1-lmbda):
                 LE = True
 
             # Binding : Loop Extrusion does not occur

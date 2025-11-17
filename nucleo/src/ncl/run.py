@@ -213,7 +213,7 @@ def sw_nucleo(
 
         # Chromatin Analysis : Obstacles Linkers Distribution
         s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = calculate_obs_and_linker_distribution(
-            alpha_matrix[0], alphaf, alphao
+            landscape, s, l, alpha_matrix[0], alphaf, alphao
         )
         
         # Chromatin Analysis : Linker Profile
@@ -364,7 +364,7 @@ def sw_nucleo(
     # ------------------- Writing ------------------- #
     
     try:
-
+        # print(alpha_mean_eff)
         if saving == "data":
             data_result = {
                 
