@@ -419,3 +419,140 @@ def gillespie_algorithm_two_steps(
         x_matrix[_] = x_list
 
     return results, t_matrix, x_matrix
+
+
+def gillespie_algorithm_two_steps_FACT(
+    alpha_matrix: np.ndarray,
+    p: np.ndarray,
+    beta: float, 
+    lmbda: float,
+    rtot_bind: float,
+    rtot_rest: float,
+    nt: int, 
+    tmax: float, 
+    dt: float,
+    L: np.ndarray, 
+    origin: int, 
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Simulates stochastic transitions using a two-step Gillespie algorithm.
+
+    Args:
+        alpha_matrix (np.ndarray): Matrix of acceptance probabilities.
+        p (np.ndarray): Probability array for transitions.
+        beta (float): Unfolding probability.
+        lmbda (float): Probability to perform a reverse jump after a forward move.
+        rtot_bind (float): Reaction rate for binding events.
+        rtot_rest (float): Reaction rate for resting events.
+        nt (int): Number of trajectories to simulate.
+        tmax (float): Maximum simulation time.
+        dt (float): Time step increment.
+        L (np.ndarray): Chromatin structure array.
+        origin (int): Initial position in the simulation.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray, np.ndarray]: 
+            - A matrix containing the simulation results.
+            - An array of all recorded time steps.
+            - An array of all recorded positions.
+    """
+
+
+    # --- Starting values --- #
+    # beta_matrix = np.tile(np.full(len(L)*bps, beta), (nt, 1))
+
+    results = np.empty((nt, int(tmax/dt)))
+    results.fill(np.nan)
+
+    t_matrix = np.empty(nt, dtype=object)
+    x_matrix = np.empty(nt, dtype=object)
+
+    # --- Loop on trajectories --- #
+    for _ in range(0,nt) :
+
+        # Initialization of starting values
+        t, t_bind, t_rest = 0, 0, 0           # First times
+        x = folding(alpha_matrix[_], origin)  # Initial calculation
+        prev_x = np.copy(x)                   # Copy for later use (filling the matrix)
+        ox = np.copy(x)                       # Initial point on the chromatin (used to reset trajectories to start at zero)
+
+        # Model 
+        i0, i = 0, 0
+
+        # Initial calibration
+        results[_][0] = t                     # Store the initial time
+        t_list = [t]                          # List to track time points
+        x_list = [x-ox]                       # List to track recalibrated positions
+
+        # --- Loop on times --- #
+        while (t<tmax) :
+
+            # --- Unbinding or not --- #
+
+            # # Not needed for the moment
+            # r0_unbind = np.random.rand()
+            # if r0_unbind<(beta_matrix[_][x]):
+            #     i = int(np.floor(t/dt))                                         # Last time
+            #     results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = prev_x-ox      # Last value
+            #     break
+
+            # --- Jumping : mandatory --- #
+
+            # Almost instantaneous jumps (approx. 20 ms)
+            x_jump = np.random.choice(L, p=p)       # Gives the x position
+            x += x_jump                             # Whatever happens loop extrusion spends time trying to extrude
+
+            # --- Jumping : edge conditions  --- #
+            if x >= (np.max(L) - origin) :
+                i = int(np.floor(t/dt))                                         # Last time
+                results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = np.nan         # Last value
+                break
+
+            # --- Binding or Abortion --- #
+
+            # Binding : values
+            r_bind = alpha_matrix[_][x]
+            t_bind = - np.log(np.random.rand())/rtot_bind       # Random time of bind or abortion
+            r0_bind = np.random.rand()                          # Random event of bind or abortion
+
+            # Binding : whatever happens loop extrusion spends time trying to bind event if it fails  
+            if np.isinf(t_bind) == True:
+                t = 1e308
+            t += t_bind
+
+            # Acquisition 1 : Binding
+            t_list.append(t)
+            x_list.append(x-ox)
+            i = int(np.floor(t/dt))                                   
+            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
+            
+            # Resting : whatever happens loop extrusion needs to rest after an attempt event if it fails  
+            t_rest = - np.log(np.random.rand())/rtot_rest
+            if np.isinf(t_rest) == True:
+                t_rest = 1e308
+            t += t_rest
+                  
+            # Binding : Loop Extrusion does occur
+            if r0_bind < r_bind * (1-lmbda):
+                LE = True
+
+            # Binding : Loop Extrusion does not occur
+            else : 
+                LE = False
+                x = prev_x
+            
+            # Acquisition 2 : Resting
+            t_list.append(t)
+            x_list.append(x-ox)
+            i = int(np.floor(t/dt))                                   
+            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(x-ox)
+            
+            # Next loop
+            i0 = i+1
+            prev_x = np.copy(x)
+
+        # All datas
+        t_matrix[_] = t_list
+        x_matrix[_] = x_list
+
+    return results, t_matrix, x_matrix

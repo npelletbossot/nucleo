@@ -129,7 +129,7 @@ def calculate_obs_and_linker_distribution(
     alpha_scenario: str, s: int, l: int,
     alpha_array: np.ndarray, alphaf: float, alphao: float,
     step: int = 10
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Process a 1D alpha array to calculate lengths of linker and obstacle sequences
     and their distributions.
@@ -150,7 +150,7 @@ def calculate_obs_and_linker_distribution(
     
     # Concerning flat landscape
     if alpha_scenario == "homogeneous":
-        return s, 0.0, 0.0, l, 0.0, 0.0
+        return np.float64(s), np.array([0.0]), np.array([0.0]), np.float64(l), np.array([0.0]), np.array([0.0])
     
     # Masks for obstacles and linkers
     mask_o = alpha_array == alphao

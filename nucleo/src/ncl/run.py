@@ -326,30 +326,30 @@ def sw_nucleo(
     
     # ------------------- Analysis 4 - Rates and Taus ------------------- #
     
-    # try:
+    try:
     
-    #     # if formalism == "2":
+        if formalism == "2":
             
-    #     # Nature of jumps
-    #     x_forward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
+            # Nature of jumps
+            x_forward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
 
-    #     # Dwell times
-    #     dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
-    #         t_matrix, x_matrix, t_fb, t_lb, t_bw
-    #     )
-    #     tau_forwards, tau_reverses = calculate_dwell_times(
-    #         dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
-    #     )
+            # Dwell times
+            dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
+                t_matrix, x_matrix, t_fb, t_lb, t_bw
+            )
+            tau_forwards, tau_reverses = calculate_dwell_times(
+                dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+            )
 
-    #     # Rates and Taus
-    #     fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
-    #     tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-    #     rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-    #     v_fit = theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit)
-    #     print(v_fit)
+            # Rates and Taus
+            fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
+            tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
+            rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+            v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit, formalism)
             
-    # except Exception as e:
-    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
+    except Exception as e:
+        print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
+
 
     # ------------------- Working area ------------------- #
 
@@ -467,17 +467,23 @@ def sw_nucleo(
                 'bound_low'      : bound_low,
                 'bound_high'     : bound_high,
                 
-                # # --- Forwards / Reverses --- #
-                # 'v_fit'          : v_fit,
-                # 'tau_forwards'   : tau_forwards,
-                # 'tau_reverses'   : tau_reverses,
-                # 'rtot_bind_fit'  : rtot_bind_fit,
-                # 'rtot_rest_fit'  : rtot_rest_fit
-                
                 # --- Work --- #
                 'parameter'      : parameter,
 
             }
+            
+            if formalism == "2":
+                data_rates = {
+                    # --- Forwards / Reverses --- #
+                    'v_th_fit'       : v_th_fit,
+                    'tau_forwards'   : tau_forwards,
+                    'tau_reverses'   : tau_reverses,
+                    'rtot_bind_fit'  : rtot_bind_fit,
+                    'rtot_rest_fit'  : rtot_rest_fit
+                }
+                
+                data_result.update(data_rates)
+
 
         elif saving == "test":
             data_result = {

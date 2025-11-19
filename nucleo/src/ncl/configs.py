@@ -175,10 +175,10 @@ def choose_configuration(config: str) -> dict:
 
         "SHORTTEST": {
             "geometry": {
-                "landscape": np.array(['homogeneous']),
+                # "landscape": np.array(['homogeneous']),
                 # "landscape": np.array(['periodic']),
                 # "landscape": np.array(['random', 'periodic']),
-                # "landscape": np.array(['homogeneous', 'periodic', 'random']),
+                "landscape": np.array(['homogeneous', 'periodic', 'random']),
                 "s": np.array([35], dtype=int),
                 "l": np.array([10, 35], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -196,7 +196,7 @@ def choose_configuration(config: str) -> dict:
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
-                "nt": 10_000,
+                "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },
