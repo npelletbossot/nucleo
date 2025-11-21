@@ -47,7 +47,7 @@ def checking_inputs(
     Parameters:
     - s (int): Nucleosome lenght (must be 150).
     - l (int): Linker DNA length (must be ≤ s).
-    - bpmin (int): Minimum base pair value to bind (must be ≤ 10).
+    - bpmin (int): Minimum base pair value to capt (must be ≤ 10).
     - alphaf (float): Linker alpha parameter (must be in [0, 1]).
     - alphao (float): Obstacle alpha parameter (must be in [0, 1]).
     - alphar (float): FACT alpha parameter (must be in [0, 1]).
@@ -122,7 +122,7 @@ def sw_nucleo(
     landscape: str, s: int, l: int, bpmin: int,
     mu: float, theta: float, 
     lmbda: float, alphaf: float, alphao: float, beta: float,
-    rtot_bind: float, rtot_rest: float,
+    rtot_capt: float, rtot_rest: float,
     formalism: str, parameter: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
@@ -143,7 +143,7 @@ def sw_nucleo(
         alphaf (float): Acceptance probability on linker sites.
         alphao (float): Acceptance probability on nucleosome sites.
         beta (float): Unfolding probability.
-        rtot_bind (float): Reaction rate for binding (inverse of characteristic time).
+        rtot_capt (float): Reaction rate for capturing (inverse of characteristic time).
         rtot_rest (float): Reaction rate for resting (inverse of characteristic time).
         nt (int): Number of trajectories to simulate.
         path (str): Output path for saving results.
@@ -170,7 +170,7 @@ def sw_nucleo(
             f"formalism={formalism}__"
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
-            f"lmbda={lmbda:.2e}_rtotbind={rtot_bind:.2e}_rtotrest={rtot_rest:.2e}_"
+            f"lmbda={lmbda:.2e}_rtotcapt={rtot_capt:.2e}_rtotrest={rtot_rest:.2e}_"
             f"parameter={parameter:.2e}__"
             f"nt={nt}__"
             )
@@ -253,7 +253,7 @@ def sw_nucleo(
         # Gillespie Two-Steps
         elif formalism == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, beta, lmbda, rtot_bind, rtot_rest, nt, tmax, dt, L, origin
+                alpha_matrix, p, beta, lmbda, rtot_capt, rtot_rest, nt, tmax, dt, L, origin
             )
             
         # Else
@@ -283,8 +283,8 @@ def sw_nucleo(
         )
         
         # Theoretical
-        v_th_sim    = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind, rtot_rest, formalism)
-        v_th_eff    = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_bind, rtot_rest, formalism)
+        v_th_sim    = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest, formalism)
+        v_th_eff    = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest, formalism)
     
     except Exception as e:
         print(f"Error in Analysis 1 - General results: {e} for {title}")
@@ -331,7 +331,7 @@ def sw_nucleo(
         if formalism == "2":
             
             # Nature of jumps
-            x_forward_bind, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
+            x_forward_capt, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
 
             # Dwell times
             dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
@@ -344,8 +344,8 @@ def sw_nucleo(
             # Rates and Taus
             fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
             tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-            rtot_bind_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-            v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_bind_fit, rtot_rest_fit, formalism)
+            rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+            v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, formalism)
             
     except Exception as e:
         print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
@@ -382,7 +382,7 @@ def sw_nucleo(
                 'alphao'         : alphao,
                 'beta'           : beta,
                 'lmbda'          : lmbda,
-                'rtot_bind'      : rtot_bind,
+                'rtot_capt'      : rtot_capt,
                 'rtot_rest'      : rtot_rest,
                 
                 # --- Working Parameter --- #
@@ -478,7 +478,7 @@ def sw_nucleo(
                     'v_th_fit'       : v_th_fit,
                     'tau_forwards'   : tau_forwards,
                     'tau_reverses'   : tau_reverses,
-                    'rtot_bind_fit'  : rtot_bind_fit,
+                    'rtot_capt_fit'  : rtot_capt_fit,
                     'rtot_rest_fit'  : rtot_rest_fit
                 }
                 
@@ -502,14 +502,14 @@ def sw_nucleo(
                 'alphao'         : alphao,
                 'beta'           : beta,
                 'lmbda'          : lmbda,
-                'rtot_bind'      : rtot_bind,
+                'rtot_capt'      : rtot_capt,
                 'rtot_rest'      : rtot_rest,
 
                 # # --- Speeds and Taus --- #
                 # 'v_mean'         : v_mean,
                 # 'tau_forwards'   : tau_forwards,
                 # 'tau_reverses'   : tau_reverses,
-                # 'rtot_bind_fit'  : rtot_bind_fit,
+                # 'rtot_capt_fit'  : rtot_capt_fit,
                 # 'rtot_rest_fit'  : rtot_rest_fit
             }
 
@@ -568,7 +568,7 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         params['s'], params['l'], params['bpmin'],
         params['mu'], params['theta'],
         params['lmbda'], params['alphaf'], params['alphao'], params['beta'],
-        params['rtot_bind'], params['rtot_rest'],
+        params['rtot_capt'], params['rtot_rest'],
         params['formalism'], params['parameter'],
         params['nt'], params['path'],
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],

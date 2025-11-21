@@ -51,10 +51,10 @@ def choose_configuration(config: str) -> dict:
     }
 
     RATES = {
-        # "rtot_bind": 1/2,   # Rate of binding (1/6)
+        # "rtot_capt": 1/2,   # Rate of capturing (1/6)
         # "rtot_rest": 1/2    # Rate of resting (1/6)
-        "rtot_bind": 1,     # Rate of binding (1/6)
-        "rtot_rest": 1      # Rate of resting (1/6)
+        "rtot_capt": 1/2,     # Rate of capturing (1/6)
+        "rtot_rest": 1/2      # Rate of resting (1/6)
     }
     
     WORK = {
@@ -87,7 +87,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
@@ -112,7 +112,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
@@ -137,7 +137,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
@@ -162,7 +162,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
@@ -179,20 +179,20 @@ def choose_configuration(config: str) -> dict:
                 # "landscape": np.array(['periodic']),
                 # "landscape": np.array(['random', 'periodic']),
                 "landscape": np.array(['homogeneous', 'periodic', 'random']),
-                "s": np.array([35], dtype=int),
+                "s": np.array([0, 35], dtype=int),
                 "l": np.array([10, 35], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
                 "mu": np.array([180]),
                 "theta": np.array([90]),
-                "lmbda": np.array([0.00, 0.25, 0.50, 0.75, 1.00], dtype=float),
+                "lmbda": np.array([0.00, 0.50, 1.00], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
@@ -218,7 +218,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
@@ -245,7 +245,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": 1 / np.linspace(0.10, 20, 100),
+                "rtot_capt": 1 / np.linspace(0.10, 20, 100),
                 "rtot_rest": 1 / np.linspace(0.10, 20, 100)
             },
             "meta": {
@@ -274,7 +274,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
             },
             "meta": {
@@ -303,7 +303,7 @@ def choose_configuration(config: str) -> dict:
                 "beta": np.array([PROBAS["beta"]], dtype=float)
             },
             "rates": {
-                "rtot_bind": np.array([RATES["rtot_bind"]], dtype=float),
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
 
             },

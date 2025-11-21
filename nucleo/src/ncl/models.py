@@ -287,7 +287,7 @@ def gillespie_algorithm_two_steps(
     p: np.ndarray,
     beta: float, 
     lmbda: float,
-    rtot_bind: float,
+    rtot_capt: float,
     rtot_rest: float,
     nt: int, 
     tmax: float, 
@@ -303,7 +303,7 @@ def gillespie_algorithm_two_steps(
         p (np.ndarray): Probability array for transitions.
         beta (float): Unfolding probability.
         lmbda (float): Probability to perform a reverse jump after a forward move.
-        rtot_bind (float): Reaction rate for binding events.
+        rtot_capt (float): Reaction rate for capturing events.
         rtot_rest (float): Reaction rate for resting events.
         nt (int): Number of trajectories to simulate.
         tmax (float): Maximum simulation time.
@@ -332,7 +332,7 @@ def gillespie_algorithm_two_steps(
     for _ in range(0,nt) :
 
         # Initialization of starting values
-        t, t_bind, t_rest = 0, 0, 0           # First times
+        t, t_capt, t_rest = 0, 0, 0           # First times
         x = folding(alpha_matrix[_], origin)  # Initial calculation
         prev_x = np.copy(x)                   # Copy for later use (filling the matrix)
         ox = np.copy(x)                       # Initial point on the chromatin (used to reset trajectories to start at zero)
@@ -371,46 +371,44 @@ def gillespie_algorithm_two_steps(
 
             # --- Binding or Abortion --- #
 
-            # Binding : values
-            r_bind = alpha_matrix[_][x]
-            t_bind = - np.log(np.random.rand())/rtot_bind       # Random time of bind or abortion
-            r0_bind = np.random.rand()                          # Random event of bind or abortion
+            # Capturing : values
+            r_capt = alpha_matrix[_][x]
+            t_capt = - np.log(np.random.rand())/rtot_capt       # Random time of capt or abortion
+            r0_capt = np.random.rand()                          # Random event of capt or abortion
 
-            # Binding : whatever happens loop extrusion spends time trying to bind event if it fails  
-            if np.isinf(t_bind) == True:
+            # Capturing : whatever happens loop extrusion spends time trying to capt event if it fails  
+            if np.isinf(t_capt) == True:
                 t = 1e308
-            t += t_bind
+            t += t_capt
 
-            # Acquisition 1 : Binding
+            # Capturing : Acquisition 1
             t_list.append(t)
             x_list.append(x-ox)
+            i = int(np.floor(t/dt))                                   
+            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
             
             # Resting : whatever happens loop extrusion needs to rest after an attempt event if it fails  
             t_rest = - np.log(np.random.rand())/rtot_rest
             if np.isinf(t_rest) == True:
                 t_rest = 1e308
             t += t_rest
-      
-            # Here is the problem ....
-            
-            # Binding : Loop Extrusion does occur
-            if r0_bind < r_bind * (1-lmbda):
+                  
+            # Capturing : Loop Extrusion does occur
+            if r0_capt < r_capt * (1-lmbda):
                 LE = True
 
-            # Binding : Loop Extrusion does not occur
+            # Capturing : Loop Extrusion does not occur
             else : 
                 LE = False
                 x = prev_x
             
-            # Here ....
-
-            # Acquisition 2 : Resting
+            # Resting : Acquisition 2 
             t_list.append(t)
             x_list.append(x-ox)
-
-            # Filling
             i = int(np.floor(t/dt))                                   
             results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
+            
+            # Next step
             i0 = i+1
             prev_x = np.copy(x)
 
@@ -426,7 +424,7 @@ def gillespie_algorithm_two_steps_FACT(
     p: np.ndarray,
     beta: float, 
     lmbda: float,
-    rtot_bind: float,
+    rtot_capt: float,
     rtot_rest: float,
     nt: int, 
     tmax: float, 
@@ -442,7 +440,7 @@ def gillespie_algorithm_two_steps_FACT(
         p (np.ndarray): Probability array for transitions.
         beta (float): Unfolding probability.
         lmbda (float): Probability to perform a reverse jump after a forward move.
-        rtot_bind (float): Reaction rate for binding events.
+        rtot_capt (float): Reaction rate for capturing events.
         rtot_rest (float): Reaction rate for resting events.
         nt (int): Number of trajectories to simulate.
         tmax (float): Maximum simulation time.
@@ -471,7 +469,7 @@ def gillespie_algorithm_two_steps_FACT(
     for _ in range(0,nt) :
 
         # Initialization of starting values
-        t, t_bind, t_rest = 0, 0, 0           # First times
+        t, t_capt, t_rest = 0, 0, 0           # First times
         x = folding(alpha_matrix[_], origin)  # Initial calculation
         prev_x = np.copy(x)                   # Copy for later use (filling the matrix)
         ox = np.copy(x)                       # Initial point on the chromatin (used to reset trajectories to start at zero)
@@ -510,17 +508,17 @@ def gillespie_algorithm_two_steps_FACT(
 
             # --- Binding or Abortion --- #
 
-            # Binding : values
-            r_bind = alpha_matrix[_][x]
-            t_bind = - np.log(np.random.rand())/rtot_bind       # Random time of bind or abortion
-            r0_bind = np.random.rand()                          # Random event of bind or abortion
+            # Capturing : values
+            r_capt = alpha_matrix[_][x]
+            t_capt = - np.log(np.random.rand())/rtot_capt       # Random time of capt or abortion
+            r0_capt = np.random.rand()                          # Random event of capt or abortion
 
-            # Binding : whatever happens loop extrusion spends time trying to bind event if it fails  
-            if np.isinf(t_bind) == True:
+            # Capturing : whatever happens loop extrusion spends time trying to capt event if it fails  
+            if np.isinf(t_capt) == True:
                 t = 1e308
-            t += t_bind
+            t += t_capt
 
-            # Acquisition 1 : Binding
+            # Capturing : Acquisition 1
             t_list.append(t)
             x_list.append(x-ox)
             i = int(np.floor(t/dt))                                   
@@ -532,23 +530,22 @@ def gillespie_algorithm_two_steps_FACT(
                 t_rest = 1e308
             t += t_rest
                   
-            # Binding : Loop Extrusion does occur
-            if r0_bind < r_bind * (1-lmbda):
+            # Capturing : Loop Extrusion does occur
+            if r0_capt < r_capt * (1-lmbda):
                 LE = True
 
-            # Binding : Loop Extrusion does not occur
+            # Capturing : Loop Extrusion does not occur
             else : 
                 LE = False
                 x = prev_x
             
-            # Acquisition 2 : Resting
+            # Resting : Acquisition 2 
             t_list.append(t)
             x_list.append(x-ox)
             i = int(np.floor(t/dt))                                   
             results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(x-ox)
             
-            # Next loop
-            i0 = i+1
+            # Next step
             prev_x = np.copy(x)
 
         # All datas

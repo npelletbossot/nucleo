@@ -208,7 +208,7 @@ def calculate_alpha_mean(alphaf: float, alphao: float, s: int, l: int) -> float:
 
 def calculate_theoretical_speed(
     alphaf: float, alphao: float, s: int, l: int, 
-    mu: float, lmbda: float, rtot_bind: float, rtot_rest: float, 
+    mu: float, lmbda: float, rtot_capt: float, rtot_rest: float, 
     formalism: str
     ) -> float:
     """Calculate the theoretical average speed."""
@@ -219,7 +219,7 @@ def calculate_theoretical_speed(
     
     elif formalism == "2":
         eps = 1e-12
-        denom = (1 / (rtot_bind + eps)) + (1 / (rtot_rest + eps))
+        denom = (1 / (rtot_capt + eps)) + (1 / (rtot_rest + eps))
         return alpha_mean * mu * (1 - lmbda) / denom
     
     else:
@@ -556,9 +556,9 @@ def find_jumps(x_matrix: np.ndarray, t_matrix) -> tuple[np.ndarray, np.ndarray, 
 
     Returns:
         tuple containing flattened arrays of:
-            - forward bind times
+            - forward capt times
             - forward rest times
-            - reverse bind times
+            - reverse capt times
             - reverse rest times
     """
     
@@ -569,29 +569,29 @@ def find_jumps(x_matrix: np.ndarray, t_matrix) -> tuple[np.ndarray, np.ndarray, 
     frwd_mask = np.zeros_like(x_matrix, dtype=bool)
     equal_next = (x_matrix[:, :-1] == x_matrix[:, 1:])
 
-    # Transmit the True from bind_time to corresponding rest_time
+    # Transmit the True from capt to corresponding rest_time
     frwd_mask[:, :-1] |= equal_next
     frwd_mask[:,  1:] |= equal_next
     frwd_mask = np.copy(frwd_mask[:, 1:])
     rvrs_mask = ~ frwd_mask
     x_matrix = np.copy(x_matrix[:, 1:])    
     
-    # Forward : select the columns corresponding to bind (odd) and rest (even)
+    # Forward : select the columns corresponding to capt (odd) and rest (even)
     frwd_time = frwd_mask * time
     frwd_time[frwd_time==0] = np.nan  
-    frwd_bind = frwd_time[:, 0::2]
+    frwd_capt = frwd_time[:, 0::2]
     frwd_rest = frwd_time[:, 1::2]
 
-    # Reverse : select the columns corresponding to bind (odd) and rest (even)
+    # Reverse : select the columns corresponding to capt (odd) and rest (even)
     rvrs_time = rvrs_mask * time
     rvrs_time[rvrs_time==0] = np.nan  
-    rvrs_bind = rvrs_time[:, 0::2]
+    rvrs_capt = rvrs_time[:, 0::2]
     rvrs_rest = rvrs_time[:, 1::2]
     
-    # print(x_matrix, "\n\n", time, "\n\n", frwd_bind, "\n\n", frwd_rest, "\n\n", rvrs_bind, "\n\n", rvrs_rest)
-    return (np.concatenate(frwd_bind),
+    # print(x_matrix, "\n\n", time, "\n\n", frwd_capt, "\n\n", frwd_rest, "\n\n", rvrs_capt, "\n\n", rvrs_rest)
+    return (np.concatenate(frwd_capt),
             np.concatenate(frwd_rest),
-            np.concatenate(rvrs_bind), 
+            np.concatenate(rvrs_capt), 
             np.concatenate(rvrs_rest))
     
     
@@ -602,7 +602,7 @@ def calculate_nature_jump_distribution(t_matrix: np.ndarray,
                                        bin_width: float
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Calculates the binned distributions of forward and reverse bind/rest times.
+    Calculates the binned distributions of forward and reverse capt/rest times.
 
     Args:
         t_matrix: 2D array of cumulative times.
@@ -613,9 +613,9 @@ def calculate_nature_jump_distribution(t_matrix: np.ndarray,
 
     Returns:
         tuple of distributions:
-            - fb : forward bind times
+            - fb : forward capt times
             - fr : forward rest times
-            - rb : reverse bind times
+            - rb : reverse capt times
             - rr : reverse rest times
    
     """
@@ -643,9 +643,9 @@ def extracting_taus(
     Fits exponential decay to the given distributions and extracts decay constants and initial values.
 
     Args:
-        fb_y: Forward bind distribution.
+        fb_y: Forward capt distribution.
         fr_y: Forward rest distribution.
-        rb_y: Reverse bind distribution.
+        rb_y: Reverse capt distribution.
         rr_y: Reverse rest distribution.
         array: Bin centers or time points.
 
@@ -663,24 +663,24 @@ def extracting_taus(
 
 def calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr):
     """
-    Calculate fitted binding and resting rates based on times.
+    Calculate fitted capturing and resting rates based on times.
     So not on dweel times !
 
     Parameters:
-        tau_fb (float): Mean forward binding time.
+        tau_fb (float): Mean forward capturing time.
         tau_fr (float): Mean forward resting time.
-        tau_rb (float): Mean reverse binding time.
+        tau_rb (float): Mean reverse capturing time.
         tau_rr (float): Mean reverse resting time.
 
     Returns:
         tuple: 
-            rtot_bind_fit (float): Fitted total binding rate.
+            rtot_capt_fit (float): Fitted total captturing rate.
             rtot_rest_fit (float): Fitted total resting rate.
     """
-    rtot_bind_fit = ((tau_fb + tau_rb) / 2) ** -1
+    rtot_capt_fit = ((tau_fb + tau_rb) / 2) ** -1
     rtot_rest_fit = ((tau_fr + tau_rr) / 2) ** -1
 
-    return rtot_bind_fit, rtot_rest_fit
+    return rtot_capt_fit, rtot_rest_fit
 
 
 def getting_forwards(
@@ -809,7 +809,7 @@ def calculate_dwell_distribution(t_matrix: list, x_matrix: list, first_bin: floa
     d_forwards = (e_forwards[:, :-1] == True) & (e_forwards[:, 1:] == True)     # was there a forward jump then a forward jump ?
     d_reverses = (e_forwards[:, :-1] == True) & (e_forwards[:, 1:] == False)    # was there a forward jump then a reverse jump ?
 
-    # Calculating time associated by grouping them per 2 because of our formalism : bind + rest
+    # Calculating time associated by grouping them per 2 because of our formalism : capt + rest
     t_event = np.add(t[:, ::2], t[:, 1::2])
     t_forwards = d_forwards * t_event[:, :-1]
     t_reverses = d_reverses * t_event[:, :-1]
