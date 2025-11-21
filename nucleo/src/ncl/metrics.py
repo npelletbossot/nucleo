@@ -120,9 +120,12 @@ def calculate_linker_landscape(data, landscape ,nt, alphaf, Lmin, Lmax, view_siz
         view_array = np.mean(view_matrix, axis=0)   # Average per column
         view_datas[_] = view_array                  # Filling the all datas matrix
 
-    # Last result and return
+    # Mean and return
     view_mean = np.mean(view_datas, axis=0)
-    return view_mean
+    if np.isnan(view_mean).all():
+        return np.zeros(len(view_mean), dtype=float)
+    else:
+        return view_mean
 
 
 def calculate_obs_and_linker_distribution(

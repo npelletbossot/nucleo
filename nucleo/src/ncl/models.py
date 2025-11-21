@@ -332,12 +332,10 @@ def gillespie_algorithm_two_steps(
     for _ in range(0,nt) :
 
         # Initialization of starting values
-        t, t_capt, t_rest = 0, 0, 0           # First times
-        x = folding(alpha_matrix[_], origin)  # Initial calculation
-        prev_x = np.copy(x)                   # Copy for later use (filling the matrix)
-        ox = np.copy(x)                       # Initial point on the chromatin (used to reset trajectories to start at zero)
-
-        # Model 
+        t, t_capt, t_rest = 0, 0, 0             # First times
+        x = folding(alpha_matrix[_], origin)    # Initial calculation
+        prev_x  = np.copy(x)                    # Copy for later use (filling the matrix)
+        ox      = np.copy(x)                    # Initial point on the chromatin (used to reset trajectories to start at zero)
         i0, i = 0, 0
 
         # Initial calibration
@@ -385,7 +383,7 @@ def gillespie_algorithm_two_steps(
             t_list.append(t)
             x_list.append(x-ox)
             i = int(np.floor(t/dt))                                   
-            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
+            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(x-ox)
             
             # Resting : whatever happens loop extrusion needs to rest after an attempt event if it fails  
             t_rest = - np.log(np.random.rand())/rtot_rest
@@ -464,17 +462,19 @@ def gillespie_algorithm_two_steps_FACT(
 
     t_matrix = np.empty(nt, dtype=object)
     x_matrix = np.empty(nt, dtype=object)
+    
+    # Rate for FACT (to include later in configs.py)
+    kA = 0.50
+    kB = 0.50
 
     # --- Loop on trajectories --- #
     for _ in range(0,nt) :
 
         # Initialization of starting values
-        t, t_capt, t_rest = 0, 0, 0           # First times
-        x = folding(alpha_matrix[_], origin)  # Initial calculation
-        prev_x = np.copy(x)                   # Copy for later use (filling the matrix)
-        ox = np.copy(x)                       # Initial point on the chromatin (used to reset trajectories to start at zero)
-
-        # Model 
+        t, t_capt, t_rest = 0, 0, 0             # First times
+        x = folding(alpha_matrix[_], origin)    # Initial calculation
+        prev_x  = np.copy(x)                    # Copy for later use (filling the matrix)
+        ox      = np.copy(x)                    # Initial point on the chromatin (used to reset trajectories to start at zero)
         i0, i = 0, 0
 
         # Initial calibration
@@ -507,7 +507,12 @@ def gillespie_algorithm_two_steps_FACT(
                 break
 
             # --- Binding or Abortion --- #
-
+            
+            # FACT : values
+            r_FACT = np.random.rand()
+            
+            
+            
             # Capturing : values
             r_capt = alpha_matrix[_][x]
             t_capt = - np.log(np.random.rand())/rtot_capt       # Random time of capt or abortion
@@ -522,7 +527,7 @@ def gillespie_algorithm_two_steps_FACT(
             t_list.append(t)
             x_list.append(x-ox)
             i = int(np.floor(t/dt))                                   
-            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
+            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(x-ox)
             
             # Resting : whatever happens loop extrusion needs to rest after an attempt event if it fails  
             t_rest = - np.log(np.random.rand())/rtot_rest
@@ -543,9 +548,10 @@ def gillespie_algorithm_two_steps_FACT(
             t_list.append(t)
             x_list.append(x-ox)
             i = int(np.floor(t/dt))                                   
-            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(x-ox)
+            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
             
             # Next step
+            i0 = i+1
             prev_x = np.copy(x)
 
         # All datas

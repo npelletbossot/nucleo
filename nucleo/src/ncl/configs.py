@@ -53,12 +53,12 @@ def choose_configuration(config: str) -> dict:
     RATES = {
         # "rtot_capt": 1/2,   # Rate of capturing (1/6)
         # "rtot_rest": 1/2    # Rate of resting (1/6)
-        "rtot_capt": 1/2,     # Rate of capturing (1/6)
-        "rtot_rest": 1/2      # Rate of resting (1/6)
+        "rtot_capt": 1/10,     # Rate of capturing (1/6)
+        "rtot_rest": 1/10      # Rate of resting (1/6)
     }
     
     WORK = {
-        "formalism": "2", # Either 1 (one_step) or 2 (two_steps)
+        "formalism": "2", # Either 1 (one_step) or 2 (two_steps) or 3 (two_steps_FACT)
         "parameter": np.array([0], dtype=float)
         # "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }
@@ -175,12 +175,12 @@ def choose_configuration(config: str) -> dict:
 
         "SHORTTEST": {
             "geometry": {
-                # "landscape": np.array(['homogeneous']),
+                "landscape": np.array(['homogeneous']),
                 # "landscape": np.array(['periodic']),
                 # "landscape": np.array(['random', 'periodic']),
-                "landscape": np.array(['homogeneous', 'periodic', 'random']),
+                # "landscape": np.array(['homogeneous', 'periodic', 'random']),
                 "s": np.array([0, 35], dtype=int),
-                "l": np.array([10, 35], dtype=int),
+                "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
