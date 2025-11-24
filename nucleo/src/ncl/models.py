@@ -509,9 +509,15 @@ def gillespie_algorithm_two_steps_FACT(
             # --- Binding or Abortion --- #
             
             # FACT : values
-            r_FACT = np.random.rand()
+            r_FACT_1 = np.random.rand()
             
+            if r_FACT_1 < kB / (kA + kB):
+                FACT = True
+                
+            else:
+                FACT = False
             
+
             
             # Capturing : values
             r_capt = alpha_matrix[_][x]
