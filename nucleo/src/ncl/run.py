@@ -17,7 +17,7 @@ from ncl.landscape import destroy_obstacles
 
 from tls.probabilities import proba_gamma
 
-from ncl.models import gillespie_algorithm_one_step, gillespie_algorithm_two_steps
+from ncl.models import *
 
 from tls.utils import listoflist_into_matrix
 from ncl.metrics import *
@@ -256,9 +256,18 @@ def sw_nucleo(
                 alpha_matrix, p, beta, lmbda, rtot_capt, rtot_rest, nt, tmax, dt, L, origin
             )
             
+        # Gillespie Two-Steps FACT
+        elif formalism == "3":
+            kB = 0.50
+            kU = 0.50
+            rR = 0.80
+            results, t_matrix, x_matrix = gillespie_algorithm_two_steps_FACT(
+                alpha_matrix, p, beta, lmbda, rtot_capt, rtot_rest, kB, kU, rR, nt, tmax, dt, L, origin, bps
+            )
+            
         # Else
         else:
-            raise ValueError(f"Invalid algorithm choice got : {formalism} instead of 1 or 2.")   
+            raise ValueError(f"Invalid algorithm choice got : {formalism} instead of 1 - 2 - 3.")   
 
         # Clean datas
         x_matrix = listoflist_into_matrix(x_matrix)

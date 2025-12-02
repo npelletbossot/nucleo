@@ -168,6 +168,87 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
     return(true_origin)
 
 
+def remodelling_by_FACT(kB: float, kU: float, K: float, tR: float) -> bool:
+    """
+    Determine whether FACT-mediated chromatin remodelling occurs during a rest period tR.
+
+    This function implements a two-state stochastic model for FACT binding dynamics:
+    - State F  : FACT is bound to the nucleosome.
+    - State NF : FACT is unbound.
+    
+    At the beginning of the rest interval tR, the system is assigned a state according to
+    the equilibrium probability:
+        P(F) = K = kB / (kB + kU)
+        P(NF) = 1 - K
+    
+    Depending on the state, dwell times are drawn using exponential distributions:
+        T_F   ~ Exp(kU)
+        T_NF  ~ Exp(kB)
+    
+    A random internal time T is drawn uniformly within the dwell interval 
+    (i.e. T = TF * U or T = TNF * U with U ~ Uniform[0,1]).
+    
+    During the rest period tR, remodelling may occur either:
+    1. Immediately: if tR < (T_state - T)
+    2. After a delayed event with probability:
+    
+        PF  = K * [1 - exp(-(kB + kU) * (tR - (TF  - T)))]    for state F
+        PNF = exp(-(kB + kU) * (tR - (TNF - T))) 
+              + K * [1 - exp(-(kB + kU) * (tR - (TNF - T)))]  for state NF
+    
+    Parameters
+    ----------
+    kB : float
+        FACT binding rate (NF → F).
+    kU : float
+        FACT unbinding rate (F → NF).
+    K : float
+        Equilibrium occupancy of the FACT-bound state (kB / (kB + kU)).
+    tR : float
+        Rest period duration during which remodelling may occur.
+    
+    Returns
+    -------
+    bool
+        True if chromatin remodelling occurs during tR, False otherwise.
+    """
+
+    rF0 = np.random.rand()
+    
+    # --- FACT state (F) --- #
+    if rF0 < K:
+        TF = -1 / kU * np.log(np.random.rand())
+        rF1 = np.random.rand()
+        T = TF * rF1
+        
+        # Immediate remodelling success
+        if tR < (TF - T):
+            return True
+        
+        # Delayed remodelling
+        rF2 = np.random.rand()
+        PF = K * (1 - np.exp(-(kB + kU) * (tR - (TF - T))))
+        return (rF2 < PF)
+            
+    # --- Non-FACT state (NF) --- #       
+    else:
+        TNF = -1 / kB * np.log(np.random.rand())
+        rF1 = np.random.rand() 
+        T = TNF * rF1
+        
+        # Immediate remodelling failure
+        if tR < (TNF - T):
+            return False
+            
+        # Delayed remodelling
+        rF2 = np.random.rand()
+        PNF = (
+            np.exp(-(kB + kU) * (tR - (TNF - T)))
+            + K * (1 - np.exp(-(kB + kU) * (tR - (TNF - T))))
+        )
+        return (rF2 < PNF)
+
+
 # 2.2 : Gillespies
 
 
@@ -407,7 +488,7 @@ def gillespie_algorithm_two_steps(
             results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
             
             # Next step
-            i0 = i+1
+            i0 = i + 1
             prev_x = np.copy(x)
 
         # All datas
@@ -415,87 +496,6 @@ def gillespie_algorithm_two_steps(
         x_matrix[_] = x_list
 
     return results, t_matrix, x_matrix
-
-
-def remodelling_by_FACT(kB: float, kU: float, K: float, tR: float) -> bool:
-    """
-    Determine whether FACT-mediated chromatin remodelling occurs during a rest period tR.
-
-    This function implements a two-state stochastic model for FACT binding dynamics:
-    - State F  : FACT is bound to the nucleosome.
-    - State NF : FACT is unbound.
-    
-    At the beginning of the rest interval tR, the system is assigned a state according to
-    the equilibrium probability:
-        P(F) = K = kB / (kB + kU)
-        P(NF) = 1 - K
-    
-    Depending on the state, dwell times are drawn using exponential distributions:
-        T_F   ~ Exp(kU)
-        T_NF  ~ Exp(kB)
-    
-    A random internal time T is drawn uniformly within the dwell interval 
-    (i.e. T = TF * U or T = TNF * U with U ~ Uniform[0,1]).
-    
-    During the rest period tR, remodelling may occur either:
-    1. Immediately: if tR < (T_state - T)
-    2. After a delayed event with probability:
-    
-        PF  = K * [1 - exp(-(kB + kU) * (tR - (TF  - T)))]    for state F
-        PNF = exp(-(kB + kU) * (tR - (TNF - T))) 
-              + K * [1 - exp(-(kB + kU) * (tR - (TNF - T)))]  for state NF
-    
-    Parameters
-    ----------
-    kB : float
-        FACT binding rate (NF → F).
-    kU : float
-        FACT unbinding rate (F → NF).
-    K : float
-        Equilibrium occupancy of the FACT-bound state (kB / (kB + kU)).
-    tR : float
-        Rest period duration during which remodelling may occur.
-    
-    Returns
-    -------
-    bool
-        True if chromatin remodelling occurs during tR, False otherwise.
-    """
-
-    rF0 = np.random.rand()
-    
-    # --- FACT state (F) --- #
-    if rF0 < K:
-        TF = -1 / kU * np.log(np.random.rand())
-        rF1 = np.random.rand()
-        T = TF * rF1
-        
-        # Immediate remodelling success
-        if tR < (TF - T):
-            return True
-        
-        # Delayed remodelling
-        rF2 = np.random.rand()
-        PF = K * (1 - np.exp(-(kB + kU) * (tR - (TF - T))))
-        return (rF2 < PF)
-            
-    # --- Non-FACT state (NF) --- #       
-    else:
-        TNF = -1 / kB * np.log(np.random.rand())
-        rF1 = np.random.rand() 
-        T = TNF * rF1
-        
-        # Immediate remodelling failure
-        if tR < (TNF - T):
-            return False
-            
-        # Delayed remodelling
-        rF2 = np.random.rand()
-        PNF = (
-            np.exp(-(kB + kU) * (tR - (TNF - T)))
-            + K * (1 - np.exp(-(kB + kU) * (tR - (TNF - T))))
-        )
-        return (rF2 < PNF)
 
 
 def gillespie_algorithm_two_steps_FACT(

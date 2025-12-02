@@ -224,6 +224,11 @@ def calculate_theoretical_speed(
         eps = 1e-12
         denom = (1 / (rtot_capt + eps)) + (1 / (rtot_rest + eps))
         return alpha_mean * mu * (1 - lmbda) / denom
+   
+    elif formalism == "3":
+        eps = 1e-12
+        denom = (1 / (rtot_capt + eps)) + (1 / (rtot_rest + eps))
+        return alpha_mean * mu * (1 - lmbda) / denom 
     
     else:
         raise ValueError(f"Unknown formalism: {formalism}")

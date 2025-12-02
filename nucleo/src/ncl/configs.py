@@ -53,8 +53,8 @@ def choose_configuration(config: str) -> dict:
     RATES = {
         # "rtot_capt": 1/2,   # Rate of capturing (1/6)
         # "rtot_rest": 1/2    # Rate of resting (1/6)
-        "rtot_capt": 1/10,     # Rate of capturing (1/6)
-        "rtot_rest": 1/10      # Rate of resting (1/6)
+        "rtot_capt": 1/2,     # Rate of capturing (1/6)
+        "rtot_rest": 1/2      # Rate of resting (1/6)
     }
     
     WORK = {
