@@ -243,6 +243,9 @@ def sw_nucleo(
     # ------------------- Simulations ------------------- #
 
     try:
+        kB = 0.50
+        kU = 0.50
+        alphar = 0.80
         
         # Gillespie One-Step
         if formalism == "1":
@@ -255,14 +258,10 @@ def sw_nucleo(
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
                 alpha_matrix, p, beta, lmbda, rtot_capt, rtot_rest, nt, tmax, dt, L, origin
             )
-            
         # Gillespie Two-Steps FACT
         elif formalism == "3":
-            kB = 0.50
-            kU = 0.50
-            rR = 0.80
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps_FACT(
-                alpha_matrix, p, beta, lmbda, rtot_capt, rtot_rest, kB, kU, rR, nt, tmax, dt, L, origin, bps
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, kB, kU, alphar, nt, tmax, dt, L, origin, bps
             )
             
         # Else
@@ -292,8 +291,8 @@ def sw_nucleo(
         )
         
         # Theoretical
-        v_th_sim = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest, formalism)
-        v_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest, formalism)
+        v_th_sim = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
+        v_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
     
     except Exception as e:
         print(f"Error in Analysis 1 - General results: {e} for {title}")
@@ -335,29 +334,29 @@ def sw_nucleo(
     
     # ------------------- Analysis 4 - Rates and Taus ------------------- #
     
-    try:
+    # try:
     
-        if formalism == "2":
+    #     if formalism == "2":
             
-            # Nature of jumps
-            x_forward_capt, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
+    #         # Nature of jumps
+    #         x_forward_capt, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
 
-            # Dwell times
-            dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
-                t_matrix, x_matrix, t_fb, t_lb, t_bw
-            )
-            tau_forwards, tau_reverses = calculate_dwell_times(
-                dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
-            )
+    #         # Dwell times
+    #         dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
+    #             t_matrix, x_matrix, t_fb, t_lb, t_bw
+    #         )
+    #         tau_forwards, tau_reverses = calculate_dwell_times(
+    #             dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+    #         )
 
-            # Rates and Taus
-            fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
-            tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-            rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-            v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, formalism)
+    #         # Rates and Taus
+    #         fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
+    #         tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
+    #         rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+    #         v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, formalism)
             
-    except Exception as e:
-        print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
+    # except Exception as e:
+    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
 
 
     # ------------------- Working area ------------------- #
@@ -481,17 +480,17 @@ def sw_nucleo(
 
             }
             
-            if formalism == "2":
-                data_rates = {
-                    # --- Forwards / Reverses --- #
-                    'v_th_fit'       : v_th_fit,
-                    'tau_forwards'   : tau_forwards,
-                    'tau_reverses'   : tau_reverses,
-                    'rtot_capt_fit'  : rtot_capt_fit,
-                    'rtot_rest_fit'  : rtot_rest_fit
-                }
+            # if formalism == "2":
+            #     data_rates = {
+            #         # --- Forwards / Reverses --- #
+            #         'v_th_fit'       : v_th_fit,
+            #         'tau_forwards'   : tau_forwards,
+            #         'tau_reverses'   : tau_reverses,
+            #         'rtot_capt_fit'  : rtot_capt_fit,
+            #         'rtot_rest_fit'  : rtot_rest_fit
+            #     }
                 
-                data_result.update(data_rates)
+            #     data_result.update(data_rates)
 
 
         elif saving == "test":

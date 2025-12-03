@@ -211,7 +211,8 @@ def calculate_alpha_mean(alphaf: float, alphao: float, s: int, l: int) -> float:
 
 def calculate_theoretical_speed(
     alphaf: float, alphao: float, s: int, l: int, 
-    mu: float, lmbda: float, rtot_capt: float, rtot_rest: float, 
+    mu: float, lmbda: float, rtot_capt: float, rtot_rest: float,
+    alphar: float, kB: float, kU: float, 
     formalism: str
     ) -> float:
     """Calculate the theoretical average speed."""
@@ -227,6 +228,7 @@ def calculate_theoretical_speed(
    
     elif formalism == "3":
         eps = 1e-12
+        alpha_mean = (l*alphaf + s*(alphao*kU + alphar*kB) / (kU+eps+kB+eps)) / (l+eps+s+eps)
         denom = (1 / (rtot_capt + eps)) + (1 / (rtot_rest + eps))
         return alpha_mean * mu * (1 - lmbda) / denom 
     

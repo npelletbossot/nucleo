@@ -410,17 +410,17 @@ def gillespie_algorithm_two_steps(
     x_matrix = np.empty(nt, dtype=object)
 
     # --- Loop on trajectories --- #
-    for _ in range(0,nt) :
+    for n in range(0,nt) :
 
         # Initialization of starting values
         t, t_capt, t_rest = 0, 0, 0             # First times
-        x = folding(alpha_matrix[_], origin)    # Initial calculation
+        x = folding(alpha_matrix[n], origin)    # Initial calculation
         prev_x  = np.copy(x)                    # Copy for later use (filling the matrix)
         ox      = np.copy(x)                    # Initial point on the chromatin (used to reset trajectories to start at zero)
-        i0, i = 0, 0
+        i0, i1  = 0, 0
 
         # Initial calibration
-        results[_][0] = t                     # Store the initial time
+        results[n][0] = t                     # Store the initial time
         t_list = [t]                          # List to track time points
         x_list = [x-ox]                       # List to track recalibrated positions
 
@@ -445,13 +445,13 @@ def gillespie_algorithm_two_steps(
             # --- Jumping : edge conditions  --- #
             if x >= (np.max(L) - origin) :
                 i = int(np.floor(t/dt))                                         # Last time
-                results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = np.nan         # Last value
+                results[n][i0:int(min(np.floor(tmax/dt),i)+1)] = np.nan         # Last value
                 break
 
             # --- Binding or Abortion --- #
 
             # Capturing : values
-            r_capt = alpha_matrix[_][x]
+            r_capt = alpha_matrix[n][x]
             t_capt = - np.log(np.random.rand())/rtot_capt       # Random time of capt or abortion
             r0_capt = np.random.rand()                          # Random event of capt or abortion
 
@@ -463,37 +463,44 @@ def gillespie_algorithm_two_steps(
             # Capturing : Acquisition 1
             t_list.append(t)
             x_list.append(x-ox)
-            i = int(np.floor(t/dt))                                   
-            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(x-ox)
+            i1 = int(np.floor(t/dt)) 
+            i2 = int(min(np.floor(tmax/dt),i1)+1)
+            print(i1, i2, prev_x-ox)                              
+            results[n][i0:i2] = int(prev_x-ox)
+            i0 = np.copy(i1) + 1
+            print(i0)
             
             # Resting : whatever happens loop extrusion needs to rest after an attempt event if it fails  
             t_rest = - np.log(np.random.rand())/rtot_rest
             if np.isinf(t_rest) == True:
                 t_rest = 1e308
             t += t_rest
+            
+            # Resting : Acquisition 2 
+            i1 = int(np.floor(t/dt))   
+            i2 = int(min(np.floor(tmax/dt),i1)+1)  
+            print(i1, i2, x-ox)                               
+            results[n][i0:i2] = int(x-ox)
                   
             # Capturing : Loop Extrusion does occur
             if r0_capt < r_capt * (1-lmbda):
                 LE = True
-
             # Capturing : Loop Extrusion does not occur
             else : 
                 LE = False
-                x = prev_x
-            
-            # Resting : Acquisition 2 
+                x = np.copy(prev_x)
+
             t_list.append(t)
             x_list.append(x-ox)
-            i = int(np.floor(t/dt))                                   
-            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
-            
             # Next step
-            i0 = i + 1
+            i0 = np.copy(i1) + 1
             prev_x = np.copy(x)
+            print(i0)
+            print("*")
 
         # All datas
-        t_matrix[_] = t_list
-        x_matrix[_] = x_list
+        t_matrix[n] = t_list
+        x_matrix[n] = x_list
 
     return results, t_matrix, x_matrix
 
@@ -501,13 +508,14 @@ def gillespie_algorithm_two_steps(
 def gillespie_algorithm_two_steps_FACT(
     alpha_matrix: np.ndarray,
     p: np.ndarray,
+    alphao: float,
     beta: float,
     lmbda: float,
     rC_tot: float,
     rR_tot: float,
     kB: float,
     kU: float,
-    rR: float,
+    alphar: float,
     nT: int,
     tmax: float,
     dt: float,
@@ -615,10 +623,10 @@ def gillespie_algorithm_two_steps_FACT(
 
         # Starting values
         t = tC = tR = 0
-        x = folding(alpha_matrix[n], origin)   # Folding on naked DNA
+        x = folding(alpha_matrix[n], origin)    # Folding on naked DNA
         xp = np.copy(x)
         xo = np.copy(x)
-        i0 = i = 0                             # Index for matrix filling
+        i0 = i = iC = iR = 0                    # Index for matrix filling
 
         # Initial calibration
         results[n][0] = t
@@ -631,7 +639,7 @@ def gillespie_algorithm_two_steps_FACT(
             # --- Dropout condition --- #
             if np.random.rand() < beta_matrix[n][x]:
                 i = int(np.floor(t / dt))
-                results[n][i0:int(min(np.floor(tmax / dt), i) + 1)] = xp - xo
+                results[n][i0:int(min(np.floor(tmax / dt), i) + 1)] = int(xp - xo)
                 break
 
             # --- Jumping step --- #
@@ -645,10 +653,14 @@ def gillespie_algorithm_two_steps_FACT(
                 break
             
             # - Unwrapping : FACT comes to help extrude by opening nucleosme and gives more accessibilitywith rF - #
-            if remodelling_by_FACT(kB, kU, K, tR):
-                rC = rR
+            rCJ = alpha_matrix[n][x]
+            if rCJ == alphao:
+                if remodelling_by_FACT(kB, kU, K, tR):
+                    rC = alphar
+                else:
+                    rC = rCJ
             else:
-                rC = alpha_matrix[n][x]
+                rC = rCJ
 
             # --- Capturing attempt --- #
             tC = -np.log(np.random.rand()) / rC_tot   # Time for capture or fail
@@ -662,8 +674,8 @@ def gillespie_algorithm_two_steps_FACT(
             # Store step after capturing attempt
             t_list.append(t)
             x_list.append(x - xo)
-            i = int(np.floor(t / dt))
-            results[n][i0:int(min(np.floor(tmax / dt), i) + 1)] = int(x - xo)
+            iC = int(np.floor(t / dt))
+            results[n][i0:int(min(np.floor(tmax / dt), iC) + 1)] = int(x - xo)
 
             # --- Resting step --- #
             tR = -np.log(np.random.rand()) / rR_tot
@@ -681,15 +693,16 @@ def gillespie_algorithm_two_steps_FACT(
             # Store step after resting
             t_list.append(t)
             x_list.append(x - xo)
-            i = int(np.floor(t / dt))
-            results[n][i0:int(min(np.floor(tmax / dt), i) + 1)] = int(xp - xo)
+            iR = int(np.floor(t / dt))
+            results[n][iC:int(min(np.floor(tmax / dt), iR) + 1)] = int(xp - xo)
 
             # Prepare next iteration
-            i0 = i + 1
+            i0 = iR + 1
             xp = np.copy(x)
 
         # Store full trajectories
         t_matrix[n] = t_list
         x_matrix[n] = x_list
+        results[n][0] = 0
 
     return results, t_matrix, x_matrix
