@@ -93,6 +93,7 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     keys = [
         'landscape', 's', 'l', 'bpmin',
         'mu', 'theta', 'lmbda', 'alphaf', 'alphao', 'beta',
+        'kB', 'kU', 'alphar',
         'rtot_capt', 'rtot_rest',
         'formalism', 'parameter'
     ]
@@ -102,6 +103,7 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
         geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'],
         probas['mu'], probas['theta'], probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
         rates['rtot_capt'], rates['rtot_rest'],
+        probas['alphar'], rates['kB'], rates['kU'],
         work['formalism'], work['parameter']
     )
         

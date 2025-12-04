@@ -201,12 +201,17 @@ def calculate_obs_and_linker_distribution(
 # 2.2 : Results
 
 
-def calculate_alpha_mean(alphaf: float, alphao: float, s: int, l: int) -> float:
-    """Calculate the weighted average of alpha."""
-    denom = l + s
-    if denom == 0:
-        return np.nan
-    return (alphaf*l + alphao*s) / denom
+def calculate_alpha_mean(alphaf: float, alphao: float, s: int, l: int, alphar: float, kB:float, kU: float, formalism) -> float:
+    """
+    Calculate the weighted average of alpha.
+    Chromatin related.
+    """
+        
+    if formalism == "1" or formalism == "2":
+        return(alphaf * l + alphao * s) / (l + s)
+    
+    elif formalism == "3":
+        return (alphaf * l + alphao * s * (kU / (kB + kU)) + alphar * s * (kB / (kB + kU))) / (l + s)
 
 
 def calculate_theoretical_speed(
@@ -215,28 +220,32 @@ def calculate_theoretical_speed(
     alphar: float, kB: float, kU: float, 
     formalism: str
     ) -> float:
-    """Calculate the theoretical average speed."""
-    alpha_mean = calculate_alpha_mean(alphaf, alphao, s, l)
-
-    if formalism == "1":
-        return alpha_mean * mu
+    """
+    Calculate the theoretical average speed.
+    Loop Extrusion related.
+    """
     
+    if formalism not in ["1", "2", "3"]:
+        raise ValueError(f"Formalism = {formalism} ; such formalism does not exist.")
+    
+    if formalism == "1":
+        kB = kU = 0
+        alpha_mean = calculate_alpha_mean(alphaf, alphao, s, l, alphar, kB, kU, formalism)
+        return mu * alpha_mean
+
     elif formalism == "2":
-        eps = 1e-12
-        denom = (1 / (rtot_capt + eps)) + (1 / (rtot_rest + eps))
-        return alpha_mean * mu * (1 - lmbda) / denom
+        kB = kU = 0
+        alpha_mean = calculate_alpha_mean(alphaf, alphao, s, l, alphar, kB, kU, formalism)
+        rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
+        return mu * (1 - lmbda) / rates_mean * alpha_mean
    
     elif formalism == "3":
-        eps = 1e-12
-        alpha_mean = (l*alphaf + s*(alphao*kU + alphar*kB) / (kU+eps+kB+eps)) / (l+eps+s+eps)
-        denom = (1 / (rtot_capt + eps)) + (1 / (rtot_rest + eps))
-        return alpha_mean * mu * (1 - lmbda) / denom 
-    
-    else:
-        raise ValueError(f"Unknown formalism: {formalism}")
+        alpha_mean = calculate_alpha_mean(alphaf, alphao, s, l, alphar, kB, kU, formalism)
+        rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
+        return mu * (1 - lmbda) / rates_mean * alpha_mean
 
 
-def calculate_main_results(results: np.ndarray, dt: float, alpha_0: float, nt: int) -> tuple:
+def calculate_main_results(results: np.ndarray, dt: float, alpha_0: float, lb: int) -> tuple:
     """
     Calculate main statistics and derived results for a matrix of trajectories.
 
@@ -263,12 +272,12 @@ def calculate_main_results(results: np.ndarray, dt: float, alpha_0: float, nt: i
         - Bootstrapping is used to estimate the error of the mean velocity.
     """
 
-    mean_results = np.nanmean(results, axis=0)                    # Calculate mean trajectory across all trajectories
-    med_results = np.nanmedian(results, axis=0)                   # Calculate median trajectory across all trajectories
-    std_results = np.nanstd(results, axis=0)                      # Calculate the standard deviation of the trajectories
+    mean_results = np.nanmean(results, axis=0)      # Calculate mean trajectory across all trajectories
+    med_results = np.nanmedian(results, axis=0)     # Calculate median trajectory across all trajectories
+    std_results = np.nanstd(results, axis=0)        # Calculate the standard deviation of the trajectories
 
-    v_mean = linear_fit(mean_results, dt) * alpha_0            # Calculate the velocity for the mean trajectory
-    v_med = linear_fit(med_results, dt) * alpha_0              # Calculate the velocity for the median trajectory
+    v_mean = linear_fit(mean_results[lb:], dt, offset=lb) * alpha_0    # Calculate the velocity for the mean trajectory
+    v_med = linear_fit(med_results[lb:], dt, offset=lb) * alpha_0      # Calculate the velocity for the median trajectory
 
     return mean_results, med_results, std_results, v_mean, v_med
 

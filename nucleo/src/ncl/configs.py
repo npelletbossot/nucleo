@@ -47,18 +47,19 @@ def choose_configuration(config: str) -> dict:
         "lmbda": 0.00,      # Probability of in vitro condensin to reverse and not beeing accepted
         "alphaf": 1.00,     # Probability of binding if linker
         "alphao": 0.00,     # Probability of binding if obstacle
-        "beta": 0.00,       # Probability of in vitro condensin to undinb
+        "beta": 0.00,       # Probability of in vitro condensin to unbind
+        "alphar": 0.50      # Probability of binding while FACT is there
     }
 
     RATES = {
-        # "rtot_capt": 1/2,   # Rate of capturing (1/6)
-        # "rtot_rest": 1/2    # Rate of resting (1/6)
-        "rtot_capt": 1/2,     # Rate of capturing (1/6)
-        "rtot_rest": 1/2      # Rate of resting (1/6)
+        "rtot_capt": 1/2,   # Rate of capturing (1/6)
+        "rtot_rest": 1/2,   # Rate of resting (1/6)
+        "kB" : 0.50,        # Rate of FACT Binding
+        "kU": 0.50,         # Rate of FACT Unbinding
     }
     
     WORK = {
-        "formalism": "2", # Either 1 (one_step) or 2 (two_steps) or 3 (two_steps_FACT)
+        "formalism": "3", # Either 1 (one_step) or 2 (two_steps) or 3 (two_steps_FACT)
         "parameter": np.array([0], dtype=float)
         # "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }
@@ -84,11 +85,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 10_000,
@@ -109,11 +113,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 10_000,
@@ -134,11 +141,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 10_000,
@@ -159,11 +169,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 10_000,
@@ -189,11 +202,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([0.00, 0.50, 1.00], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 1_000,
@@ -215,11 +231,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 100,
@@ -242,11 +261,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.arange(0.10, 0.90, 0.20),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": 1 / np.linspace(0.10, 20, 100),
-                "rtot_rest": 1 / np.linspace(0.10, 20, 100)
+                "rtot_rest": 1 / np.linspace(0.10, 20, 100),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 1_000,
@@ -271,11 +293,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
                 "nt": 10_000,
@@ -300,11 +325,14 @@ def choose_configuration(config: str) -> dict:
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float)
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float)
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([RATES["kB"]], dtype=float),
+                "kU": np.array([RATES["kU"]], dtype=float)
 
             },
             "meta": {

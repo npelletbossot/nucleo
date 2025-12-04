@@ -37,34 +37,77 @@ from tls.writing import inspect_data_types, writing_parquet
 def checking_inputs(
     landscape, s, l, bpmin, 
     mu, theta, lmbda, alphaf, alphao, beta,
+    alphar, kB, kU,
     nt,
     Lmin, Lmax, bps, origin,
     tmax, dt
 ):
     """
-    Checks the validity of input parameters for the simulation.
+    Validate all input parameters for the simulation before execution.
 
-    Parameters:
-    - s (int): Nucleosome lenght (must be 150).
-    - l (int): Linker DNA length (must be ≤ s).
-    - bpmin (int): Minimum base pair value to capt (must be ≤ 10).
-    - alphaf (float): Linker alpha parameter (must be in [0, 1]).
-    - alphao (float): Obstacle alpha parameter (must be in [0, 1]).
-    - alphar (float): FACT alpha parameter (must be in [0, 1]).
-    - Lmin (int): Minimum condensin position (must be 0).
-    - Lmax (int): Maximum condensin position (must be > Lmin).
-    - bps (int): Base pair spacing step (must be > 0).
-    - L (np.ndarray): 1D array of condensin positions from Lmin to Lmax.
-    - nt (int): Number of trajectories (must be > 0).
-    - mu (float): Mean jump length (must be > 0).
-    - theta (float): Spread or jump lenght (must be ≥ 0).
-    - tmax (int): Maximum simulation time (must be > 0).
-    - dt (float): Time resolution step (must be > 0).
-    - origin (int): Starting index of the simulation (must be in [0, Lmax)).
-    - landscape (str): Mode for alpha distribution (must be one of {"homogeneous", "periodic", "random"}).
+    This function ensures that all provided parameters related to chromatin
+    structure, obstacle configuration, probabilities, remodeling rates,
+    trajectory counts, and temporal parameters meet the required constraints.
+    It raises detailed error messages to help identify invalid inputs early,
+    preventing inconsistencies or undefined behaviors in downstream simulation
+    routines.
 
-    Raises:
-    - ValueError: If any of the parameter constraints are violated.
+    Parameters
+    ----------
+    landscape : str
+        Chromatin landscape model. Must be one of:
+        {"homogeneous", "periodic", "random"}.
+    s : np.integer
+        Nucleosome size (must be >= 0).
+    l : np.integer
+        Accessible linker size (must be >= 0 and nonzero).
+    bpmin : np.integer
+        Minimum number of accessible base pairs (>= 0).
+    mu : np.integer
+        Parameter controlling random obstacle density (>= 0).
+    theta : np.integer
+        Parameter controlling mean alpha values (>= 0).
+    lmbda : np.ndarray
+        Probability modifier array. Must satisfy 0 ≤ lmbda ≤ 1.
+    alphaf : np.ndarray
+        FACT-induced capture rate modifier (0 ≤ alphaf ≤ 1).
+    alphao : np.ndarray
+        Baseline capture probability (0 ≤ alphao ≤ 1).
+    beta : np.ndarray
+        Unbinding rate (normalized), must satisfy 0 ≤ beta ≤ 1.
+    alphar : np.ndarray
+        Capture rate in remodeled nucleosomes (0 ≤ alphar ≤ 1).
+    kB : np.integer
+        FACT binding rate (>= 0).
+    kU : np.integer
+        FACT unbinding rate (>= 0). The sum kB + kU must be nonzero.
+    nt : int
+        Number of trajectories to simulate (>= 0).
+    Lmin : int
+        Minimum lattice coordinate. Must be 0.
+    Lmax : int
+        Maximum lattice coordinate. Must be > Lmin.
+    bps : int
+        Number of base pairs per lattice site (>= 0).
+    origin : int
+        Starting position of loop extrusion. Must satisfy 0 ≤ origin < Lmax.
+    tmax : int
+        Maximum time for simulation (>= 0).
+    dt : float
+        Temporal resolution of the simulation (must be > 0).
+
+    Raises
+    ------
+    ValueError
+        If any parameter violates expected constraints, the function raises 
+        a ValueError with a precise explanation of the issue.
+
+    Notes
+    -----
+    - The function captures all ValueErrors inside a try-except block and prints 
+      a unified message indicating that the issue originates from `checking_inputs()`,
+      followed by the specific error message.
+    - This function does not return anything; its purpose is purely validation.
     """
     
     try:
@@ -83,13 +126,19 @@ def checking_inputs(
             raise ValueError(f"Invalid value for mu: must be an int >= 0. Got {mu}.")
         if not isinstance(theta, np.integer) or theta < 0:
             raise ValueError(f"Invalid value for theta: must be an int >= 0. Got {theta}.")
-        for name, value in zip(["lmbda", "alphaf", "alphao", "beta"], 
-                            [lmbda, alphaf, alphao, beta]):
+        for name, value in zip(["lmbda", "alphaf", "alphao", "beta", "alphar"], 
+                            [lmbda, alphaf, alphao, beta, alphar]):
             if not ((0 <= value).all() and (value <= 1).all()):
                 raise ValueError(
                     f"{name} must be between 0 and 1. "
                     f"Got array with min={value.min()}, max={value.max()}."
                 )
+        for name, value in [("kB", kB), ("kU", kU)]:
+            if not ((0 <= value).all() and (value <= 1).all()):
+                raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
+            else:
+                if (kB + kU) == 0:
+                    raise ValueError(f"Invalid value for the sum of kB and kU : must be an floar >= 0.")
 
         # Chromatin
         if Lmin != 0:
@@ -123,6 +172,7 @@ def sw_nucleo(
     mu: float, theta: float, 
     lmbda: float, alphaf: float, alphao: float, beta: float,
     rtot_capt: float, rtot_rest: float,
+    kB: float, kU: float, alphar: float,
     formalism: str, parameter: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
@@ -185,7 +235,7 @@ def sw_nucleo(
     bin_fpt = int(1e+1)             # Bins on times during the all analysis
 
     # Linear factor
-    alpha_0 = int(1e+0)             # Calibration on linear speed in order to multiplicate speeds by a linear number
+    alpha0 = int(1e+0)             # Calibration on linear speed in order to multiplicate speeds by a linear number
 
     # Bins for Positions and Times : fb (firstbin) - lb (lastbin) - bw (binwidth)
     x_fb, x_lb, x_bw = 0, 10_000, 1
@@ -223,7 +273,7 @@ def sw_nucleo(
         
         # Chromatin Analysis : Mean Landscape
         alpha_mean_sim  = np.mean(alpha_matrix, axis=0)
-        alpha_mean_eff  = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean)
+        alpha_mean_eff  = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean, alphar, kB, kU, formalism)
     
     except Exception as e:
         print(f"Error in Input 1 - Landscape : {e} for {title}")
@@ -243,9 +293,6 @@ def sw_nucleo(
     # ------------------- Simulations ------------------- #
 
     try:
-        kB = 0.50
-        kU = 0.50
-        alphar = 0.80
         
         # Gillespie One-Step
         if formalism == "1":
@@ -256,12 +303,12 @@ def sw_nucleo(
         # Gillespie Two-Steps
         elif formalism == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, beta, lmbda, rtot_capt, rtot_rest, nt, tmax, dt, L, origin
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, kB, kU, alphar, nt, tmax, dt, L, origin, bps, FACT=False
             )
         # Gillespie Two-Steps FACT
         elif formalism == "3":
-            results, t_matrix, x_matrix = gillespie_algorithm_two_steps_FACT(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, kB, kU, alphar, nt, tmax, dt, L, origin, bps
+            results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, kB, kU, alphar, nt, tmax, dt, L, origin, bps, FACT=True
             )
             
         # Else
@@ -282,7 +329,7 @@ def sw_nucleo(
 
         # Main Results
         results_mean, results_med, results_std, v_mean, v_med = calculate_main_results(
-            results, dt, alpha_0, nt
+            results, dt, alpha0, lb=20
         )
         
         # Fits
@@ -392,7 +439,10 @@ def sw_nucleo(
                 'lmbda'          : lmbda,
                 'rtot_capt'      : rtot_capt,
                 'rtot_rest'      : rtot_rest,
-                
+                'kB'             : kB,
+                'kU'             : kU,
+                'alphar'         : alphar,
+
                 # --- Working Parameter --- #
                 'parameter'      : parameter, 
 
@@ -469,7 +519,7 @@ def sw_nucleo(
                 'vi_mp'          : vi_mp,
 
                 # --- Fits --- #
-                'alpha_0'        : alpha_0,
+                'alpha0'         : alpha0,
                 'xt_over_t'      : xt_over_t,
                 'G'              : G,
                 'bound_low'      : bound_low,
@@ -562,6 +612,9 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         alphaf=params['alphaf'],
         alphao=params['alphao'],
         beta=params['beta'],
+        kB=params['kB'],
+        kU=params['kU'],
+        alphar=params['alphar'],
         nt=params['nt'],
         Lmin=chromatin["Lmin"],
         Lmax=chromatin["Lmax"],
@@ -577,6 +630,7 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         params['mu'], params['theta'],
         params['lmbda'], params['alphaf'], params['alphao'], params['beta'],
         params['rtot_capt'], params['rtot_rest'],
+        params['kB'], params['kU'], params['alphar'],
         params['formalism'], params['parameter'],
         params['nt'], params['path'],
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],

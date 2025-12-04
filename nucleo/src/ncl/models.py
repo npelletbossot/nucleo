@@ -366,343 +366,224 @@ def gillespie_algorithm_one_step(
 def gillespie_algorithm_two_steps(
     alpha_matrix: np.ndarray,
     p: np.ndarray,
-    beta: float, 
-    lmbda: float,
-    rtot_capt: float,
-    rtot_rest: float,
-    nt: int, 
-    tmax: float, 
-    dt: float,
-    L: np.ndarray, 
-    origin: int, 
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Simulates stochastic transitions using a two-step Gillespie algorithm.
-
-    Args:
-        alpha_matrix (np.ndarray): Matrix of acceptance probabilities.
-        p (np.ndarray): Probability array for transitions.
-        beta (float): Unfolding probability.
-        lmbda (float): Probability to perform a reverse jump after a forward move.
-        rtot_capt (float): Reaction rate for capturing events.
-        rtot_rest (float): Reaction rate for resting events.
-        nt (int): Number of trajectories to simulate.
-        tmax (float): Maximum simulation time.
-        dt (float): Time step increment.
-        L (np.ndarray): Chromatin structure array.
-        origin (int): Initial position in the simulation.
-
-    Returns:
-        tuple[np.ndarray, np.ndarray, np.ndarray]: 
-            - A matrix containing the simulation results.
-            - An array of all recorded time steps.
-            - An array of all recorded positions.
-    """
-
-
-    # --- Starting values --- #
-    # beta_matrix = np.tile(np.full(len(L)*bps, beta), (nt, 1))
-
-    results = np.empty((nt, int(tmax/dt)))
-    results.fill(np.nan)
-
-    t_matrix = np.empty(nt, dtype=object)
-    x_matrix = np.empty(nt, dtype=object)
-
-    # --- Loop on trajectories --- #
-    for n in range(0,nt) :
-
-        # Initialization of starting values
-        t, t_capt, t_rest = 0, 0, 0             # First times
-        x = folding(alpha_matrix[n], origin)    # Initial calculation
-        prev_x  = np.copy(x)                    # Copy for later use (filling the matrix)
-        ox      = np.copy(x)                    # Initial point on the chromatin (used to reset trajectories to start at zero)
-        i0, i1  = 0, 0
-
-        # Initial calibration
-        results[n][0] = t                     # Store the initial time
-        t_list = [t]                          # List to track time points
-        x_list = [x-ox]                       # List to track recalibrated positions
-
-        # --- Loop on times --- #
-        while (t<tmax) :
-
-            # --- Unbinding or not --- #
-
-            # # Not needed for the moment
-            # r0_unbind = np.random.rand()
-            # if r0_unbind<(beta_matrix[_][x]):
-            #     i = int(np.floor(t/dt))                                         # Last time
-            #     results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = prev_x-ox      # Last value
-            #     break
-
-            # --- Jumping : mandatory --- #
-
-            # Almost instantaneous jumps (approx. 20 ms)
-            x_jump = np.random.choice(L, p=p)       # Gives the x position
-            x += x_jump                             # Whatever happens loop extrusion spends time trying to extrude
-
-            # --- Jumping : edge conditions  --- #
-            if x >= (np.max(L) - origin) :
-                i = int(np.floor(t/dt))                                         # Last time
-                results[n][i0:int(min(np.floor(tmax/dt),i)+1)] = np.nan         # Last value
-                break
-
-            # --- Binding or Abortion --- #
-
-            # Capturing : values
-            r_capt = alpha_matrix[n][x]
-            t_capt = - np.log(np.random.rand())/rtot_capt       # Random time of capt or abortion
-            r0_capt = np.random.rand()                          # Random event of capt or abortion
-
-            # Capturing : whatever happens loop extrusion spends time trying to capt event if it fails  
-            if np.isinf(t_capt) == True:
-                t = 1e308
-            t += t_capt
-
-            # Capturing : Acquisition 1
-            t_list.append(t)
-            x_list.append(x-ox)
-            i1 = int(np.floor(t/dt)) 
-            i2 = int(min(np.floor(tmax/dt),i1)+1)
-            print(i1, i2, prev_x-ox)                              
-            results[n][i0:i2] = int(prev_x-ox)
-            i0 = np.copy(i1) + 1
-            print(i0)
-            
-            # Resting : whatever happens loop extrusion needs to rest after an attempt event if it fails  
-            t_rest = - np.log(np.random.rand())/rtot_rest
-            if np.isinf(t_rest) == True:
-                t_rest = 1e308
-            t += t_rest
-            
-            # Resting : Acquisition 2 
-            i1 = int(np.floor(t/dt))   
-            i2 = int(min(np.floor(tmax/dt),i1)+1)  
-            print(i1, i2, x-ox)                               
-            results[n][i0:i2] = int(x-ox)
-                  
-            # Capturing : Loop Extrusion does occur
-            if r0_capt < r_capt * (1-lmbda):
-                LE = True
-            # Capturing : Loop Extrusion does not occur
-            else : 
-                LE = False
-                x = np.copy(prev_x)
-
-            t_list.append(t)
-            x_list.append(x-ox)
-            # Next step
-            i0 = np.copy(i1) + 1
-            prev_x = np.copy(x)
-            print(i0)
-            print("*")
-
-        # All datas
-        t_matrix[n] = t_list
-        x_matrix[n] = x_list
-
-    return results, t_matrix, x_matrix
-
-
-def gillespie_algorithm_two_steps_FACT(
-    alpha_matrix: np.ndarray,
-    p: np.ndarray,
     alphao: float,
     beta: float,
     lmbda: float,
-    rC_tot: float,
-    rR_tot: float,
     kB: float,
     kU: float,
     alphar: float,
-    nT: int,
+    rtot_CAPT: float,
+    rtot_REST: float,
+    nt: int,
     tmax: float,
     dt: float,
     L: np.ndarray,
     origin: int,
-    bps: int
+    bps: int,
+    FACT = False
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Simulates a two-step Gillespie dynamics of a motor progressing along DNA/chromatin,
-    with optional nucleosome unwrapping assistance by FACT.
+    Simulate multiple loop-extrusion trajectories using a two-step Gillespie-like algorithm.
 
-    The model describes a particle that:
-    - jumps forward by a random increment drawn from `L` with probability distribution `p`,
-    - may be captured at each visited position with an effective rate that depends on
-      local accessibility (`alpha_matrix`) or FACT-mediated unwrapping,
-    - alternates between capturing attempts and resting steps,
-    - may leave the system through a dropout process with rate controlled by `beta`,
-    - stops when reaching a boundary or when `tmax` is reached.
+    This function performs a stochastic simulation of loop extrusion on a chromatin fiber. 
+    For each trajectory, the model iteratively processes:
+    - random unbinding events,
+    - mandatory extrusion (jumping) attempts,
+    - potential FACT-mediated nucleosome unwrapping,
+    - capturing events (successful or aborted),
+    - mandatory resting periods following attempts.
 
-    Each trajectory is simulated independently using a two-step Gillespie scheme:
-    1. **Capture attempt:** exponential waiting time with rate `rC_tot`.
-    2. **Resting step:** exponential waiting time with rate `rR_tot`.
-
-    FACT remodeling is introduced via a binary stochastic rule:
-    if `remodelling_by_FACT()` is true, the local capture rate becomes `rR`
-    (increased accessibility), otherwise the native accessibility
-    `alpha_matrix[n][x]` is used. The parameters `kB` and `kU`
-    define FACT binding/unbinding kinetics through the equilibrium
-    probability `K = kB / (kB + kU)` (currently computed but unused).
+    The algorithm tracks the evolution of the extrusion position over time for each trajectory.
+    All results are aligned on a recalibrated coordinate such that extrusion begins at 0.
 
     Parameters
     ----------
     alpha_matrix : np.ndarray
-        Accessibility matrix of shape (nT, genome_length), one row per trajectory.
-        Used to determine intrinsic capture rate at each visited coordinate.
+        Matrix of local capture rates for each trajectory (shape: nt × fiber_length).
     p : np.ndarray
-        Probability distribution for jump sizes in `L`. Must sum to 1.
+        Probability distribution of jump amplitudes for extrusion.
+    alphao : float
+        Baseline capture rate in the absence of remodeling.
     beta : float
-        Dropout probability per visited position.
+        Spontaneous unbinding rate.
     lmbda : float
-        Capture failure penalty factor: affects probability of successful capture.
-    rC_tot : float
-        Total rate for capture attempts (Gillespie step 1).
-    rR_tot : float
-        Total rate for resting durations (Gillespie step 2).
+        Probability reduction factor for successful capture (1 - λ multiplies the capture rate).
     kB : float
-        FACT binding rate.
+        FACT-mediated binding (nucleosome opening) rate.
     kU : float
-        FACT unbinding rate.
-    rR : float
-        Effective capture rate in the presence of FACT unwrapping.
-    nT : int
+        FACT-mediated unbinding (restoration) rate.
+    alphar : float
+        Capture rate in the remodeled (opened) nucleosome state.
+    rtot_CAPT : float
+        Total rate controlling the waiting time before capture/abortion attempts.
+    rtot_REST : float
+        Total rate controlling the post-attempt resting times.
+    nt : int
         Number of independent trajectories to simulate.
     tmax : float
-        Total simulation time. Trajectories stop once `t >= tmax`.
+        Maximum simulation time for each trajectory.
     dt : float
-        Temporal binning resolution for storing `results`.
+        Time resolution for recording results.
     L : np.ndarray
-        Array of allowed jump lengths.
+        Array of possible jump amplitudes.
     origin : int
-        Coordinate shift used to initialize the system via `folding()`.
+        Starting index on the chromatin fiber.
     bps : int
-        Number of base pairs per chromatin unit (used to size the beta matrix).
+        Number of base pairs per lattice unit in the chromatin representation.
+    FACT : bool, optional
+        Whether to activate FACT-mediated nucleosome remodeling (default: False).
 
     Returns
     -------
-    results : np.ndarray of shape (nT, tmax/dt)
-        Time-binned positions for all trajectories, aligned on a common time grid.
-        Values are (x - xo), i.e., displacement relative to initial position.
-        Missing or out-of-bound values are encoded as NaN.
-    t_matrix : list of lists
-        Exact Gillespie times for each update event, one list per trajectory.
-    x_matrix : list of lists
-        Exact positions (x - xo) for each update event, one list per trajectory.
+    results : np.ndarray
+        Matrix of extrusion positions over time, shaped (nt × floor(tmax/dt)).
+        Missing or terminated trajectories are filled with NaN.
+    t_matrix : np.ndarray
+        Array of Python lists, each containing the exact stochastic time points for events.
+    x_matrix : np.ndarray
+        Array of Python lists, each containing the corresponding extrusion positions 
+        at the recorded times (recalibrated to start at 0).
 
     Notes
     -----
-    - The function uses `folding(alpha_matrix[n], origin)` to determine the initial
-      accessible starting position.
-    - FACT remodeling is determined by the external function `remodelling_by_FACT()`,
-      which must return a boolean.
-    - Simulation stops early if:
-        * dropout occurs,
-        * the particle crosses the boundary `max(L) - origin`,
-        * time exceeds `tmax`.
+    The execution consists of several structured phases:
+
+    **1. Initialization**
+    - Precompute beta values.
+    - Allocate storage for results and event lists.
+    - Set initial chromosome position via `folding()`.
+
+    **2. Main stochastic loop**
+    For each time step until `tmax`:
+        a. Unbinding test  
+           The trajectory may terminate if spontaneous unbinding occurs.
+        
+        b. Mandatory extrusion attempt  
+           Draw a random jump from `L` using probability distribution `p`.
+
+        c. Boundary check  
+           If the fiber boundary is reached, the trajectory stops.
+
+        d. (Optional) FACT remodeling  
+           Nucleosome accessibility may be modified according to FACT rates kB and kU.
+
+        e. Capturing attempt  
+           A stochastic waiting time determines the next capture/abortion event.
+           Extrusion always consumes time even if unsuccessful.
+
+        f. Resting period  
+           A mandatory resting time follows each capture attempt.
+
+        g. Capture success or failure  
+           With probability r_capt * (1 - λ), loop extrusion proceeds;
+           otherwise the position is reverted.
+
+    **3. Data recording**
+    - Results are stored at resolution `dt` using stepwise filling.
+    - Exact event times and positions are stored separately for higher-precision analysis.
+
+    The function stops early if unbinding occurs or the fiber end is reached.
     """
 
-    # --- Initialization --- #
-    beta_matrix = np.tile(np.full(len(L) * bps, beta), (nT, 1))
-
-    results = np.empty((nT, int(tmax / dt)))
+    # --- Starting matrices --- #
+    beta_matrix = np.tile(np.full(len(L)*bps, beta), (nt, 1))
+    results = np.empty((nt, int(tmax/dt)))
     results.fill(np.nan)
+    t_matrix = np.empty(nt, dtype=object)
+    x_matrix = np.empty(nt, dtype=object)
 
-    t_matrix = np.empty(nT, dtype=object)
-    x_matrix = np.empty(nT, dtype=object)
+    # --- Loop Over Trajectories --- #
+    for n in range(0,nt) :
 
-    # # FACT rates (to include later in configs.py)
-    # rR = 0.80
-    # kB = 0.50     # Bind rate
-    # kU = 0.50     # Unbind rate
-    K = kB / (kB + kU)  
-
-    # --- Loop over Trajectories --- #
-    for n in range(nT):
-
-        # Starting values
-        t = tC = tR = 0
-        x = folding(alpha_matrix[n], origin)    # Folding on naked DNA
-        xp = np.copy(x)
-        xo = np.copy(x)
-        i0 = i = iC = iR = 0                    # Index for matrix filling
+        # Initialization of starting values
+        t, t_CAPT, t_REST = 0, 0, 0             # First times
+        x = folding(alpha_matrix[n], origin)    # Initial calculation
+        px, ox  = np.copy(x), np.copy(x)        # Previous_x and Origin_x
+        i0, i   = 0, 0                          # Ranks of filling results
 
         # Initial calibration
-        results[n][0] = t
-        t_list = [t]
-        x_list = [x - xo]
+        results[n][0] = t   # Store the initial time
+        t_list = [t]        # List to track time points
+        x_list = [x-ox]     # List to track recalibrated positions
 
-        # --- Time evolution loop --- #
-        while t < tmax:
+        # --- Loop Over Time --- #
+        while (t<tmax) :
 
-            # --- Dropout condition --- #
-            if np.random.rand() < beta_matrix[n][x]:
-                i = int(np.floor(t / dt))
-                results[n][i0:int(min(np.floor(tmax / dt), i) + 1)] = int(xp - xo)
+            # --- Unbinding : Stochasticity --- #
+            r0_UNBIND = np.random.rand()
+            if r0_UNBIND < (beta_matrix[n][x]):
+                i = int(np.floor(t/dt))
+                j = int(min(np.floor(tmax/dt),i)+1)
+                results[n][i0:j] = int(px - ox)
                 break
 
-            # --- Jumping step --- #
-            xJ = np.random.choice(L, p=p)
-            x += xJ
+            # --- Jumping : Destination --- #
+            x_JUMP = np.random.choice(L, p=p)
+            x += x_JUMP
 
-            # Boundary condition
-            if x >= (np.max(L) - origin):
-                i = int(np.floor(t / dt))
-                results[n][i0:int(min(np.floor(tmax / dt), i) + 1)] = np.nan
+            # --- Jumping : Edge Conditions --- #
+            if x >= (np.max(L) - origin) :
+                i = int(np.floor(t/dt))
+                j = int(min(np.floor(tmax/dt),i)+1)
+                results[n][i0:j] = np.nan
                 break
             
-            # - Unwrapping : FACT comes to help extrude by opening nucleosme and gives more accessibilitywith rF - #
-            rCJ = alpha_matrix[n][x]
-            if rCJ == alphao:
-                if remodelling_by_FACT(kB, kU, K, tR):
-                    rC = alphar
+            # --- FACT : Stochasticity --- #
+            if FACT:
+                r_CAPT_TRY = alpha_matrix[n][x]
+                if r_CAPT_TRY == alphao:
+                    r0_FACT = np.random.rand()
+                    if r0_FACT < kB / (kB + kU):
+                        r_CAPT = alphar
+                    else:
+                        r_CAPT = r_CAPT_TRY
                 else:
-                    rC = rCJ
+                    r_CAPT = r_CAPT_TRY
             else:
-                rC = rCJ
+                r_CAPT = alpha_matrix[n][x]
 
-            # --- Capturing attempt --- #
-            tC = -np.log(np.random.rand()) / rC_tot   # Time for capture or fail
-            rC_0 = np.random.rand()                   # Capture event result
-
-            # Time advance: capturing attempt
-            if np.isinf(tC):
+            # --- Capturing : Time Condition --- #
+            t_CAPT = - np.log(np.random.rand())/rtot_CAPT
+            if np.isinf(t_CAPT) == True:
                 t = 1e308
-            t += tC
+            t += t_CAPT
 
-            # Store step after capturing attempt
+            # --- Capturing : First Acquisition --- #
             t_list.append(t)
-            x_list.append(x - xo)
-            iC = int(np.floor(t / dt))
-            results[n][i0:int(min(np.floor(tmax / dt), iC) + 1)] = int(x - xo)
-
-            # --- Resting step --- #
-            tR = -np.log(np.random.rand()) / rR_tot
-            if np.isinf(tR):
-                tR = 1e308
-            t += tR
-
-            # --- Capture success --- #
-            if rC_0 < rC * (1 - lmbda):
+            x_list.append(x-ox)
+            i = int(np.floor(t/dt)) 
+            j = int(min(np.floor(tmax/dt),i)+1)
+            results[n][i0:j] = int(px - ox)
+            i0 = np.copy(i) + 1
+            
+            # --- Resting : Time Condition --- #
+            t_REST = - np.log(np.random.rand())/rtot_REST
+            if np.isinf(t_REST) == True:
+                t_REST = 1e308
+            t += t_REST
+            
+            # --- Resting : Second Acquisition 2.1 --- #
+            i = int(np.floor(t/dt)) 
+            j = int(min(np.floor(tmax/dt),i)+1)
+            results[n][i0:j] = int(x - ox)
+            i0 = np.copy(i) + 1
+                  
+            # --- Capturing : Stochasticity --- #
+            r0_CAPT = np.random.rand()
+            if r0_CAPT < r_CAPT * (1-lmbda):
                 LE = True
-            else:
+            else : 
                 LE = False
-                x = xp
+                x = np.copy(px)
 
-            # Store step after resting
+            # --- Capturing : Second Acquisition 2.2 --- #
             t_list.append(t)
-            x_list.append(x - xo)
-            iR = int(np.floor(t / dt))
-            results[n][iC:int(min(np.floor(tmax / dt), iR) + 1)] = int(xp - xo)
-
-            # Prepare next iteration
-            i0 = iR + 1
-            xp = np.copy(x)
-
-        # Store full trajectories
+            x_list.append(x-ox)
+            px = np.copy(x)
+            
+        # --- Data Update --- #
         t_matrix[n] = t_list
         x_matrix[n] = x_list
-        results[n][0] = 0
 
+    # --- Return --- #
     return results, t_matrix, x_matrix
