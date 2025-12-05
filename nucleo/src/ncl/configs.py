@@ -40,7 +40,7 @@ def choose_configuration(config: str) -> dict:
 
     TIME = {
         "tmax": 100,        # Total time of modeling : 0 is taken into account
-        "dt": 1             # Step of time
+        "dt": 0.1             # Step of time
     }
 
     PROBAS = {
@@ -188,8 +188,8 @@ def choose_configuration(config: str) -> dict:
 
         "SHORTTEST": {
             "geometry": {
-                "landscape": np.array(['homogeneous']),
-                # "landscape": np.array(['periodic']),
+                # "landscape": np.array(['homogeneous']),
+                "landscape": np.array(['random']),
                 # "landscape": np.array(['random', 'periodic']),
                 # "landscape": np.array(['homogeneous', 'periodic', 'random']),
                 "s": np.array([0, 35], dtype=int),
@@ -241,7 +241,7 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "nt": 100,
+                "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__longtest"
             }
         },

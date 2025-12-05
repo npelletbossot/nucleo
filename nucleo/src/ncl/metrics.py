@@ -229,12 +229,12 @@ def calculate_theoretical_speed(
         raise ValueError(f"Formalism = {formalism} ; such formalism does not exist.")
     
     if formalism == "1":
-        kB = kU = 0
+        kB = kU = np.nan
         alpha_mean = calculate_alpha_mean(alphaf, alphao, s, l, alphar, kB, kU, formalism)
         return mu * alpha_mean
 
     elif formalism == "2":
-        kB = kU = 0
+        kB = kU = np.nan
         alpha_mean = calculate_alpha_mean(alphaf, alphao, s, l, alphar, kB, kU, formalism)
         rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
         return mu * (1 - lmbda) / rates_mean * alpha_mean

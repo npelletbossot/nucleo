@@ -168,7 +168,7 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
     return(true_origin)
 
 
-def remodelling_by_FACT(kB: float, kU: float, K: float, tR: float) -> bool:
+def remodelling_phenomenological(kB: float, kU: float, K: float, tR: float) -> bool:
     """
     Determine whether FACT-mediated chromatin remodelling occurs during a rest period tR.
 
@@ -247,6 +247,52 @@ def remodelling_by_FACT(kB: float, kU: float, K: float, tR: float) -> bool:
             + K * (1 - np.exp(-(kB + kU) * (tR - (TNF - T))))
         )
         return (rF2 < PNF)
+    
+    
+def remodelling_equilibrium(alphao: float, alphar: float, kB: float, kU: float) -> float:
+    """
+    Sample the instantaneous chromatin accessibility under FACT remodelling equilibrium.
+
+    This function returns either the obstructed accessibility `alphao` or the 
+    remodelled (facilitated) accessibility `alphar` according to the stationary
+    probability of being in each state of the two-state system:
+    
+        NF  --kB-->  F
+        NF <--kU--  F
+
+    The stationary probability of being in the remodelled state (F) is:
+    
+        P(F) = kB / (kB + kU)
+    
+    A uniform random draw determines whether the system is in the F or NF state
+    at the sampled instant.
+
+    Parameters
+    ----------
+    alphao : float
+        Accessibility (or effective rate) when the nucleosome is in the 
+        obstructed state NF (closed state).
+    alphar : float
+        Accessibility (or effective rate) when the nucleosome is in the 
+        remodelled state F (opened state with FACT).
+    kB : float
+        Transition rate NF → F (FACT binding or remodelling rate).
+    kU : float
+        Transition rate F → NF (FACT unbinding or closing rate).
+
+    Returns
+    -------
+    float
+        Either `alphar` with probability kB / (kB + kU),
+        or `alphao` with probability kU / (kB + kU).
+    """
+    
+    r0_FACT = np.random.rand()
+
+    if r0_FACT < kB / (kB + kU):
+        return alphar
+    else:
+        return alphao
 
 
 # 2.2 : Gillespies
@@ -380,7 +426,7 @@ def gillespie_algorithm_two_steps(
     L: np.ndarray,
     origin: int,
     bps: int,
-    FACT = False
+    FACT: str
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Simulate multiple loop-extrusion trajectories using a two-step Gillespie-like algorithm.
@@ -518,8 +564,10 @@ def gillespie_algorithm_two_steps(
                 break
 
             # --- Jumping : Destination --- #
-            x_JUMP = np.random.choice(L, p=p)
-            x += x_JUMP
+            x_JUMP  = np.random.choice(L, p=p)
+            x       += x_JUMP
+            r0_CAPT = np.random.rand()
+            r_CAPT  = alpha_matrix[n][x]
 
             # --- Jumping : Edge Conditions --- #
             if x >= (np.max(L) - origin) :
@@ -529,18 +577,13 @@ def gillespie_algorithm_two_steps(
                 break
             
             # --- FACT : Stochasticity --- #
-            if FACT:
-                r_CAPT_TRY = alpha_matrix[n][x]
-                if r_CAPT_TRY == alphao:
-                    r0_FACT = np.random.rand()
-                    if r0_FACT < kB / (kB + kU):
-                        r_CAPT = alphar
-                    else:
-                        r_CAPT = r_CAPT_TRY
-                else:
-                    r_CAPT = r_CAPT_TRY
-            else:
-                r_CAPT = alpha_matrix[n][x]
+            if FACT and np.isclose(r_CAPT, alphao):
+                r0_FACT = np.random.rand()
+                if r0_FACT < kB / (kB + kU):
+                    r_CAPT = alphar
+                    rpi = np.argmax(alpha_matrix[n][x:] == alphao)
+                    rpf = np.argmin(alpha_matrix[n][x:] == alphao)
+                    alpha_matrix[n][x + rpi : x + rpf] = alphar
 
             # --- Capturing : Time Condition --- #
             t_CAPT = - np.log(np.random.rand())/rtot_CAPT
@@ -569,7 +612,6 @@ def gillespie_algorithm_two_steps(
             i0 = np.copy(i) + 1
                   
             # --- Capturing : Stochasticity --- #
-            r0_CAPT = np.random.rand()
             if r0_CAPT < r_CAPT * (1-lmbda):
                 LE = True
             else : 

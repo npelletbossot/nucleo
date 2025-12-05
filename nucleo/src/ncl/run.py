@@ -220,10 +220,11 @@ def sw_nucleo(
             f"formalism={formalism}__"
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
-            f"lmbda={lmbda:.2e}_rtotcapt={rtot_capt:.2e}_rtotrest={rtot_rest:.2e}_"
+            f"lmbda={lmbda:.2e}__rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
+            f"kB={kB:.2e}__kU={kU:.2e}__alphar={alphar:.2e}__"
             f"parameter={parameter:.2e}__"
             f"nt={nt}__"
-            )
+    )
     
 
     # Chromatin

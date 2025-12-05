@@ -37,8 +37,9 @@ def main():
 # EXE_MODE = "PC"
 
 # Options: // NU / BP / LSLOW / LSHIGH -- SHORTTEST / LONGTEST -- ACCESSRANDOM // ACCESSPERIODIC / MAP //
-CONFIG = "SHORTTEST"
-
+CONFIG      = "SHORTTEST"
+# Options: // "1" / "2" / "3" //
+# FORMALISM   = "3"
 
 # ─────────────────────────────────────────────
 # 4 : Entry point

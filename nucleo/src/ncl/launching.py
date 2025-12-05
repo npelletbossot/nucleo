@@ -164,10 +164,13 @@ def execute_in_parallel(config: str,
         task_suffix = str(task_id)
     else:
         this_params = all_params
-        num_workers = 6
         base_dir    = Path.home() / "Documents" / "PhD" / "Workspace"
         use_tqdm    = True
         task_suffix = str(slurm_params.get('task_id', 0))
+        if cfg['meta']['nt'] == 10_000:
+            num_workers = 2
+        else:
+            num_workers = 10
 
     project_name   = project['project_name']
     folder_name    = f"{cfg['meta']['path']}_{task_suffix}"
