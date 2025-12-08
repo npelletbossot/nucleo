@@ -29,6 +29,7 @@ def choose_configuration(config: str) -> dict:
     
     PROJECT = {
         "project_name": "nucleo"
+        # formalism :
     }
 
     CHROMATIN = {
@@ -40,7 +41,7 @@ def choose_configuration(config: str) -> dict:
 
     TIME = {
         "tmax": 100,        # Total time of modeling : 0 is taken into account
-        "dt": 0.1             # Step of time
+        "dt": 0.1           # Step of time
     }
 
     PROBAS = {
@@ -189,9 +190,9 @@ def choose_configuration(config: str) -> dict:
         "SHORTTEST": {
             "geometry": {
                 # "landscape": np.array(['homogeneous']),
-                "landscape": np.array(['random']),
+                # "landscape": np.array(['random', 'homogeneous']),
                 # "landscape": np.array(['random', 'periodic']),
-                # "landscape": np.array(['homogeneous', 'periodic', 'random']),
+                "landscape": np.array(['homogeneous', 'periodic', 'random']),
                 "s": np.array([0, 35], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -199,11 +200,11 @@ def choose_configuration(config: str) -> dict:
             "probas": {
                 "mu": np.array([180]),
                 "theta": np.array([90]),
-                "lmbda": np.array([0.00, 0.50, 1.00], dtype=float),
+                "lmbda": np.array([0.50], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
+                "alphar": np.array([0.00, 0.50], dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),

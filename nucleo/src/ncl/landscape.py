@@ -79,7 +79,11 @@ def alpha_periodic(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int,
     return alpha_array
 
 
-def alpha_homogeneous(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
+def alpha_homogeneous(formalism: str, 
+                    s: int, l: int, alphaf: float, alphao: float, 
+                    alphar: float, kB: float, kU: float, 
+                    Lmin: int, Lmax: int, bps: int
+) -> np.ndarray:
     """Generates one flat pattern
 
     Args:
@@ -95,7 +99,19 @@ def alpha_homogeneous(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:i
         np.ndarray: Landscape corresponding to one trajectory.
     """
 
-    value = (alphao * s + alphaf * l) / (l + s)
+    if formalism in ("1", "2"):
+        value = (alphao * s + alphaf * l) / (l + s)
+        
+    elif formalism == "3":
+        value = (
+            alphaf * l
+            + alphao * s * (kU / (kB + kU))
+            + alphar * s * (kB / (kB + kU))
+        ) / (l + s)
+
+    else:
+        raise ValueError(f"Unknown formalism: {formalism}")
+        
     size = int((Lmax - Lmin) / bps)
     alpha_array = np.full(size, value)
 
@@ -105,7 +121,11 @@ def alpha_homogeneous(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:i
 # 2.2 Generation
 
 
-def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, bps:int, nt:int) -> np.ndarray:
+def alpha_matrix_calculation(formalism: str, landscape: str, 
+                            s: int, l: int, bpmin: int, alphaf: float, alphao: float, 
+                            alphar: float, kB: float, kU: float,
+                            Lmin: int, Lmax: int, bps: int, nt: int
+) -> np.ndarray:
     """
     Calculation of the matrix of obstacles, each line corresponding to a trajectory
 
@@ -120,7 +140,6 @@ def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphaf:floa
         Lmax (int): Last point of chromatin.
         bps (int): Number of base pairs per site.
         nt (int): Number of trajectories for the simulation.
-
 
     Raises:
         ValueError: In case the choice is not aligned with the possibilities
@@ -143,7 +162,7 @@ def alpha_matrix_calculation(landscape:str, s:int, l:int, bpmin:int, alphaf:floa
         alpha_matrix = np.tile(alpha_array, (nt,1))
     
     elif landscape == 'homogeneous' :
-        alpha_array = alpha_homogeneous(s, l, alphaf, alphao, Lmin, Lmax, bps)
+        alpha_array = alpha_homogeneous(formalism, s, l, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
 
     elif landscape == 'random':

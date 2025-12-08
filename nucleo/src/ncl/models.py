@@ -415,9 +415,9 @@ def gillespie_algorithm_two_steps(
     alphao: float,
     beta: float,
     lmbda: float,
+    alphar: float,
     kB: float,
     kU: float,
-    alphar: float,
     rtot_CAPT: float,
     rtot_REST: float,
     nt: int,
@@ -426,7 +426,7 @@ def gillespie_algorithm_two_steps(
     L: np.ndarray,
     origin: int,
     bps: int,
-    FACT: str
+    FACT: bool
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Simulate multiple loop-extrusion trajectories using a two-step Gillespie-like algorithm.
@@ -537,6 +537,10 @@ def gillespie_algorithm_two_steps(
     results.fill(np.nan)
     t_matrix = np.empty(nt, dtype=object)
     x_matrix = np.empty(nt, dtype=object)
+    
+    # # --- FACT Conditions for Homogeneous Landscapes --- #
+    # if FACT and alpha_matrix.all() == alpha_matrix[0][0]:
+    #     alpha_matrix[:][:] *= (kB / (kB + kU))
 
     # --- Loop Over Trajectories --- #
     for n in range(0,nt) :
@@ -581,9 +585,9 @@ def gillespie_algorithm_two_steps(
                 r0_FACT = np.random.rand()
                 if r0_FACT < kB / (kB + kU):
                     r_CAPT = alphar
-                    rpi = np.argmax(alpha_matrix[n][x:] == alphao)
-                    rpf = np.argmin(alpha_matrix[n][x:] == alphao)
-                    alpha_matrix[n][x + rpi : x + rpf] = alphar
+                    ip = np.argmax(alpha_matrix[n][x:] == alphao)
+                    fp = np.argmin(alpha_matrix[n][x:] == alphao)
+                    alpha_matrix[n][x + ip : x + fp] = alphar
 
             # --- Capturing : Time Condition --- #
             t_CAPT = - np.log(np.random.rand())/rtot_CAPT

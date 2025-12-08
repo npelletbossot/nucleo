@@ -221,7 +221,7 @@ def sw_nucleo(
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
             f"lmbda={lmbda:.2e}__rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
-            f"kB={kB:.2e}__kU={kU:.2e}__alphar={alphar:.2e}__"
+            f"alphar={alphar:.2e}__kB={kB:.2e}__kU={kU:.2e}__"
             f"parameter={parameter:.2e}__"
             f"nt={nt}__"
     )
@@ -251,11 +251,11 @@ def sw_nucleo(
 
         # Chromatin Generation : Landscape
         alpha_matrix = alpha_matrix_calculation(
-            landscape, s, l, bpmin, alphaf, alphao, Lmin, Lmax, bps, nt
+            formalism, landscape, s, l, bpmin, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps, nt
         )
             
         # Chromatin Generation : Destroying Obstacles
-        destroy = True
+        destroy = False
         if destroy:
             first_point = Lmin
             last_point = Lmax
@@ -272,9 +272,9 @@ def sw_nucleo(
             alpha_matrix, landscape, nt, alphaf, Lmin, Lmax
         )
         
-        # Chromatin Analysis : Mean Landscape
-        alpha_mean_sim  = np.mean(alpha_matrix, axis=0)
-        alpha_mean_eff  = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean, alphar, kB, kU, formalism)
+        # Chromatin Analysis : Mean Landscape - Profile and Value
+        alpha_mean_p  = np.mean(alpha_matrix, axis=0)
+        alpha_mean_v  = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean, alphar, kB, kU, formalism)
     
     except Exception as e:
         print(f"Error in Input 1 - Landscape : {e} for {title}")
@@ -304,12 +304,12 @@ def sw_nucleo(
         # Gillespie Two-Steps
         elif formalism == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, kB, kU, alphar, nt, tmax, dt, L, origin, bps, FACT=False
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=False
             )
         # Gillespie Two-Steps FACT
         elif formalism == "3":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, kB, kU, alphar, nt, tmax, dt, L, origin, bps, FACT=True
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True
             )
             
         # Else
@@ -440,9 +440,9 @@ def sw_nucleo(
                 'lmbda'          : lmbda,
                 'rtot_capt'      : rtot_capt,
                 'rtot_rest'      : rtot_rest,
+                'alphar'         : alphar,
                 'kB'             : kB,
                 'kU'             : kU,
-                'alphar'         : alphar,
 
                 # --- Working Parameter --- #
                 'parameter'      : parameter, 
@@ -468,8 +468,8 @@ def sw_nucleo(
                 'l_points'       : l_points,
                 'l_distrib'      : l_distrib,
                 'l_view'         : l_view,
-                'alpha_mean_sim' : alpha_mean_sim,
-                'alpha_mean_eff' : alpha_mean_eff,
+                'alpha_mean_p'   : alpha_mean_p,
+                'alpha_mean_v'   : alpha_mean_v,
                 
                 # --- Raw Datas --- #
                 't_matrix'       : t_matrix,

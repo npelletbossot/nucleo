@@ -201,7 +201,7 @@ def calculate_obs_and_linker_distribution(
 # 2.2 : Results
 
 
-def calculate_alpha_mean(alphaf: float, alphao: float, s: int, l: int, alphar: float, kB:float, kU: float, formalism) -> float:
+def calculate_alpha_mean(alphaf: float, alphao: float, s: int, l: int, alphar: float, kB:float, kU: float, formalism: str) -> float:
     """
     Calculate the weighted average of alpha.
     Chromatin related.
