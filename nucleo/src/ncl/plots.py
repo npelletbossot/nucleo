@@ -38,35 +38,58 @@ def plot_obstacle(s, l, origin, alpha_mean, xmin = 10_000, xmax = 1_000, text_si
     # ax.legend(fontsize=text_size, loc='upper right')
 
 
-def plot_obs_linker_distrib(obs_points, obs_distrib, link_points, link_distrib, text_size=16, ax=None):
+def plot_obs_linker_distrib(s, s_points, s_distrib, l_points, l_distrib, text_size=16, ax=None, plot_s=True):
+    
+    # Convert to numpy arrays if needed
+    s_points = np.asarray(s_points)
+    s_distrib = np.asarray(s_distrib)
+    l_points = np.asarray(l_points)
+    l_distrib = np.asarray(l_distrib)
+
+    # Create axes
     if ax is None:
         fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(8, 6), sharex=True)
     else:
         fig = ax.figure
-        # clear original ax
         ax.clear()
         ax.set_visible(False)
-        # split the subplot
         gs = GridSpecFromSubplotSpec(2, 1, subplot_spec=ax.get_subplotspec(), hspace=0.3)
         ax1 = fig.add_subplot(gs[0])
         ax2 = fig.add_subplot(gs[1])
-    # Top plot: obstacles
-    ax1.plot(obs_points, obs_distrib, label='obstacles', color='b', alpha=0.75, marker='o')
-    ax1.set_title('Obstacle distribution', size=text_size)
+        
+    # Filtering logic
+    if plot_s:
+        mask_s = (s_distrib != 0)
+        s_points = s_points[mask_s]
+        s_distrib = s_distrib[mask_s]
+        ax1.plot(s_points//s, s_distrib, label='obstacles',
+             color='b', alpha=0.75, marker='o')
+        ax1.set_xticks(np.arange(1, 6, 1, dtype=int))
+        ax1.set_xlabel("Count of obstacle", size=text_size)
+
+    else:
+    # Obstacle distribution
+        ax1.plot(s_points, s_distrib, label='obstacles',
+             color='b', alpha=0.75, marker='o')
+        ax1.set_xlabel("Lenght of obstacle (a.u.)", size=text_size)
+
+    # ax1.set_title('Obstacle distribution', size=text_size)
     ax1.set_ylabel('distribution', fontsize=text_size)
-    # ax1.set_xlim([0,500])
-    ax1.set_ylim([-0.1, 1.1])
+    ax1.set_ylim([-0.10, 1.10])
     ax1.grid(True)
     ax1.legend(fontsize=text_size)
-    # Bottom plot: linkers
-    ax2.plot(link_points, link_distrib, label='linkers', color='r', alpha=0.75, marker='o')
-    ax2.set_title('Linker distribution', size=text_size)
-    ax2.set_xlabel('bp', fontsize=text_size)
+
+    # Linker distribution
+    ax2.plot(l_points, l_distrib, label='linkers',
+             color='r', alpha=0.75, marker='o')
+
+    # ax2.set_title('Linker distribution', size=text_size)
+    ax2.set_xlabel('Size of linker (a.u.)', fontsize=text_size)
     ax2.set_ylabel('distribution', fontsize=text_size)
-    ax2.set_ylim([-0.1, 1.1])
-    # ax2.set_xlim([0,250])
+    ax2.set_ylim([-0.10, 0.30])
     ax2.grid(True)
     ax2.legend(fontsize=text_size)
+
     return fig
 
 
@@ -121,8 +144,8 @@ def plot_fpt_distrib_2d(fpt_distrib_2D, tmax, time_bin, text_size=fontsize, ax=N
     x_labels = x_ticks * time_bin
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_labels)
-    ax.set_xlabel('x (bp)', size=text_size)
-    ax.set_ylabel('t', size=text_size)
+    ax.set_xlabel('x (a.u.)', size=text_size)
+    ax.set_ylabel('t (a.u.)', size=text_size)
     # ax.set_xlim([0, 10_000])
     ax.set_ylim([0, tmax - 1])
     plt.colorbar(im, ax=ax, label='Value')
@@ -133,7 +156,7 @@ def plot_fpt_number(nt, tmax, fpt_number, time_bin, text_size=fontsize, ax=None)
     ax.set_title(f'Number of trajectories that reached', size=text_size)
     x_values = np.arange(len(fpt_number)) * time_bin
     ax.plot(x_values, fpt_number, label='number', color='b', alpha=0.7, marker='s')
-    ax.set_xlabel('x (bp)', fontsize=text_size)
+    ax.set_xlabel('x (a.u.)', fontsize=text_size)
     ax.set_ylabel('number of trajectories', fontsize=text_size)
     ax.set_xlim([0, 10_000])
     ax.set_ylim([-200, nt+200])

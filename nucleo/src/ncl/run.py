@@ -233,7 +233,6 @@ def sw_nucleo(
 
     # Time 
     times = np.arange(0,tmax,dt)    # Discretisation of all times
-    bin_fpt = int(1e+1)             # Bins on times during the all analysis
 
     # Linear factor
     alpha0 = int(1e+0)             # Calibration on linear speed in order to multiplicate speeds by a linear number
@@ -243,6 +242,8 @@ def sw_nucleo(
     t_fb, t_lb, t_bw = 0, 100, 0.20
     x_bins = np.arange(x_fb, x_lb, x_bw)
     t_bins = np.arange(t_fb, t_lb, t_bw)
+    binx = int(1e0)
+    bint = int(1e+1)
 
 
     # ------------------- Input 1 - Landscape ------------------- #
@@ -264,7 +265,7 @@ def sw_nucleo(
 
         # Chromatin Analysis : Obstacles Linkers Distribution
         s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = calculate_obs_and_linker_distribution(
-            landscape, s, l, alpha_matrix[0], alphaf, alphao
+            landscape, s, l, alpha_matrix[0], alphaf, alphao, binx
         )
         
         # Chromatin Analysis : Linker Profile
@@ -359,7 +360,7 @@ def sw_nucleo(
         tbj_points, tbj_distrib = calculate_timejump_distribution(t_matrix)
 
         # First Pass Times
-        fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bin_fpt) 
+        fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bint) 
         
     except Exception as e:
         print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e} for {title}")
@@ -415,9 +416,6 @@ def sw_nucleo(
     # plt.grid(True, which="both")
     # plt.legend()
     # plt.show()
-    
-    print(results[0], "\n")
-
 
     # ------------------- Writing ------------------- #
     
@@ -458,6 +456,11 @@ def sw_nucleo(
                 # --- Time Parameters --- #
                 'tmax'           : tmax,
                 'dt'             : dt,
+                'times'          : times,
+                
+                # --- Bins --- #
+                'binx'          : binx,
+                'bint'          : bint,
                 
                 # --- Simulation --- #
                 'nt'             : nt,
@@ -474,6 +477,7 @@ def sw_nucleo(
                 'alpha_mean_v'   : alpha_mean_v,
                 
                 # --- Raw Datas --- #
+                'p'              : p,
                 't_matrix'       : t_matrix,
                 'x_matrix'       : x_matrix,
 
@@ -500,7 +504,6 @@ def sw_nucleo(
                 'tbj_distrib'    : tbj_distrib,
 
                 # --- First Passage Time --- #
-                'bin_fpt'        : bin_fpt,
                 'fpt_distrib_2D' : fpt_distrib_2D,
                 'fpt_number'     : fpt_number,
 

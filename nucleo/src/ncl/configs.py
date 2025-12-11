@@ -193,7 +193,8 @@ def choose_configuration(config: str) -> dict:
                 # "landscape": np.array(['random', 'homogeneous']),
                 # "landscape": np.array(['random', 'periodic']),
                 "landscape": np.array(['homogeneous', 'periodic', 'random']),
-                "s": np.array([0, 35], dtype=int),
+                # "s": np.array([0, 35], dtype=int),
+                "s": np.array([35], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
@@ -274,6 +275,34 @@ def choose_configuration(config: str) -> dict:
             "meta": {
                 "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__map"
+            }
+        },
+        
+        "ACCESS": {
+            "geometry": {
+                "landscape": np.array(["random"]),
+                "s": np.array([150], dtype=int),
+                "l": np.array([10], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                "mu": np.array([180], dtype=int),
+                "theta": np.array([90], dtype=int),
+                "lmbda": np.array([0], dtype=float),
+                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.array([0], dtype=float)
+            },
+            "rates": {
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB": np.array([0], dtype=float),
+                "kU": np.array([0], dtype=float)
+            },
+            "meta": {
+                "nt": 10_000,
+                "path": f"{PROJECT["project_name"]}__access"
             }
         },
         
