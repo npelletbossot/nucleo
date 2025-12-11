@@ -426,7 +426,8 @@ def gillespie_algorithm_two_steps(
     L: np.ndarray,
     origin: int,
     bps: int,
-    FACT: bool
+    FACT: bool,
+    FACT_GLOBAL: bool
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Simulate multiple loop-extrusion trajectories using a two-step Gillespie-like algorithm.
@@ -530,6 +531,9 @@ def gillespie_algorithm_two_steps(
 
     The function stops early if unbinding occurs or the fiber end is reached.
     """
+    
+    # --- Random Seed --- #
+    np.random.seed(None)
 
     # --- Starting matrices --- #
     beta_matrix = np.tile(np.full(len(L)*bps, beta), (nt, 1))
@@ -585,9 +589,10 @@ def gillespie_algorithm_two_steps(
                 r0_FACT = np.random.rand()
                 if r0_FACT < kB / (kB + kU):
                     r_CAPT = alphar
-                    ip = np.argmax(alpha_matrix[n][x:] == alphao)
-                    fp = np.argmin(alpha_matrix[n][x:] == alphao)
-                    alpha_matrix[n][x + ip : x + fp] = alphar
+                    if FACT_GLOBAL:
+                        ip = np.argmax(alpha_matrix[n][x:] == alphao)
+                        fp = np.argmin(alpha_matrix[n][x:] == alphao)
+                        alpha_matrix[n][x + ip : x + fp] = alphar
 
             # --- Capturing : Time Condition --- #
             t_CAPT = - np.log(np.random.rand())/rtot_CAPT

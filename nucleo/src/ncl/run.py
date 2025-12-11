@@ -172,7 +172,7 @@ def sw_nucleo(
     mu: float, theta: float, 
     lmbda: float, alphaf: float, alphao: float, beta: float,
     rtot_capt: float, rtot_rest: float,
-    kB: float, kU: float, alphar: float,
+    alphar: float,kB: float, kU: float,
     formalism: str, parameter: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
@@ -304,12 +304,12 @@ def sw_nucleo(
         # Gillespie Two-Steps
         elif formalism == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=False
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=False, FACT_GLOBAL=False
             )
         # Gillespie Two-Steps FACT
         elif formalism == "3":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True, FACT_GLOBAL=False
             )
             
         # Else
@@ -415,6 +415,8 @@ def sw_nucleo(
     # plt.grid(True, which="both")
     # plt.legend()
     # plt.show()
+    
+    print(results[0], "\n")
 
 
     # ------------------- Writing ------------------- #
@@ -613,9 +615,9 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         alphaf=params['alphaf'],
         alphao=params['alphao'],
         beta=params['beta'],
+        alphar=params['alphar'],
         kB=params['kB'],
         kU=params['kU'],
-        alphar=params['alphar'],
         nt=params['nt'],
         Lmin=chromatin["Lmin"],
         Lmax=chromatin["Lmax"],
@@ -631,7 +633,7 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         params['mu'], params['theta'],
         params['lmbda'], params['alphaf'], params['alphao'], params['beta'],
         params['rtot_capt'], params['rtot_rest'],
-        params['kB'], params['kU'], params['alphar'],
+        params['alphar'], params['kB'], params['kU'],
         params['formalism'], params['parameter'],
         params['nt'], params['path'],
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
