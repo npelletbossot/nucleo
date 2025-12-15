@@ -252,7 +252,7 @@ def sw_nucleo(
 
         # Chromatin Generation : Landscape
         alpha_matrix = alpha_matrix_calculation(
-            formalism, landscape, s, l, bpmin, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps, nt
+            landscape, s, l, bpmin, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps, nt
         )
             
         # Chromatin Generation : Destroying Obstacles
@@ -340,8 +340,8 @@ def sw_nucleo(
         )
         
         # Theoretical
-        v_th_sim = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
-        v_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
+        v_mean_th = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
+        v_mean_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
     
     except Exception as e:
         print(f"Error in Analysis 1 - General results: {e} for {title}")
@@ -488,8 +488,8 @@ def sw_nucleo(
                 'results_std'    : results_std,
                 'v_mean'         : v_mean,
                 'v_med'          : v_med,
-                'v_th_sim'       : v_th_sim,
-                'v_th_eff'       : v_th_eff,
+                'v_mean_th'      : v_mean_th,
+                'v_mean_th_eff'  : v_mean_th_eff,
                 'vf'             : vf,
                 'Cf'             : Cf,
                 'wf'             : wf,

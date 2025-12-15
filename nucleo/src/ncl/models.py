@@ -344,7 +344,7 @@ def gillespie_algorithm_one_step(
         i = 0                                   # Current index
 
         # Initial calibration
-        results[_][0] = t                       # Store the initial time
+        results[_][0] = x                       # Store the initial time
         t_list = [t]                            # List to track time points
         x_list = [x-ox]                         # List to track recalibrated positions
 
@@ -556,9 +556,9 @@ def gillespie_algorithm_two_steps(
         i0, i   = 0, 0                          # Ranks of filling results
 
         # Initial calibration
-        results[n][0] = t   # Store the initial time
-        t_list = [t]        # List to track time points
-        x_list = [x-ox]     # List to track recalibrated positions
+        results[n][0] = x - ox  # Store the initial position
+        t_list = [t]            # List to track time points
+        x_list = [x-ox]         # List to track recalibrated positions
 
         # --- Loop Over Time --- #
         while (t<tmax) :
@@ -584,15 +584,15 @@ def gillespie_algorithm_two_steps(
                 results[n][i0:j] = np.nan
                 break
             
-            # --- FACT : Stochasticity --- #
-            if FACT and np.isclose(r_CAPT, alphao):
-                r0_FACT = np.random.rand()
-                if r0_FACT < kB / (kB + kU):
-                    r_CAPT = alphar
-                    if FACT_GLOBAL:
-                        ip = np.argmax(alpha_matrix[n][x:] == alphao)
-                        fp = np.argmin(alpha_matrix[n][x:] == alphao)
-                        alpha_matrix[n][x + ip : x + fp] = alphar
+            # # --- FACT : Stochasticity --- #
+            # if FACT and np.isclose(r_CAPT, alphao):
+            #     r0_FACT = np.random.rand()
+            #     if r0_FACT < kB / (kB + kU):
+            #         r_CAPT = alphar
+            #         if FACT_GLOBAL:
+            #             ip = np.argmax(alpha_matrix[n][x:] == alphao)
+            #             fp = np.argmin(alpha_matrix[n][x:] == alphao)
+            #             alpha_matrix[n][x + ip : x + fp] = alphar
 
             # --- Capturing : Time Condition --- #
             t_CAPT = - np.log(np.random.rand())/rtot_CAPT

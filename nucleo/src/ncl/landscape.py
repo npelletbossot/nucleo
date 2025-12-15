@@ -79,8 +79,7 @@ def alpha_periodic(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int,
     return alpha_array
 
 
-def alpha_homogeneous(formalism: str, 
-                    s: int, l: int, alphaf: float, alphao: float, 
+def alpha_homogeneous(s: int, l: int, alphaf: float, alphao: float, 
                     alphar: float, kB: float, kU: float, 
                     Lmin: int, Lmax: int, bps: int
 ) -> np.ndarray:
@@ -99,19 +98,7 @@ def alpha_homogeneous(formalism: str,
         np.ndarray: Landscape corresponding to one trajectory.
     """
 
-    if formalism in ("1", "2"):
-        value = (alphao * s + alphaf * l) / (l + s)
-        
-    elif formalism == "3":
-        value = (
-            alphaf * l
-            + alphao * s * (kU / (kB + kU))
-            + alphar * s * (kB / (kB + kU))
-        ) / (l + s)
-
-    else:
-        raise ValueError(f"Unknown formalism: {formalism}")
-        
+    value = (alphao * s + alphaf * l) / (l + s)   
     size = int((Lmax - Lmin) / bps)
     alpha_array = np.full(size, value)
 
@@ -121,7 +108,7 @@ def alpha_homogeneous(formalism: str,
 # 2.2 Generation
 
 
-def alpha_matrix_calculation(formalism: str, landscape: str, 
+def alpha_matrix_calculation(landscape: str, 
                             s: int, l: int, bpmin: int, alphaf: float, alphao: float, 
                             alphar: float, kB: float, kU: float,
                             Lmin: int, Lmax: int, bps: int, nt: int
@@ -162,7 +149,7 @@ def alpha_matrix_calculation(formalism: str, landscape: str,
         alpha_matrix = np.tile(alpha_array, (nt,1))
     
     elif landscape == 'homogeneous' :
-        alpha_array = alpha_homogeneous(formalism, s, l, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps)
+        alpha_array = alpha_homogeneous(s, l, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
 
     elif landscape == 'random':

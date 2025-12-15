@@ -131,6 +131,7 @@ def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: i
 
 
 def execute_in_parallel(config: str,
+                        formalism: str,
                         execution_mode: str | None = None,
                         slurm_params: dict | None = None) -> None:
     """
@@ -147,7 +148,7 @@ def execute_in_parallel(config: str,
     num_tasks     = int(slurm_params.get("num_tasks", env_num_tasks))
     num_cores     = int(slurm_params.get("num_cores_used", _choose_num_workers()))
 
-    cfg         = choose_configuration(config)
+    cfg         = choose_configuration(config, formalism)
     project     = cfg['project']
     chromatin   = cfg['chromatin']
     time        = cfg['time']

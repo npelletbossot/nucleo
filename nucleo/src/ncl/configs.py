@@ -17,7 +17,7 @@ import numpy as np
 # ─────────────────────────────────────────────
 
 
-def choose_configuration(config: str) -> dict:
+def choose_configuration(config: str, formalism: str) -> dict:
     """
     Returns a dictionary of study parameters organized in logical blocks.
     All list-like parameters are converted to np.array.
@@ -41,7 +41,7 @@ def choose_configuration(config: str) -> dict:
 
     TIME = {
         "tmax": 100,        # Total time of modeling : 0 is taken into account
-        "dt": 0.1           # Step of time
+        "dt": 0.01           # Step of time
     }
 
     PROBAS = {
@@ -60,7 +60,7 @@ def choose_configuration(config: str) -> dict:
     }
     
     WORK = {
-        "formalism": "3", # Either 1 (one_step) or 2 (two_steps) or 3 (two_steps_FACT)
+        "formalism": {formalism},
         "parameter": np.array([0], dtype=float)
         # "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }

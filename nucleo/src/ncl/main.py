@@ -22,7 +22,7 @@ def main():
     print('\n# --- Launched --- #\n')
     start_time = time.time()
     try:
-        execute_in_parallel(CONFIG)
+        execute_in_parallel(CONFIG, FORMALISM)
     except Exception as e:
         print(f"[ERROR] Process failed: {e}")
     elapsed = time.time() - start_time
@@ -33,13 +33,14 @@ def main():
 # 3 : Execution parameters
 # ─────────────────────────────────────────────
 
-# # Options: // PSMN / PC / SNAKEVIZ //
+# Options: /// PSMN / PC / SNAKEVIZ ///
 # EXE_MODE = "PC"
 
-# Options: // NU / BP / LSLOW / LSHIGH -- SHORTTEST / LONGTEST -- ACCESS // ACCESSRANDOM // ACCESSPERIODIC / MAP //
+# Options: /// NU / BP / LSLOW / LSHIGH /// SHORTTEST / LONGTEST /// ACCESS / ACCESSRANDOM / ACCESSPERIODIC / MAP ///
 CONFIG = "SHORTTEST"
-# Options: // "1" / "2" / "3" //
-# FORMALISM   = "3"
+
+# Options: /// "1" : One-step / "2" : Two-steps / "3" : Two-steps + FACT ///
+FORMALISM   = "3"
 
 # ─────────────────────────────────────────────
 # 4 : Entry point
@@ -47,4 +48,3 @@ CONFIG = "SHORTTEST"
 
 if __name__ == '__main__':
     main()
-#. 
