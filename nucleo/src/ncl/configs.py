@@ -41,7 +41,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
 
     TIME = {
         "tmax": 100,        # Total time of modeling : 0 is taken into account
-        "dt": 0.01           # Step of time
+        "dt": 1.00          # Step of time
     }
 
     PROBAS = {
@@ -214,7 +214,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "nt": 1_000,
+                "nt": 10,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },

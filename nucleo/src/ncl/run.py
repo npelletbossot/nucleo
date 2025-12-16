@@ -273,9 +273,10 @@ def sw_nucleo(
             alpha_matrix, landscape, nt, alphaf, Lmin, Lmax
         )
         
-        # Chromatin Analysis : Mean Landscape - Profile and Value
-        alpha_mean_p  = np.mean(alpha_matrix, axis=0)
-        alpha_mean_v  = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean, alphar, kB, kU, formalism)
+        # Chromatin Analysis : Mean Landscape - Array / Value / Calculated
+        alpha_mean_a = np.mean(alpha_matrix, axis=0)
+        alpha_mean_v = np.mean(alpha_mean_a)
+        alpha_mean_c = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean)
     
     except Exception as e:
         print(f"Error in Input 1 - Landscape : {e} for {title}")
@@ -340,8 +341,8 @@ def sw_nucleo(
         )
         
         # Theoretical
-        v_mean_th = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
-        v_mean_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, formalism)
+        v_mean_th = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest)
+        v_mean_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest)
     
     except Exception as e:
         print(f"Error in Analysis 1 - General results: {e} for {title}")
@@ -420,7 +421,7 @@ def sw_nucleo(
     # ------------------- Writing ------------------- #
     
     try:
-        # print(alpha_mean_eff)
+
         if saving == "data":
             data_result = {
                 
@@ -473,8 +474,9 @@ def sw_nucleo(
                 'l_points'       : l_points,
                 'l_distrib'      : l_distrib,
                 'l_view'         : l_view,
-                'alpha_mean_p'   : alpha_mean_p,
+                'alpha_mean_a'   : alpha_mean_a,
                 'alpha_mean_v'   : alpha_mean_v,
+                'alpha_mean_c'   : alpha_mean_c,
                 
                 # --- Raw Datas --- #
                 'p'              : p,
@@ -535,19 +537,6 @@ def sw_nucleo(
                 'parameter'      : parameter,
 
             }
-            
-            # if formalism == "2":
-            #     data_rates = {
-            #         # --- Forwards / Reverses --- #
-            #         'v_th_fit'       : v_th_fit,
-            #         'tau_forwards'   : tau_forwards,
-            #         'tau_reverses'   : tau_reverses,
-            #         'rtot_capt_fit'  : rtot_capt_fit,
-            #         'rtot_rest_fit'  : rtot_rest_fit
-            #     }
-                
-            #     data_result.update(data_rates)
-
 
         elif saving == "test":
             data_result = {
@@ -576,7 +565,6 @@ def sw_nucleo(
                 # 'rtot_capt_fit'  : rtot_capt_fit,
                 # 'rtot_rest_fit'  : rtot_rest_fit
             }
-
 
         # Types of data registered if needed
         inspect_data_types(data_result, launch=False)

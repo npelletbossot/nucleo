@@ -584,18 +584,25 @@ def gillespie_algorithm_two_steps(
                 results[n][i0:j] = np.nan
                 break
             
-            # # --- FACT : Stochasticity --- #
-            # if FACT and np.isclose(r_CAPT, alphao):
-            #     r0_FACT = np.random.rand()
-            #     if r0_FACT < kB / (kB + kU):
-            #         r_CAPT = alphar
-            #         if FACT_GLOBAL:
-            #             ip = np.argmax(alpha_matrix[n][x:] == alphao)
-            #             fp = np.argmin(alpha_matrix[n][x:] == alphao)
-            #             alpha_matrix[n][x + ip : x + fp] = alphar
+            # --- FACT : Stochasticity --- #
+            if FACT and np.isclose(r_CAPT, alphao):
+                r0_FACT = np.random.rand()
+                if r0_FACT < kB / (kB + kU):
+                    r_CAPT = alphar
+                    
+            # --- FACT : Remodeling Entirely --- #
+                    if FACT_GLOBAL:
+                        mask = (alpha_matrix[n] == alphao)
+                        x_left = np.copy(x)
+                        while x_left > 0 and mask[x_left - 1]:
+                            x_left -= 1
+                        x_right = np.copy(x)
+                        while x_right < len(mask) - 1 and mask[x_right + 1]:
+                            x_right += 1
+                        alpha_matrix[n][x_left:x_right + 1] = alphar
 
             # --- Capturing : Time Condition --- #
-            t_CAPT = - np.log(np.random.rand())/rtot_CAPT
+            t_CAPT = - np.log(np.random.rand()) / rtot_CAPT
             if np.isinf(t_CAPT) == True:
                 t = 1e308
             t += t_CAPT
@@ -609,7 +616,7 @@ def gillespie_algorithm_two_steps(
             i0 = np.copy(i) + 1
             
             # --- Resting : Time Condition --- #
-            t_REST = - np.log(np.random.rand())/rtot_REST
+            t_REST = - np.log(np.random.rand()) / rtot_REST
             if np.isinf(t_REST) == True:
                 t_REST = 1e308
             t += t_REST
