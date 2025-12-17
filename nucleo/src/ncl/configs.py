@@ -41,7 +41,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
 
     TIME = {
         "tmax": 100,        # Total time of modeling : 0 is taken into account
-        "dt": 1.00          # Step of time
+        "dt": 1e-2          # Step of time
     }
 
     PROBAS = {
@@ -49,7 +49,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
         "alphaf": 1.00,     # Probability of binding if linker
         "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to unbind
-        "alphar": 0.50      # Probability of binding while FACT is there
+        "alphar": 0.75      # Probability of binding while FACT is there
     }
 
     RATES = {

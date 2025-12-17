@@ -79,9 +79,9 @@ def alpha_periodic(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int,
     return alpha_array
 
 
-def alpha_homogeneous(s: int, l: int, alphaf: float, alphao: float, 
-                    alphar: float, kB: float, kU: float, 
-                    Lmin: int, Lmax: int, bps: int
+def alpha_homogeneous(
+    s: int, l: int, alphaf: float, alphao: float, 
+    Lmin: int, Lmax: int, bps: int
 ) -> np.ndarray:
     """Generates one flat pattern
 
@@ -110,7 +110,6 @@ def alpha_homogeneous(s: int, l: int, alphaf: float, alphao: float,
 
 def alpha_matrix_calculation(landscape: str, 
                             s: int, l: int, bpmin: int, alphaf: float, alphao: float, 
-                            alphar: float, kB: float, kU: float,
                             Lmin: int, Lmax: int, bps: int, nt: int
 ) -> np.ndarray:
     """
@@ -149,7 +148,7 @@ def alpha_matrix_calculation(landscape: str,
         alpha_matrix = np.tile(alpha_array, (nt,1))
     
     elif landscape == 'homogeneous' :
-        alpha_array = alpha_homogeneous(s, l, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps)
+        alpha_array = alpha_homogeneous(s, l, alphaf, alphao, Lmin, Lmax, bps)
         alpha_matrix = np.tile(alpha_array, (nt,1))
 
     elif landscape == 'random':

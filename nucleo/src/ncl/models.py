@@ -168,134 +168,190 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
     return(true_origin)
 
 
-def remodelling_phenomenological(kB: float, kU: float, K: float, tR: float) -> bool:
-    """
-    Determine whether FACT-mediated chromatin remodelling occurs during a rest period tR.
+# 2.2 : Remodellings
 
-    This function implements a two-state stochastic model for FACT binding dynamics:
-    - State F  : FACT is bound to the nucleosome.
-    - State NF : FACT is unbound.
-    
-    At the beginning of the rest interval tR, the system is assigned a state according to
-    the equilibrium probability:
-        P(F) = K = kB / (kB + kU)
-        P(NF) = 1 - K
-    
-    Depending on the state, dwell times are drawn using exponential distributions:
-        T_F   ~ Exp(kU)
-        T_NF  ~ Exp(kB)
-    
-    A random internal time T is drawn uniformly within the dwell interval 
-    (i.e. T = TF * U or T = TNF * U with U ~ Uniform[0,1]).
-    
-    During the rest period tR, remodelling may occur either:
-    1. Immediately: if tR < (T_state - T)
-    2. After a delayed event with probability:
-    
-        PF  = K * [1 - exp(-(kB + kU) * (tR - (TF  - T)))]    for state F
-        PNF = exp(-(kB + kU) * (tR - (TNF - T))) 
-              + K * [1 - exp(-(kB + kU) * (tR - (TNF - T)))]  for state NF
-    
-    Parameters
-    ----------
-    kB : float
-        FACT binding rate (NF → F).
-    kU : float
-        FACT unbinding rate (F → NF).
-    K : float
-        Equilibrium occupancy of the FACT-bound state (kB / (kB + kU)).
-    tR : float
-        Rest period duration during which remodelling may occur.
-    
-    Returns
-    -------
-    bool
-        True if chromatin remodelling occurs during tR, False otherwise.
-    """
 
-    rF0 = np.random.rand()
+# def remodelling_phenomenological(kB: float, kU: float, K: float, tR: float) -> bool:
+#     """
+#     Determine whether FACT-mediated chromatin remodelling occurs during a rest period tR.
+
+#     This function implements a two-state stochastic model for FACT binding dynamics:
+#     - State F  : FACT is bound to the nucleosome.
+#     - State NF : FACT is unbound.
     
-    # --- FACT state (F) --- #
-    if rF0 < K:
-        TF = -1 / kU * np.log(np.random.rand())
-        rF1 = np.random.rand()
-        T = TF * rF1
+#     At the beginning of the rest interval tR, the system is assigned a state according to
+#     the equilibrium probability:
+#         P(F) = K = kB / (kB + kU)
+#         P(NF) = 1 - K
+    
+#     Depending on the state, dwell times are drawn using exponential distributions:
+#         T_F   ~ Exp(kU)
+#         T_NF  ~ Exp(kB)
+    
+#     A random internal time T is drawn uniformly within the dwell interval 
+#     (i.e. T = TF * U or T = TNF * U with U ~ Uniform[0,1]).
+    
+#     During the rest period tR, remodelling may occur either:
+#     1. Immediately: if tR < (T_state - T)
+#     2. After a delayed event with probability:
+    
+#         PF  = K * [1 - exp(-(kB + kU) * (tR - (TF  - T)))]    for state F
+#         PNF = exp(-(kB + kU) * (tR - (TNF - T))) 
+#               + K * [1 - exp(-(kB + kU) * (tR - (TNF - T)))]  for state NF
+    
+#     Parameters
+#     ----------
+#     kB : float
+#         FACT binding rate (NF → F).
+#     kU : float
+#         FACT unbinding rate (F → NF).
+#     K : float
+#         Equilibrium occupancy of the FACT-bound state (kB / (kB + kU)).
+#     tR : float
+#         Rest period duration during which remodelling may occur.
+    
+#     Returns
+#     -------
+#     bool
+#         True if chromatin remodelling occurs during tR, False otherwise.
+#     """
+
+#     rF0 = np.random.rand()
+    
+#     # --- FACT state (F) --- #
+#     if rF0 < K:
+#         TF = -1 / kU * np.log(np.random.rand())
+#         rF1 = np.random.rand()
+#         T = TF * rF1
         
-        # Immediate remodelling success
-        if tR < (TF - T):
-            return True
+#         # Immediate remodelling success
+#         if tR < (TF - T):
+#             return True
         
-        # Delayed remodelling
-        rF2 = np.random.rand()
-        PF = K * (1 - np.exp(-(kB + kU) * (tR - (TF - T))))
-        return (rF2 < PF)
+#         # Delayed remodelling
+#         rF2 = np.random.rand()
+#         PF = K * (1 - np.exp(-(kB + kU) * (tR - (TF - T))))
+#         return (rF2 < PF)
             
-    # --- Non-FACT state (NF) --- #       
-    else:
-        TNF = -1 / kB * np.log(np.random.rand())
-        rF1 = np.random.rand() 
-        T = TNF * rF1
+#     # --- Non-FACT state (NF) --- #       
+#     else:
+#         TNF = -1 / kB * np.log(np.random.rand())
+#         rF1 = np.random.rand() 
+#         T = TNF * rF1
         
-        # Immediate remodelling failure
-        if tR < (TNF - T):
-            return False
+#         # Immediate remodelling failure
+#         if tR < (TNF - T):
+#             return False
             
-        # Delayed remodelling
-        rF2 = np.random.rand()
-        PNF = (
-            np.exp(-(kB + kU) * (tR - (TNF - T)))
-            + K * (1 - np.exp(-(kB + kU) * (tR - (TNF - T))))
-        )
-        return (rF2 < PNF)
+#         # Delayed remodelling
+#         rF2 = np.random.rand()
+#         PNF = (
+#             np.exp(-(kB + kU) * (tR - (TNF - T)))
+#             + K * (1 - np.exp(-(kB + kU) * (tR - (TNF - T))))
+#         )
+#         return (rF2 < PNF)
     
     
-def remodelling_equilibrium(alphao: float, alphar: float, kB: float, kU: float) -> float:
-    """
-    Sample the instantaneous chromatin accessibility under FACT remodelling equilibrium.
+# def remodelling_equilibrium(alphao: float, alphar: float, kB: float, kU: float) -> float:
+#     """
+#     Sample the instantaneous chromatin accessibility under FACT remodelling equilibrium.
 
-    This function returns either the obstructed accessibility `alphao` or the 
-    remodelled (facilitated) accessibility `alphar` according to the stationary
-    probability of being in each state of the two-state system:
+#     This function returns either the obstructed accessibility `alphao` or the 
+#     remodelled (facilitated) accessibility `alphar` according to the stationary
+#     probability of being in each state of the two-state system:
     
-        NF  --kB-->  F
-        NF <--kU--  F
+#         NF  --kB-->  F
+#         NF <--kU--  F
 
-    The stationary probability of being in the remodelled state (F) is:
+#     The stationary probability of being in the remodelled state (F) is:
     
-        P(F) = kB / (kB + kU)
+#         P(F) = kB / (kB + kU)
     
-    A uniform random draw determines whether the system is in the F or NF state
-    at the sampled instant.
+#     A uniform random draw determines whether the system is in the F or NF state
+#     at the sampled instant.
 
-    Parameters
-    ----------
-    alphao : float
-        Accessibility (or effective rate) when the nucleosome is in the 
-        obstructed state NF (closed state).
-    alphar : float
-        Accessibility (or effective rate) when the nucleosome is in the 
-        remodelled state F (opened state with FACT).
-    kB : float
-        Transition rate NF → F (FACT binding or remodelling rate).
-    kU : float
-        Transition rate F → NF (FACT unbinding or closing rate).
+#     Parameters
+#     ----------
+#     alphao : float
+#         Accessibility (or effective rate) when the nucleosome is in the 
+#         obstructed state NF (closed state).
+#     alphar : float
+#         Accessibility (or effective rate) when the nucleosome is in the 
+#         remodelled state F (opened state with FACT).
+#     kB : float
+#         Transition rate NF → F (FACT binding or remodelling rate).
+#     kU : float
+#         Transition rate F → NF (FACT unbinding or closing rate).
 
-    Returns
-    -------
-    float
-        Either `alphar` with probability kB / (kB + kU),
-        or `alphao` with probability kU / (kB + kU).
-    """
+#     Returns
+#     -------
+#     float
+#         Either `alphar` with probability kB / (kB + kU),
+#         or `alphao` with probability kU / (kB + kU).
+#     """
     
-    r0_FACT = np.random.rand()
+#     r0_FACT = np.random.rand()
 
-    if r0_FACT < kB / (kB + kU):
-        return alphar
+#     if r0_FACT < kB / (kB + kU):
+#         return alphar
+#     else:
+#         return alphao
+    
+    
+def remodelling_passive(alphax: float, alphar: float, kB:float, kU: float):
+    K = kB / (kB + kU)
+    PF = K
+    
+    r = np.random.rand()
+    if r < PF:
+        alphax = alphar
     else:
-        return alphao
+        alphax = alphax
+        
+    return alphax
 
 
-# 2.2 : Gillespies
+def remodelling_active(alphax: float, alphar: float, kBz: float, kBp: float, kU: float, t_rest: float):
+    Kz = kBz / (kBz + kU)
+    Kp = kBp / (kBp + kU)
+    PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))
+    
+    r = np.random.rand()
+    if r < PF:
+        alphax = alphar
+    else:
+        alphax = alphax
+    
+    return alphax
+
+
+def remodelling_global(alpha_array, x, alphao, alphar):
+    mask = (alpha_array == alphao)
+    x_left = np.copy(x)
+    while x_left > 0 and mask[x_left - 1]:
+        x_left -= 1
+    x_right = np.copy(x)
+    while x_right < len(mask) - 1 and mask[x_right + 1]:
+        x_right += 1
+    alpha_array[x_left:x_right + 1] = alphar
+    return alpha_array
+
+
+def remodelling(MODE: str, alphar: float, kB: float, kBz: float, kBp: float, kU: float, t_rest: float, alphax: float):
+    
+    if MODE not in ["PASSIVE", "ACTIVE"]:
+        raise ValueError(f"You set MODE={MODE} for remodelling which is not a valid MODE")
+    
+    if MODE == "PASSIVE":
+        alphax = remodelling_passive(alphax, alphar, kB, kU)
+
+    elif MODE == "ACTIVE":
+        alphax = remodelling_active(alphax, alphar, kBz, kBp, kU, t_rest)
+        
+    return alphax
+
+
+# 2.3 : Gillespies
 
 
 def gillespie_algorithm_one_step(
@@ -415,11 +471,11 @@ def gillespie_algorithm_two_steps(
     alphao: float,
     beta: float,
     lmbda: float,
+    rtot_CAPT: float,
+    rtot_REST: float,
     alphar: float,
     kB: float,
     kU: float,
-    rtot_CAPT: float,
-    rtot_REST: float,
     nt: int,
     tmax: float,
     dt: float,
@@ -427,7 +483,7 @@ def gillespie_algorithm_two_steps(
     origin: int,
     bps: int,
     FACT: bool,
-    FACT_GLOBAL: bool
+    FACT_MODE: str
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Simulate multiple loop-extrusion trajectories using a two-step Gillespie-like algorithm.
@@ -542,18 +598,21 @@ def gillespie_algorithm_two_steps(
     t_matrix = np.empty(nt, dtype=object)
     x_matrix = np.empty(nt, dtype=object)
     
-    # # --- FACT Conditions for Homogeneous Landscapes --- #
-    # if FACT and alpha_matrix.all() == alpha_matrix[0][0]:
-    #     alpha_matrix[:][:] *= (kB / (kB + kU))
+    # --- FACT Conditions for Homogeneous Landscapes --- #
+    if FACT and alpha_matrix.all() == alpha_matrix[0][0]:
+        alpha_matrix[:][:] *= (kB / (kB + kU))
 
     # --- Loop Over Trajectories --- #
     for n in range(0,nt) :
+        
+        # Alpha array
+        alpha_array = alpha_matrix[n]
 
         # Initialization of starting values
-        t, t_CAPT, t_REST = 0, 0, 0             # First times
-        x = folding(alpha_matrix[n], origin)    # Initial calculation
-        px, ox  = np.copy(x), np.copy(x)        # Previous_x and Origin_x
-        i0, i   = 0, 0                          # Ranks of filling results
+        t, t_CAPT, t_REST = 0, 0, 0         # First times
+        x = folding(alpha_array, origin)    # Initial calculation
+        px, ox  = np.copy(x), np.copy(x)    # Previous_x and Origin_x
+        i0, i   = 0, 0                      # Ranks of filling results
 
         # Initial calibration
         results[n][0] = x - ox  # Store the initial position
@@ -575,7 +634,11 @@ def gillespie_algorithm_two_steps(
             x_JUMP  = np.random.choice(L, p=p)
             x       += x_JUMP
             r0_CAPT = np.random.rand()
-            r_CAPT  = alpha_matrix[n][x]
+            r_CAPT  = alpha_array[x]
+            
+            # --- Jumping : Times --- #
+            t_CAPT = - np.log(np.random.rand()) / rtot_CAPT
+            t_REST = - np.log(np.random.rand()) / rtot_REST
 
             # --- Jumping : Edge Conditions --- #
             if x >= (np.max(L) - origin) :
@@ -584,25 +647,18 @@ def gillespie_algorithm_two_steps(
                 results[n][i0:j] = np.nan
                 break
             
-            # --- FACT : Stochasticity --- #
+            # --- FACT : Remodelling --- #
             if FACT and np.isclose(r_CAPT, alphao):
-                r0_FACT = np.random.rand()
-                if r0_FACT < kB / (kB + kU):
-                    r_CAPT = alphar
-                    
-            # --- FACT : Remodeling Entirely --- #
-                    if FACT_GLOBAL:
-                        mask = (alpha_matrix[n] == alphao)
-                        x_left = np.copy(x)
-                        while x_left > 0 and mask[x_left - 1]:
-                            x_left -= 1
-                        x_right = np.copy(x)
-                        while x_right < len(mask) - 1 and mask[x_right + 1]:
-                            x_right += 1
-                        alpha_matrix[n][x_left:x_right + 1] = alphar
+                alphax = r_CAPT
+                kBz = 0.10
+                kBp = 0.90
+                r_FACT = np.random.rand()
+                if r_FACT < 0.5:
+                    remodelling(FACT_MODE, alphar, kB, kBz, kBp, kU, t_REST, alphax)
+                    # alpha_array = remodelling(FACT_MODE, alphar, kB, kBz, kBp, kU, t_REST, alphax)
+                    # r_CAPT  = alpha_array[x]
 
             # --- Capturing : Time Condition --- #
-            t_CAPT = - np.log(np.random.rand()) / rtot_CAPT
             if np.isinf(t_CAPT) == True:
                 t = 1e308
             t += t_CAPT
@@ -616,7 +672,6 @@ def gillespie_algorithm_two_steps(
             i0 = np.copy(i) + 1
             
             # --- Resting : Time Condition --- #
-            t_REST = - np.log(np.random.rand()) / rtot_REST
             if np.isinf(t_REST) == True:
                 t_REST = 1e308
             t += t_REST
@@ -638,6 +693,8 @@ def gillespie_algorithm_two_steps(
             t_list.append(t)
             x_list.append(x-ox)
             px = np.copy(x)
+            
+            #
             
         # --- Data Update --- #
         t_matrix[n] = t_list

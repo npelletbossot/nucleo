@@ -252,7 +252,7 @@ def sw_nucleo(
 
         # Chromatin Generation : Landscape
         alpha_matrix = alpha_matrix_calculation(
-            landscape, s, l, bpmin, alphaf, alphao, alphar, kB, kU, Lmin, Lmax, bps, nt
+            landscape, s, l, bpmin, alphaf, alphao, Lmin, Lmax, bps, nt
         )
             
         # Chromatin Generation : Destroying Obstacles
