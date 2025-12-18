@@ -300,57 +300,84 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
 #         return alphao
     
     
-def remodelling_passive(alphax: float, alphar: float, kB:float, kU: float):
-    K = kB / (kB + kU)
-    PF = K
+# def remodelling_passive(alphax: float, alphar: float, kB:float, kU: float):
+#     K = kB / (kB + kU)
+#     PF = K
     
-    r = np.random.rand()
-    if r < PF:
-        alphax = alphar
-    else:
-        alphax = alphax
+#     r = np.random.rand()
+#     if r < PF:
+#         alphax = alphar
+#     else:
+#         alphax = alphax
         
-    return alphax
+#     return alphax
 
 
-def remodelling_active(alphax: float, alphar: float, kBz: float, kBp: float, kU: float, t_rest: float):
-    Kz = kBz / (kBz + kU)
-    Kp = kBp / (kBp + kU)
-    PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))
+# def remodelling_active(alphax: float, alphar: float, kBz: float, kBp: float, kU: float, t_rest: float):
+#     Kz = kBz / (kBz + kU)
+#     Kp = kBp / (kBp + kU)
+#     PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))
     
-    r = np.random.rand()
-    if r < PF:
-        alphax = alphar
-    else:
-        alphax = alphax
+#     r = np.random.rand()
+#     if r < PF:
+#         alphax = alphar
+#     else:
+#         alphax = alphax
     
-    return alphax
+#     return alphax
 
 
-def remodelling_global(alpha_array, x, alphao, alphar):
-    mask = (alpha_array == alphao)
-    x_left = np.copy(x)
-    while x_left > 0 and mask[x_left - 1]:
-        x_left -= 1
-    x_right = np.copy(x)
-    while x_right < len(mask) - 1 and mask[x_right + 1]:
-        x_right += 1
-    alpha_array[x_left:x_right + 1] = alphar
-    return alpha_array
+# def remodelling_global(alpha_array, x, alphao, alphar):
+#     mask = (alpha_array == alphao)
+#     x_left = np.copy(x)
+#     while x_left > 0 and mask[x_left - 1]:
+#         x_left -= 1
+#     x_right = np.copy(x)
+#     while x_right < len(mask) - 1 and mask[x_right + 1]:
+#         x_right += 1
+#     alpha_array[x_left:x_right + 1] = alphar
+#     return alpha_array
 
 
-def remodelling(MODE: str, alphar: float, kB: float, kBz: float, kBp: float, kU: float, t_rest: float, alphax: float):
+def remodelling_obstacle(
+    s: int, alpha_array: np.ndarray, x: int,
+    pos_obs: np.ndarray, start_obs: np.ndarray, end_obs: np.ndarray,
+    alphar: float, PF: float, r_FACT: float
+):
+    if r_FACT < PF:
+        mask = (start_obs <= x) & (x <= end_obs)
+        hit_obs = mask.any()
+        if hit_obs:
+            start, end = pos_obs[mask][0]
+            if x == end:
+                alpha_array[end-s:end] = alphar
+            else:
+                rank_obs = int((x - start) / s)
+                alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
+                
+    return np.array(alpha_array)
+
+
+def remodelling(
+    FACT_MODE: str, 
+    s: int, alpha_array: np.ndarray, x: int,    
+    pos_obs: np.ndarray, start_obs: np.ndarray, end_obs: np.ndarray,
+    K: float, Kz: float, Kp: float, kBp: float, kU: float, t_REST: float,
+    alphar: float, r_FACT: float
+):
     
-    if MODE not in [False, "PASSIVE", "ACTIVE"]:
-        raise ValueError(f"You set MODE={MODE} for remodelling which is not a valid MODE")
+    if FACT_MODE not in [False, "PASSIVE", "ACTIVE"]:
+        raise ValueError(f"You set FACT_MODE={FACT_MODE} for remodelling which is not a valid MODE")
     
-    if MODE == "PASSIVE":
-        alphax = remodelling_passive(alphax, alphar, kB, kU)
+    elif FACT_MODE == "PASSIVE":
+        PF = K
+        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
 
-    elif MODE == "ACTIVE":
-        alphax = remodelling_active(alphax, alphar, kBz, kBp, kU, t_rest)
+    elif FACT_MODE == "ACTIVE":
+        PF = Kz * np.exp(-(kBp + kU) * t_REST) + Kp * (1 - np.exp(-(kBp + kU) * t_REST))
+        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
         
-    return alphax
+    return np.array(alpha_array)
 
 
 # 2.3 : Gillespies
@@ -595,8 +622,12 @@ def gillespie_algorithm_two_steps(
     np.random.seed(None)
     
     # --- FACT : Values --- #
-    F = kB / (kB + kU)
-
+    K = kB / (kB + kU)
+    kBp = kB * 2
+    kBz = kB / 4
+    Kz = kBz / (kBz + kU)
+    Kp = kBp / (kBp + kU)
+    
     # --- Starting matrices --- #
     beta_matrix = np.tile(np.full(len(L)*bps, beta), (nt, 1))
     results = np.empty((nt, int(tmax/dt)))
@@ -663,16 +694,49 @@ def gillespie_algorithm_two_steps(
             # --- FACT : Remodelling --- #
             if not homogeneous and FACT and np.isclose(r_CAPT, alphao):
                 r_FACT = np.random.rand()
-                if r_FACT < F:
-                    mask = (start_obs <= x) & (x <= end_obs)
-                    hit_obs = mask.any()
-                    if hit_obs:
-                        start, end = pos_obs[mask][0]
-                        if x == end:
-                            alpha_array[end-s:end] = alphar
-                        else:
-                            rank_obs = int((x - start) / s)
-                            alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
+                alpha_array = remodelling(
+                    FACT_MODE, s, alpha_array, x, 
+                    pos_obs, start_obs, end_obs, 
+                    K, Kz, Kp, kBp, kU,
+                    t_REST, alphar, r_FACT
+                )
+                r_CAPT  = alpha_array[x]
+                
+                # if FACT_MODE == "PASSIVE":
+                #     PF = K
+                    
+                #     alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
+                    # if r_FACT < PF:
+                    #     mask = (start_obs <= x) & (x <= end_obs)
+                    #     hit_obs = mask.any()
+                    #     if hit_obs:
+                    #         start, end = pos_obs[mask][0]
+                    #         if x == end:
+                    #             alpha_array[end-s:end] = alphar
+                    #         else:
+                    #             rank_obs = int((x - start) / s)
+                    #             alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
+                                
+                # elif FACT_MODE =="ACTIVE":
+                #     kBp = kB * 2
+                #     kBz = kB / 4
+                #     Kz = kBz / (kBz + kU)
+                #     Kp = kBp / (kBp + kU)
+                #     PF = Kz * np.exp(-(kBp + kU) * t_REST) + Kp * (1 - np.exp(-(kBp + kU) * t_REST))
+                    
+                #     alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
+
+                    
+                    # if r_FACT < PF:
+                    #     mask = (start_obs <= x) & (x <= end_obs)
+                    #     hit_obs = mask.any()
+                    #     if hit_obs:
+                    #         start, end = pos_obs[mask][0]
+                    #         if x == end:
+                    #             alpha_array[end-s:end] = alphar
+                    #         else:
+                    #             rank_obs = int((x - start) / s)
+                    #             alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
 
             # --- Capturing : Time Condition --- #
             if np.isinf(t_CAPT) == True:

@@ -177,7 +177,7 @@ def sw_nucleo(
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
-    saving = "data"
+    FACT_MODE = "PASSIVE"
     ) -> None:
     """
     Simulates condensin dynamics along chromatin with specified parameters.
@@ -313,8 +313,9 @@ def sw_nucleo(
             )
         # Gillespie Two-Steps FACT
         elif formalism == "3":
+            FACT = True
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True, FACT_MODE=False
+                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT, FACT_MODE
             )
             
         # Else
@@ -425,148 +426,119 @@ def sw_nucleo(
     
     try:
 
-        if saving == "data":
-            data_result = {
-                
-                # --- Formalism --- #
-                'formalism'      : formalism,                
-                
-                # --- Principal Parameters --- #
-                'landscape'      : landscape,
-                's'              : s,
-                'l'              : l,
-                'bpmin'          : bpmin,
-                'mu'             : mu,
-                'theta'          : theta,
-                'alphaf'         : alphaf,
-                'alphao'         : alphao,
-                'beta'           : beta,
-                'lmbda'          : lmbda,
-                'rtot_capt'      : rtot_capt,
-                'rtot_rest'      : rtot_rest,
-                'alphar'         : alphar,
-                'kB'             : kB,
-                'kU'             : kU,
+        data_result = {
+            
+            # --- Formalism --- #
+            'formalism'      : formalism,                
+            
+            # --- Principal Parameters --- #
+            'landscape'      : landscape,
+            's'              : s,
+            'l'              : l,
+            'bpmin'          : bpmin,
+            'mu'             : mu,
+            'theta'          : theta,
+            'alphaf'         : alphaf,
+            'alphao'         : alphao,
+            'beta'           : beta,
+            'lmbda'          : lmbda,
+            'rtot_capt'      : rtot_capt,
+            'rtot_rest'      : rtot_rest,
+            'alphar'         : alphar,
+            'kB'             : kB,
+            'kU'             : kU,
 
-                # --- Working Parameter --- #
-                'parameter'      : parameter, 
+            # --- Working Parameter --- #
+            'parameter'      : parameter, 
 
-                # --- Chromatin Parameters --- #
-                'Lmin'           : Lmin,
-                'Lmax'           : Lmax,
-                'bps'            : bps,
-                'origin'         : origin,
+            # --- Chromatin Parameters --- #
+            'Lmin'           : Lmin,
+            'Lmax'           : Lmax,
+            'bps'            : bps,
+            'origin'         : origin,
 
-                # --- Time Parameters --- #
-                'tmax'           : tmax,
-                'dt'             : dt,
-                'times'          : times,
-                
-                # --- Bins --- #
-                'binx'          : binx,
-                'bint'          : bint,
-                
-                # --- Simulation --- #
-                'nt'             : nt,
+            # --- Time Parameters --- #
+            'tmax'           : tmax,
+            'dt'             : dt,
+            'times'          : times,
+            
+            # --- Bins --- #
+            'binx'          : binx,
+            'bint'          : bint,
+            
+            # --- Simulation --- #
+            'nt'             : nt,
 
-                # --- Chromatin --- #
-                's_mean'         : s_mean,
-                's_points'       : s_points,
-                's_distrib'      : s_distrib,
-                'l_mean'         : l_mean,
-                'l_points'       : l_points,
-                'l_distrib'      : l_distrib,
-                'l_view'         : l_view,
-                'alpha_mean_a'   : alpha_mean_a,
-                'alpha_mean_v'   : alpha_mean_v,
-                'alpha_mean_c'   : alpha_mean_c,
-                
-                # --- Raw Datas --- #
-                'p'              : p,
-                't_matrix'       : t_matrix,
-                'x_matrix'       : x_matrix,
+            # --- Chromatin --- #
+            's_mean'         : s_mean,
+            's_points'       : s_points,
+            's_distrib'      : s_distrib,
+            'l_mean'         : l_mean,
+            'l_points'       : l_points,
+            'l_distrib'      : l_distrib,
+            'l_view'         : l_view,
+            'alpha_mean_a'   : alpha_mean_a,
+            'alpha_mean_v'   : alpha_mean_v,
+            'alpha_mean_c'   : alpha_mean_c,
+            
+            # --- Raw Datas --- #
+            'p'              : p,
+            't_matrix'       : t_matrix,
+            'x_matrix'       : x_matrix,
 
-                # --- Results --- #
-                'results'        : results,
-                'results_mean'   : results_mean,
-                'results_med'    : results_med,
-                'results_std'    : results_std,
-                'v_mean'         : v_mean,
-                'v_med'          : v_med,
-                'v_mean_th'      : v_mean_th,
-                'v_mean_th_eff'  : v_mean_th_eff,
-                'vf'             : vf,
-                'Cf'             : Cf,
-                'wf'             : wf,
-                'vf_std'         : vf_std,
-                'Cf_std'         : Cf_std,
-                'wf_std'         : wf_std,
+            # --- Results --- #
+            'results'        : results,
+            'results_mean'   : results_mean,
+            'results_med'    : results_med,
+            'results_std'    : results_std,
+            'v_mean'         : v_mean,
+            'v_med'          : v_med,
+            'v_mean_th'      : v_mean_th,
+            'v_mean_th_eff'  : v_mean_th_eff,
+            'vf'             : vf,
+            'Cf'             : Cf,
+            'wf'             : wf,
+            'vf_std'         : vf_std,
+            'Cf_std'         : Cf_std,
+            'wf_std'         : wf_std,
 
-                # --- Between Jumps --- #
-                'xbj_points'     : xbj_points,
-                'xbj_distrib'    : xbj_distrib,
-                'tbj_points'     : tbj_points,
-                'tbj_distrib'    : tbj_distrib,
+            # --- Between Jumps --- #
+            'xbj_points'     : xbj_points,
+            'xbj_distrib'    : xbj_distrib,
+            'tbj_points'     : tbj_points,
+            'tbj_distrib'    : tbj_distrib,
 
-                # --- First Passage Time --- #
-                'fpt_distrib_2D' : fpt_distrib_2D,
-                'fpt_number'     : fpt_number,
+            # --- First Passage Time --- #
+            'fpt_distrib_2D' : fpt_distrib_2D,
+            'fpt_number'     : fpt_number,
 
-                # --- Instantaneous statistics --- #
-                'dx_points'      : dx_points,
-                'dx_distrib'     : dx_distrib,
-                'dx_mean'        : dx_mean,
-                'dx_med'         : dx_med,
-                'dx_mp'          : dx_mp,
-                'dt_points'      : dt_points,
-                'dt_distrib'     : dt_distrib,
-                'dt_mean'        : dt_mean,
-                'dt_med'         : dt_med,
-                'dt_mp'          : dt_mp,
-                'vi_points'      : vi_points,
-                'vi_distrib'     : vi_distrib,
-                'vi_mean'        : vi_mean,
-                'vi_med'         : vi_med,
-                'vi_mp'          : vi_mp,
+            # --- Instantaneous statistics --- #
+            'dx_points'      : dx_points,
+            'dx_distrib'     : dx_distrib,
+            'dx_mean'        : dx_mean,
+            'dx_med'         : dx_med,
+            'dx_mp'          : dx_mp,
+            'dt_points'      : dt_points,
+            'dt_distrib'     : dt_distrib,
+            'dt_mean'        : dt_mean,
+            'dt_med'         : dt_med,
+            'dt_mp'          : dt_mp,
+            'vi_points'      : vi_points,
+            'vi_distrib'     : vi_distrib,
+            'vi_mean'        : vi_mean,
+            'vi_med'         : vi_med,
+            'vi_mp'          : vi_mp,
 
-                # --- Fits --- #
-                'alpha0'         : alpha0,
-                'xt_over_t'      : xt_over_t,
-                'G'              : G,
-                'bound_low'      : bound_low,
-                'bound_high'     : bound_high,
-                
-                # --- Work --- #
-                'parameter'      : parameter,
+            # --- Fits --- #
+            'alpha0'         : alpha0,
+            'xt_over_t'      : xt_over_t,
+            'G'              : G,
+            'bound_low'      : bound_low,
+            'bound_high'     : bound_high,
+            
+            # --- Work --- #
+            'parameter'      : parameter,
 
-            }
-
-        elif saving == "test":
-            data_result = {
-                
-                # --- Formalism --- #
-                'formalism'      : formalism,
-                
-                # --- Principal Parameters --- #
-                'landscape'      : landscape,
-                's'              : s,
-                'l'              : l,
-                'bpmin'          : bpmin,
-                'mu'             : mu,
-                'theta'          : theta,
-                'alphaf'         : alphaf,
-                'alphao'         : alphao,
-                'beta'           : beta,
-                'lmbda'          : lmbda,
-                'rtot_capt'      : rtot_capt,
-                'rtot_rest'      : rtot_rest,
-
-                # # --- Speeds and Taus --- #
-                # 'v_mean'         : v_mean,
-                # 'tau_forwards'   : tau_forwards,
-                # 'tau_reverses'   : tau_reverses,
-                # 'rtot_capt_fit'  : rtot_capt_fit,
-                # 'rtot_rest_fit'  : rtot_rest_fit
             }
 
         # Types of data registered if needed

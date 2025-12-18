@@ -49,7 +49,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
         "alphaf": 1.00,     # Probability of binding if linker
         "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to unbind
-        "alphar": 0.75      # Probability of binding while FACT is there
+        "alphar": 0.90      # Probability of binding while FACT is there
     }
 
     RATES = {
@@ -205,7 +205,8 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphar": np.array([0.00, 0.50], dtype=float)
+                # "alphar": np.array([PROBAS["beta"]], dtype=float),
+                "alphar": np.arange(0, 1.10, 0.10, dtype=float) 
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
@@ -214,7 +215,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "nt": 10,
+                "nt": 100,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },
