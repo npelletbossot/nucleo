@@ -11,6 +11,8 @@ Modeling functions for generating results, etc.
 
 import numpy as np
 
+from ncl.landscape import find_blocks
+
 
 # ─────────────────────────────────────────────
 # 2 : Functions
@@ -466,6 +468,7 @@ def gillespie_algorithm_one_step(
 
 
 def gillespie_algorithm_two_steps(
+    s: int,
     alpha_matrix: np.ndarray,
     p: np.ndarray,
     alphao: float,
@@ -590,6 +593,9 @@ def gillespie_algorithm_two_steps(
     
     # --- Random Seed --- #
     np.random.seed(None)
+    
+    # --- FACT : Values --- #
+    F = kB / (kB + kU)
 
     # --- Starting matrices --- #
     beta_matrix = np.tile(np.full(len(L)*bps, beta), (nt, 1))
@@ -599,14 +605,21 @@ def gillespie_algorithm_two_steps(
     x_matrix = np.empty(nt, dtype=object)
     
     # --- FACT Conditions for Homogeneous Landscapes --- #
-    if FACT and alpha_matrix.all() == alpha_matrix[0][0]:
-        alpha_matrix[:][:] *= (kB / (kB + kU))
-
+    if FACT and np.all(alpha_matrix == alpha_matrix[0, 0]):
+        # alpha_matrix *= F
+        homogeneous = True
+    else :
+        homogeneous = False
+        
     # --- Loop Over Trajectories --- #
     for n in range(0,nt) :
         
-        # Alpha array
+        # Landscape and Obstacles
         alpha_array = alpha_matrix[n]
+        if not homogeneous:
+            pos_obs     = find_blocks(alpha_array, alphao)
+            start_obs   = pos_obs[:, 0]
+            end_obs     = pos_obs[:, 1]
 
         # Initialization of starting values
         t, t_CAPT, t_REST = 0, 0, 0         # First times
@@ -648,15 +661,18 @@ def gillespie_algorithm_two_steps(
                 break
             
             # --- FACT : Remodelling --- #
-            if FACT and np.isclose(r_CAPT, alphao):
-                alphax = r_CAPT
-                kBz = 0.10
-                kBp = 0.90
+            if not homogeneous and FACT and np.isclose(r_CAPT, alphao):
                 r_FACT = np.random.rand()
-                if r_FACT < 0.5:
-                    remodelling(FACT_MODE, alphar, kB, kBz, kBp, kU, t_REST, alphax)
-                    # alpha_array = remodelling(FACT_MODE, alphar, kB, kBz, kBp, kU, t_REST, alphax)
-                    # r_CAPT  = alpha_array[x]
+                if r_FACT < F:
+                    mask = (start_obs <= x) & (x <= end_obs)
+                    hit_obs = mask.any()
+                    if hit_obs:
+                        start, end = pos_obs[mask][0]
+                        if x == end:
+                            alpha_array[end-s:end] = alphar
+                        else:
+                            rank_obs = int((x - start) / s)
+                            alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
 
             # --- Capturing : Time Condition --- #
             if np.isinf(t_CAPT) == True:

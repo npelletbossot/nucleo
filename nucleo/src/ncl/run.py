@@ -314,7 +314,7 @@ def sw_nucleo(
         # Gillespie Two-Steps FACT
         elif formalism == "3":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True, FACT_MODE=False
+                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True, FACT_MODE=False
             )
             
         # Else
