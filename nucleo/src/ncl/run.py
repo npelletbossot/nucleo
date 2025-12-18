@@ -267,7 +267,7 @@ def sw_nucleo(
         s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = calculate_obs_and_linker_distribution(
             landscape, s, l, alpha_matrix[0], alphaf, alphao, binx
         )
-        
+
         # Chromatin Analysis : Linker Profile
         l_view = calculate_linker_landscape(
             alpha_matrix, landscape, nt, alphaf, Lmin, Lmax
@@ -277,6 +277,9 @@ def sw_nucleo(
         alpha_mean_a = np.mean(alpha_matrix, axis=0)
         alpha_mean_v = np.mean(alpha_mean_a)
         alpha_mean_c = calculate_alpha_mean(alphaf, alphao, s_mean, l_mean)
+        
+        # Chromatin Remodelling : Obstacles Positions
+        obstacles = find_blocks(alpha_matrix[0], alphao)
     
     except Exception as e:
         print(f"Error in Input 1 - Landscape : {e} for {title}")
@@ -306,12 +309,12 @@ def sw_nucleo(
         # Gillespie Two-Steps
         elif formalism == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=False, FACT_GLOBAL=False
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=False, FACT_MODE=False
             )
         # Gillespie Two-Steps FACT
         elif formalism == "3":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True, FACT_GLOBAL=False
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=True, FACT_MODE=False
             )
             
         # Else

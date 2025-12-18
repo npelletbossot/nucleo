@@ -52,7 +52,7 @@ def alpha_random(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, b
     for pos in alpha_random_modified:
         alpha_array[pos:pos + s] = alphao                                                       # for each position modified in _alpha_random_modified_, place an obstacle block (alphao) of length s in the _alpha_array
 
-    return alpha_array
+    return np.array(alpha_array, dtype=float)
 
 
 def alpha_periodic(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int, bps:int) -> np.ndarray:
@@ -76,7 +76,7 @@ def alpha_periodic(s:int, l:int, alphaf:float, alphao:float, Lmin:int, Lmax:int,
     pattern = np.concatenate((np.full(l, alphaf), np.full(s, alphao)))
     alpha_array = np.concatenate((np.tile(pattern, N), np.full(residue, alphaf)))
     
-    return alpha_array
+    return np.array(alpha_array, dtype=float)
 
 
 def alpha_homogeneous(
@@ -102,7 +102,7 @@ def alpha_homogeneous(
     size = int((Lmax - Lmin) / bps)
     alpha_array = np.full(size, value)
 
-    return alpha_array
+    return np.array(alpha_array, dtype=float)
 
 
 # 2.2 Generation
@@ -256,7 +256,7 @@ def find_blocks(array: np.ndarray, alpha_value: float) -> list[tuple[int, int]]:
     if is_block[-1]:
         ends = np.append(ends, len(array))
 
-    return list(zip(starts, ends))
+    return np.array(list(zip(starts, ends)))
 
 
 def find_interval_containing_value(

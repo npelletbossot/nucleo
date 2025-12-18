@@ -339,7 +339,7 @@ def remodelling_global(alpha_array, x, alphao, alphar):
 
 def remodelling(MODE: str, alphar: float, kB: float, kBz: float, kBp: float, kU: float, t_rest: float, alphax: float):
     
-    if MODE not in ["PASSIVE", "ACTIVE"]:
+    if MODE not in [False, "PASSIVE", "ACTIVE"]:
         raise ValueError(f"You set MODE={MODE} for remodelling which is not a valid MODE")
     
     if MODE == "PASSIVE":
