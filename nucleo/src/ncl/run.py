@@ -172,7 +172,7 @@ def sw_nucleo(
     mu: float, theta: float, 
     lmbda: float, alphaf: float, alphao: float, beta: float,
     rtot_capt: float, rtot_rest: float,
-    alphar: float,kB: float, kU: float,
+    alphar: float, kB: float, kU: float,
     formalism: str, parameter: float,
     nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
@@ -343,7 +343,7 @@ def sw_nucleo(
         vf, Cf, wf, vf_std, Cf_std, wf_std, xt_over_t, G, bound_low, bound_high = fitting_in_two_steps(
             times, results_mean, results_std
         )
-        
+                
         # Theoretical
         v_mean_th = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest)
         v_mean_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest)
@@ -422,16 +422,131 @@ def sw_nucleo(
     # plt.legend()
     # plt.show()
 
+    # print(Cf)
+
     # ------------------- Writing ------------------- #
     
     try:
 
+        # data_result = {
+            
+        #     # --- Formalism --- #
+        #     'formalism'      : formalism,                
+            
+        #     # --- Principal Parameters --- #
+        #     'landscape'      : landscape,
+        #     's'              : s,
+        #     'l'              : l,
+        #     'bpmin'          : bpmin,
+        #     'mu'             : mu,
+        #     'theta'          : theta,
+        #     'alphaf'         : alphaf,
+        #     'alphao'         : alphao,
+        #     'beta'           : beta,
+        #     'lmbda'          : lmbda,
+        #     'rtot_capt'      : rtot_capt,
+        #     'rtot_rest'      : rtot_rest,
+        #     'alphar'         : alphar,
+        #     'kB'             : kB,
+        #     'kU'             : kU,
+
+        #     # --- Working Parameter --- #
+        #     'parameter'      : parameter, 
+
+        #     # --- Chromatin Parameters --- #
+        #     'Lmin'           : Lmin,
+        #     'Lmax'           : Lmax,
+        #     'bps'            : bps,
+        #     'origin'         : origin,
+
+        #     # --- Time Parameters --- #
+        #     'tmax'           : tmax,
+        #     'dt'             : dt,
+        #     'times'          : times,
+            
+        #     # --- Bins --- #
+        #     'binx'          : binx,
+        #     'bint'          : bint,
+            
+        #     # --- Simulation --- #
+        #     'nt'             : nt,
+
+        #     # --- Chromatin --- #
+        #     's_mean'         : s_mean,
+        #     's_points'       : s_points,
+        #     's_distrib'      : s_distrib,
+        #     'l_mean'         : l_mean,
+        #     'l_points'       : l_points,
+        #     'l_distrib'      : l_distrib,
+        #     'l_view'         : l_view,
+        #     'alpha_mean_a'   : alpha_mean_a,
+        #     'alpha_mean_v'   : alpha_mean_v,
+        #     'alpha_mean_c'   : alpha_mean_c,
+            
+        #     # --- Raw Datas --- #
+        #     'p'              : p,
+        #     't_matrix'       : t_matrix,
+        #     'x_matrix'       : x_matrix,
+
+        #     # --- Results --- #
+        #     'results'        : results,
+        #     'results_mean'   : results_mean,
+        #     'results_med'    : results_med,
+        #     'results_std'    : results_std,
+        #     'v_mean'         : v_mean,
+        #     'v_med'          : v_med,
+        #     'v_mean_th'      : v_mean_th,
+        #     'v_mean_th_eff'  : v_mean_th_eff,
+        #     'vf'             : vf,
+        #     'Cf'             : Cf,
+        #     'wf'             : wf,
+        #     'vf_std'         : vf_std,
+        #     'Cf_std'         : Cf_std,
+        #     'wf_std'         : wf_std,
+
+        #     # --- Between Jumps --- #
+        #     'xbj_points'     : xbj_points,
+        #     'xbj_distrib'    : xbj_distrib,
+        #     'tbj_points'     : tbj_points,
+        #     'tbj_distrib'    : tbj_distrib,
+
+        #     # --- First Passage Time --- #
+        #     'fpt_distrib_2D' : fpt_distrib_2D,
+        #     'fpt_number'     : fpt_number,
+
+        #     # --- Instantaneous statistics --- #
+        #     'dx_points'      : dx_points,
+        #     'dx_distrib'     : dx_distrib,
+        #     'dx_mean'        : dx_mean,
+        #     'dx_med'         : dx_med,
+        #     'dx_mp'          : dx_mp,
+        #     'dt_points'      : dt_points,
+        #     'dt_distrib'     : dt_distrib,
+        #     'dt_mean'        : dt_mean,
+        #     'dt_med'         : dt_med,
+        #     'dt_mp'          : dt_mp,
+        #     'vi_points'      : vi_points,
+        #     'vi_distrib'     : vi_distrib,
+        #     'vi_mean'        : vi_mean,
+        #     'vi_med'         : vi_med,
+        #     'vi_mp'          : vi_mp,
+
+        #     # --- Fits --- #
+        #     'alpha0'         : alpha0,
+        #     'xt_over_t'      : xt_over_t,
+        #     'G'              : G,
+        #     'bound_low'      : bound_low,
+        #     'bound_high'     : bound_high,
+            
+        #     # --- Work --- #
+        #     'parameter'      : parameter,
+
+        #     }
+        
         data_result = {
             
-            # --- Formalism --- #
+            # Inputs
             'formalism'      : formalism,                
-            
-            # --- Principal Parameters --- #
             'landscape'      : landscape,
             's'              : s,
             'l'              : l,
@@ -448,49 +563,17 @@ def sw_nucleo(
             'kB'             : kB,
             'kU'             : kU,
 
-            # --- Working Parameter --- #
-            'parameter'      : parameter, 
-
-            # --- Chromatin Parameters --- #
+            # Parameters
             'Lmin'           : Lmin,
             'Lmax'           : Lmax,
             'bps'            : bps,
             'origin'         : origin,
-
-            # --- Time Parameters --- #
             'tmax'           : tmax,
             'dt'             : dt,
-            'times'          : times,
-            
-            # --- Bins --- #
-            'binx'          : binx,
-            'bint'          : bint,
-            
-            # --- Simulation --- #
+            'times'          : times,            
             'nt'             : nt,
-
-            # --- Chromatin --- #
-            's_mean'         : s_mean,
-            's_points'       : s_points,
-            's_distrib'      : s_distrib,
-            'l_mean'         : l_mean,
-            'l_points'       : l_points,
-            'l_distrib'      : l_distrib,
-            'l_view'         : l_view,
-            'alpha_mean_a'   : alpha_mean_a,
-            'alpha_mean_v'   : alpha_mean_v,
-            'alpha_mean_c'   : alpha_mean_c,
             
-            # --- Raw Datas --- #
-            'p'              : p,
-            't_matrix'       : t_matrix,
-            'x_matrix'       : x_matrix,
-
-            # --- Results --- #
-            'results'        : results,
-            'results_mean'   : results_mean,
-            'results_med'    : results_med,
-            'results_std'    : results_std,
+            # Outputs
             'v_mean'         : v_mean,
             'v_med'          : v_med,
             'v_mean_th'      : v_mean_th,
@@ -501,44 +584,9 @@ def sw_nucleo(
             'vf_std'         : vf_std,
             'Cf_std'         : Cf_std,
             'wf_std'         : wf_std,
-
-            # --- Between Jumps --- #
-            'xbj_points'     : xbj_points,
-            'xbj_distrib'    : xbj_distrib,
-            'tbj_points'     : tbj_points,
-            'tbj_distrib'    : tbj_distrib,
-
-            # --- First Passage Time --- #
-            'fpt_distrib_2D' : fpt_distrib_2D,
-            'fpt_number'     : fpt_number,
-
-            # --- Instantaneous statistics --- #
-            'dx_points'      : dx_points,
-            'dx_distrib'     : dx_distrib,
-            'dx_mean'        : dx_mean,
-            'dx_med'         : dx_med,
-            'dx_mp'          : dx_mp,
-            'dt_points'      : dt_points,
-            'dt_distrib'     : dt_distrib,
-            'dt_mean'        : dt_mean,
-            'dt_med'         : dt_med,
-            'dt_mp'          : dt_mp,
-            'vi_points'      : vi_points,
-            'vi_distrib'     : vi_distrib,
             'vi_mean'        : vi_mean,
             'vi_med'         : vi_med,
             'vi_mp'          : vi_mp,
-
-            # --- Fits --- #
-            'alpha0'         : alpha0,
-            'xt_over_t'      : xt_over_t,
-            'G'              : G,
-            'bound_low'      : bound_low,
-            'bound_high'     : bound_high,
-            
-            # --- Work --- #
-            'parameter'      : parameter,
-
             }
 
         # Types of data registered if needed

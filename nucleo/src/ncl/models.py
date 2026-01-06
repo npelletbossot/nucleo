@@ -371,11 +371,11 @@ def remodelling(
     
     elif FACT_MODE == "PASSIVE":
         PF = K
-        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
 
     elif FACT_MODE == "ACTIVE":
         PF = Kz * np.exp(-(kBp + kU) * t_REST) + Kp * (1 - np.exp(-(kBp + kU) * t_REST))
-        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
+        
+    alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
         
     return np.array(alpha_array)
 

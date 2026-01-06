@@ -93,197 +93,78 @@ def filtering_before_fit(
         return None
 
 
-# def fitting_in_two_steps(times, positions, deviations, bound_low=5, bound_high=80, epsilon=1e-10, rf=3):
-#     """
-#     Perform a two-step fit on trajectory data: 
-#     - a linear fit on x(t)/t for early-time behavior,
-#     - a log-log fit for power-law behavior at later times.
-
-#     This function automatically handles edge cases where the dataset is too short 
-#     to perform the second fit, returning `None` for those values.
-
-#     Args:
-#         times (np.ndarray): Array of time values.
-#         positions (np.ndarray): Array of average positions (x(t)).
-#         deviations (np.ndarray): Array of standard deviations.
-#         bound_low (int): Number of initial points to use for the linear average.
-#         bound_high (int): Starting index for the power-law log-log fit.
-#         epsilon (float): Small value to avoid log(0).
-#         rf (int): Rounding factor for the returned values.
-
-#     Returns:
-#         tuple: Rounded values for:
-#             - vf (float or None): Average x(t)/t in early phase.
-#             - Cf (float or None): Prefactor from log-log fit.
-#             - wf (float or None): Exponent from log-log fit.
-#             - vf_std (float or None): Standard deviation of vf.
-#             - Cf_std (float or None): Error estimate on Cf.
-#             - wf_std (float or None): Error estimate on wf.
-#     """
-
-#     # Filter data before fitting
-#     times, positions, deviations = filtering_before_fit(times, positions, deviations)
-
-#     # Check if there's enough data for both bounds
-#     if len(positions) < max(bound_high, bound_low + 2):
-#         return None, None, None, None, None, None, None, None, None, None
-
-#     # Remove the first point to avoid (0, 0)
-#     times = times[1:]
-#     positions = positions[1:]
-
-#     # Step 1: linear average of x(t)/t over early time
-#     xt_over_t = np.divide(positions, times)
-#     array_low = xt_over_t[:bound_low]
-#     vf = np.mean(array_low)
-#     vf_std = np.std(array_low)
-
-#     # Step 2: logarithmic Derivative (G) to observe where the bound_high is - helps plots
-#     dlogx = np.diff(np.log(positions))
-#     dlogt = np.diff(np.log(times))
-#     G = np.divide(dlogx, dlogt)
-
-#     # Step 3: check if there are enough points for log-log fit
-#     if len(times) <= bound_high + 1:
-#         return np.round(vf, rf), None, None, np.round(vf_std, rf), None, None, None, None, None, None
-
-#     # Step 4: log-log fit of x(t) = Cf * t^wf on the right side
-#     log_t_high = np.log(times[bound_high:])
-#     log_x_high = np.log(np.maximum(positions[bound_high:], epsilon))
-#     slope, intercept, r_value, p_value, std_err_slope = linregress(log_t_high, log_x_high)
-
-#     # Fit results
-#     Cf = np.exp(intercept)
-#     wf = slope
-
-#     # Error estimates
-#     n = len(log_t_high)
-#     std_err_intercept = std_err_slope * np.sqrt(np.sum(log_t_high**2) / n)
-#     Cf_std = Cf * std_err_intercept
-#     wf_std = std_err_slope
-
-#     return (
-#         np.round(vf, rf), np.round(Cf, rf), np.round(wf, rf), 
-#         np.round(vf_std, rf), np.round(Cf_std, rf), np.round(wf_std, rf),
-#         xt_over_t, G, bound_low, bound_high
-#     )
-    
-    
-def fitting_in_two_steps(times, positions, deviations, 
-                         bound_low=5, bound_high=80, 
-                         epsilon=1e-10, rf=3):
+def fitting_in_two_steps(times, positions, deviations, bound_low=5, bound_high=80):
     """
     Perform a two-step fit on trajectory data: 
     - a linear fit on x(t)/t for early-time behavior,
     - a log-log fit for power-law behavior at later times.
 
-    This version includes robust protections against invalid logs and
-    numerical warnings (e.g., log(0), log of negative values).
-    If such issues occur, later-step values return None while early-step
-    values remain valid.
+    This function automatically handles edge cases where the dataset is too short 
+    to perform the second fit, returning `None` for those values.
 
     Args:
         times (np.ndarray): Array of time values.
         positions (np.ndarray): Array of average positions (x(t)).
         deviations (np.ndarray): Array of standard deviations.
-        bound_low (int): Number of initial points used to compute vf.
-        bound_high (int): Starting index for the log-log fit.
-        epsilon (float): Small offset to avoid log(0).
-        rf (int): Rounding factor for returned values.
+        bound_low (int): Number of initial points to use for the linear average.
+        bound_high (int): Starting index for the power-law log-log fit.
+        epsilon (float): Small value to avoid log(0).
+        rf (int): Rounding factor for the returned values.
 
     Returns:
-        tuple: (vf, Cf, wf, vf_std, Cf_std, wf_std, xt_over_t, G, bound_low, bound_high)
-               Values may be None if insufficient data or numerical issues were detected.
+        tuple: Rounded values for:
+            - vf (float or None): Average x(t)/t in early phase.
+            - Cf (float or None): Prefactor from log-log fit.
+            - wf (float or None): Exponent from log-log fit.
+            - vf_std (float or None): Standard deviation of vf.
+            - Cf_std (float or None): Error estimate on Cf.
+            - wf_std (float or None): Error estimate on wf.
     """
 
-    # Filter
+    # Filter data before fitting
     times, positions, deviations = filtering_before_fit(times, positions, deviations)
 
-    # Not enough data
+    # Check if there's enough data for both bounds
     if len(positions) < max(bound_high, bound_low + 2):
         return None, None, None, None, None, None, None, None, None, None
 
-    # Remove (0,0)
+    # Remove the first point to avoid (0, 0)
     times = times[1:]
     positions = positions[1:]
 
-    # Step 1: early-time vf = mean[x(t)/t]
+    # Step 1: linear average of x(t)/t over early time
     xt_over_t = np.divide(positions, times)
     array_low = xt_over_t[:bound_low]
     vf = np.mean(array_low)
     vf_std = np.std(array_low)
 
-    # Safety: if any early position is negative → invalid physical situation
-    if np.any(positions < 0):
-        return (np.round(vf, rf), None, None,
-                np.round(vf_std, rf), None, None,
-                xt_over_t, None, bound_low, bound_high)
+    # Step 2: logarithmic Derivative (G) to observe where the bound_high is - helps plots
+    dlogx = np.diff(np.log(positions))
+    dlogt = np.diff(np.log(times))
+    G = np.divide(dlogx, dlogt)
 
-    # --- NEW SECTION ---
-    # Step 2: secure computation of G = dlogx / dlogt
-    # Catch log issues: log(0), log(neg), divide-by-zero, overflow
-    valid_positions = positions > 0
-    valid_times = times > 0
-
-    if not (np.all(valid_positions) and np.all(valid_times)):
-        # Return early-phase metrics but disable power-law part
-        return (np.round(vf, rf), None, None,
-                np.round(vf_std, rf), None, None,
-                xt_over_t, None, bound_low, bound_high)
-
-    # Use numpy errstate to intercept invalid log operations
-    with np.errstate(divide='ignore', invalid='ignore'):
-        logs_pos = np.log(positions)
-        logs_time = np.log(times)
-
-        # If any log is invalid → bail out cleanly
-        if np.any(~np.isfinite(logs_pos)) or np.any(~np.isfinite(logs_time)):
-            return (np.round(vf, rf), None, None,
-                    np.round(vf_std, rf), None, None,
-                    xt_over_t, None, bound_low, bound_high)
-
-        dlogx = np.diff(logs_pos)
-        dlogt = np.diff(logs_time)
-
-        # If G invalid → safe return
-        G = np.divide(dlogx, dlogt)
-        if np.any(~np.isfinite(G)):
-            return (np.round(vf, rf), None, None,
-                    np.round(vf_std, rf), None, None,
-                    xt_over_t, None, bound_low, bound_high)
-
-    # Step 3: enough points for log-log fit?
+    # Step 3: check if there are enough points for log-log fit
     if len(times) <= bound_high + 1:
-        return (np.round(vf, rf), None, None,
-                np.round(vf_std, rf), None, None,
-                xt_over_t, G, bound_low, bound_high)
+        return None, None, None, None, None, None, None, None, None, None
 
-    # Step 4: Log-log fit on the right side
-    log_t_high = logs_time[bound_high:]
-    log_x_high = logs_pos[bound_high:]
+    # Step 4: log-log fit of x(t) = Cf * t^wf on the right side
+    log_t_high = np.log(times[bound_high:])
+    log_x_high = np.log(positions[bound_high:])
+    
+    # Linear fit with covariance
+    coeffs, cov = np.polyfit(log_t_high, log_x_high, 1, cov=True)
 
-    # Ensure we only fit finite values
-    mask = np.isfinite(log_t_high) & np.isfinite(log_x_high)
-    if np.sum(mask) < 3:
-        return (np.round(vf, rf), None, None,
-                np.round(vf_std, rf), None, None,
-                xt_over_t, G, bound_low, bound_high)
-
-    slope, intercept, r_value, p_value, std_err_slope = linregress(
-        log_t_high[mask], log_x_high[mask]
-    )
-
+    wf = coeffs[0]
+    intercept = coeffs[1]
     Cf = np.exp(intercept)
-    wf = slope
 
-    # Error propagation
-    n = np.sum(mask)
-    std_err_intercept = std_err_slope * np.sqrt(np.sum(log_t_high[mask]**2) / n)
-    Cf_std = Cf * std_err_intercept
-    wf_std = std_err_slope
+    # Error estimates
+    wf_std = np.sqrt(cov[0, 0])
+    intercept_std = np.sqrt(cov[1, 1])
+    Cf_std = Cf * intercept_std
 
     return (
-        np.round(vf, rf), np.round(Cf, rf), np.round(wf, rf),
-        np.round(vf_std, rf), np.round(Cf_std, rf), np.round(wf_std, rf),
+        vf, Cf, wf,
+        vf_std, Cf_std, wf_std,
         xt_over_t, G, bound_low, bound_high
     )

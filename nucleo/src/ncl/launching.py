@@ -102,8 +102,8 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     values = product(
         geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'],
         probas['mu'], probas['theta'], probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
+        rates['kB'], rates['kU'], probas['alphar'], 
         rates['rtot_capt'], rates['rtot_rest'],
-        probas['alphar'], rates['kB'], rates['kU'],
         work['formalism'], work['parameter']
     )
         

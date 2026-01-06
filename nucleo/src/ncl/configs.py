@@ -206,7 +206,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
                 # "alphar": np.array([PROBAS["beta"]], dtype=float),
-                "alphar": np.arange(0, 1.10, 0.10, dtype=float) 
+                # "alphar": np.arange(0, 1.10, 0.10, dtype=float) 
+                "alphar" : np.linspace(0, 1.0, 11, dtype=float)
+
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
@@ -244,8 +246,37 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "nt": 1_000,
+                "nt": 100,
                 "path": f"{PROJECT["project_name"]}__longtest"
+            }
+        },
+        
+        
+        "PERFTEST": {
+            "geometry": {
+                "landscape": np.array(['homogeneous', 'periodic', 'random']),
+                "s": np.array([35], dtype=int),
+                "l": np.array([10, 35, 100], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                "mu": np.array([180]),
+                "theta": np.array([90]),
+                "lmbda": np.array([0.50], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
+                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphar" : np.arange(0, 1.10, 0.50, dtype=float)
+            },
+            "rates": {
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB" : np.arange(0.10, 1.10, 0.10, dtype=float),
+                "kU" : np.arange(0.10, 1.10, 0.10, dtype=float)
+            },
+            "meta": {
+                "nt": 1_000,
+                "path": f"{PROJECT["project_name"]}__perftest"
             }
         },
 
