@@ -311,7 +311,7 @@ def sw_nucleo(
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
                 alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=False, FACT_MODE=False
             )
-        # Gillespie Two-Steps FACT
+        # Gillespie Two-Steps + FACT
         elif formalism == "3":
             FACT = True
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
@@ -412,17 +412,6 @@ def sw_nucleo(
     # except Exception as e:
     #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
 
-
-    # ------------------- Working area ------------------- #
-
-    # # Nucleosomic profile close to : "Determinants of nucleosome organization in primary human cells"
-    # plt.figure(figsize=(8,6))
-    # plt.plot(link_view, label="link_view")
-    # plt.grid(True, which="both")
-    # plt.legend()
-    # plt.show()
-
-    # print(Cf)
 
     # ------------------- Writing ------------------- #
     

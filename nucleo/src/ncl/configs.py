@@ -256,7 +256,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
             "geometry": {
                 "landscape": np.array(['homogeneous', 'periodic', 'random']),
                 "s": np.array([35], dtype=int),
-                "l": np.array([10, 35, 100], dtype=int),
+                "l": np.array([10, 20, 30, 40, 50, 100, 150], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
@@ -266,7 +266,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphar" : np.arange(0, 1.10, 0.50, dtype=float)
+                "alphar" : np.arange(0, 1.05, 0.050, dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
