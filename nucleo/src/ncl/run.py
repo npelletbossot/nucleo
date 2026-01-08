@@ -40,7 +40,8 @@ def checking_inputs(
     alphar, kB, kU,
     nt,
     Lmin, Lmax, bps, origin,
-    tmax, dt
+    tmax, dt,
+    FORMALISM, FACT, FACTMODE
 ):
     """
     Validate all input parameters for the simulation before execution.
@@ -160,6 +161,10 @@ def checking_inputs(
         if dt <= 0:
             raise ValueError(f"dt must be positive. Got {dt}.")
         
+        # Formalism
+        if (FORMALISM == "1") and ((FACT != False) or (FACTMODE != None)):
+            raise ValueError(f"Error on FORMALISM you set : FORMALISM={FORMALISM} - FACT={FACT} - FACTMODE={FACTMODE}")
+        
     except Exception as e:
         print(f"The error is in the checking_inputs() function and is : {e}")
 
@@ -173,11 +178,11 @@ def sw_nucleo(
     lmbda: float, alphaf: float, alphao: float, beta: float,
     rtot_capt: float, rtot_rest: float,
     alphar: float, kB: float, kU: float,
-    formalism: str, parameter: float,
-    nt: int, path: str,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
-    FACT_MODE = "PASSIVE"
+    FORMALISM: str, FACT: str, FACTMODE:str,
+    nt: int, path: str,
+    parameter: float
     ) -> None:
     """
     Simulates condensin dynamics along chromatin with specified parameters.
@@ -217,7 +222,7 @@ def sw_nucleo(
 
     # Title & Folder    
     title = (
-            f"formalism={formalism}__"
+            f"FORMALISM={FORMALISM}__FACTMODE{FACTMODE}"
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
             f"lmbda={lmbda:.2e}__rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
@@ -301,26 +306,26 @@ def sw_nucleo(
     try:
         
         # Gillespie One-Step
-        if formalism == "1":
+        if FORMALISM == "1":
             results, t_matrix, x_matrix = gillespie_algorithm_one_step(
                 nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
             )
             
         # Gillespie Two-Steps
-        elif formalism == "2":
+        elif FORMALISM == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT=False, FACT_MODE=False
+                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT, FACTMODE
             )
+            
         # Gillespie Two-Steps + FACT
-        elif formalism == "3":
-            FACT = True
+        elif FORMALISM == "3":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT, FACT_MODE
+                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT, FACTMODE
             )
             
         # Else
         else:
-            raise ValueError(f"Invalid algorithm choice got : {formalism} instead of 1 - 2 - 3.")   
+            raise ValueError(f"Invalid algorithm choice got : {FORMALISM} instead of 1 - 2 - 3.")   
 
         # Clean datas
         x_matrix = listoflist_into_matrix(x_matrix)
@@ -390,7 +395,7 @@ def sw_nucleo(
     
     # try:
     
-    #     if formalism == "2":
+    #     if FORMALISM == "2":
             
     #         # Nature of jumps
     #         x_forward_capt, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
@@ -407,7 +412,7 @@ def sw_nucleo(
     #         fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
     #         tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
     #         rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-    #         v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, formalism)
+    #         v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, FORMALISM)
             
     # except Exception as e:
     #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
@@ -420,7 +425,7 @@ def sw_nucleo(
         # data_result = {
             
         #     # --- Formalism --- #
-        #     'formalism'      : formalism,                
+        #     'FORMALISM'      : FORMALISM,                
             
         #     # --- Principal Parameters --- #
         #     'landscape'      : landscape,
@@ -535,7 +540,7 @@ def sw_nucleo(
         data_result = {
             
             # Inputs
-            'formalism'      : formalism,                
+            'FORMALISM'      : FORMALISM,                
             'landscape'      : landscape,
             's'              : s,
             'l'              : l,
@@ -598,7 +603,7 @@ def sw_nucleo(
 # 2.3 : One run
 
 
-def process_run(params: dict, chromatin: dict, time: dict) -> None:
+def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
     """
     Executes one simulation with the given parameters and shared constants.
     
@@ -622,23 +627,33 @@ def process_run(params: dict, chromatin: dict, time: dict) -> None:
         kB=params['kB'],
         kU=params['kU'],
         nt=params['nt'],
+        
         Lmin=chromatin["Lmin"],
         Lmax=chromatin["Lmax"],
         bps=chromatin["bps"],
         origin=chromatin["origin"],
+        
         tmax=time["tmax"],
-        dt=time["dt"]
+        dt=time["dt"],
+        
+        FORMALISM=meta["FORMALISM"],
+        FACT=meta["FACT"],
+        FACTMODE=meta["FACTMODE"]
     )
 
     sw_nucleo(
-        params['landscape'],
-        params['s'], params['l'], params['bpmin'],
+        params['landscape'], params['s'], params['l'], params['bpmin'],
         params['mu'], params['theta'],
         params['lmbda'], params['alphaf'], params['alphao'], params['beta'],
         params['rtot_capt'], params['rtot_rest'],
         params['alphar'], params['kB'], params['kU'],
-        params['formalism'], params['parameter'],
-        params['nt'], params['path'],
+        
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
-        time["tmax"], time["dt"]
+        
+        time["tmax"], time["dt"],
+        
+        meta['FORMALISM'], meta['FACT'], meta['FACTMODE'],
+        meta['nt'], meta['path'],
+
+        params['parameter'],
     )

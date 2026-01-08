@@ -95,7 +95,7 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
         'mu', 'theta', 'lmbda', 'alphaf', 'alphao', 'beta',
         'kB', 'kU', 'alphar',
         'rtot_capt', 'rtot_rest',
-        'formalism', 'parameter'
+        'parameter'
     ]
     
     # All combinations
@@ -104,20 +104,20 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
         probas['mu'], probas['theta'], probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
         rates['kB'], rates['kU'], probas['alphar'], 
         rates['rtot_capt'], rates['rtot_rest'],
-        work['formalism'], work['parameter']
+        work['parameter']
     )
         
     return [
-        dict(zip(keys, vals)) | {"nt": meta['nt'], "path": meta['path']}
+        dict(zip(keys, vals)) | {"FORMALISM": meta['FORMALISM'], "FACT": meta['FACT'], "FACTMODE": meta['FACTMODE'], "nt": meta['nt'], "path": meta['path']}
         for vals in values
     ]
 
 
-def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: int, use_tqdm: bool = False) -> None:
+def run_parallel(params: list[dict], chromatin: dict, time: dict, meta:dict, num_workers: int, use_tqdm: bool = False) -> None:
     """
     Runs processes in parallel with optional progress bar.
     """
-    process = partial(process_run, chromatin=chromatin, time=time)
+    process = partial(process_run, chromatin=chromatin, time=time, meta=meta)
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(process, p) for p in params]
@@ -131,7 +131,6 @@ def run_parallel(params: list[dict], chromatin: dict, time: dict, num_workers: i
 
 
 def execute_in_parallel(config: str,
-                        formalism: str,
                         execution_mode: str | None = None,
                         slurm_params: dict | None = None) -> None:
     """
@@ -148,10 +147,11 @@ def execute_in_parallel(config: str,
     num_tasks     = int(slurm_params.get("num_tasks", env_num_tasks))
     num_cores     = int(slurm_params.get("num_cores_used", _choose_num_workers()))
 
-    cfg         = choose_configuration(config, formalism)
+    cfg         = choose_configuration(config)
     project     = cfg['project']
     chromatin   = cfg['chromatin']
     time        = cfg['time']
+    meta        = cfg['meta']
 
     all_params  = generate_param_combinations(cfg)
 
@@ -184,10 +184,10 @@ def execute_in_parallel(config: str,
         pr = cProfile.Profile()
         pr.enable()
         try:
-            run_parallel(this_params, chromatin, time, num_workers=num_workers, use_tqdm=use_tqdm)
+            run_parallel(this_params, chromatin, time, meta, num_workers=num_workers, use_tqdm=use_tqdm)
         finally:
             pr.disable()
             pr.dump_stats(str(profile_path))
             pstats.Stats(pr).sort_stats("cumtime").print_stats(30)
     else:
-        run_parallel(this_params, chromatin, time, num_workers=num_workers, use_tqdm=use_tqdm)
+        run_parallel(this_params, chromatin, time, meta, num_workers=num_workers, use_tqdm=use_tqdm)

@@ -17,7 +17,7 @@ import numpy as np
 # ─────────────────────────────────────────────
 
 
-def choose_configuration(config: str, formalism: str) -> dict:
+def choose_configuration(config: str) -> dict:
     """
     Returns a dictionary of study parameters organized in logical blocks.
     All list-like parameters are converted to np.array.
@@ -29,7 +29,7 @@ def choose_configuration(config: str, formalism: str) -> dict:
     
     PROJECT = {
         "project_name": "nucleo"
-        # formalism :
+        # FORMALISM :
     }
 
     CHROMATIN = {
@@ -60,7 +60,6 @@ def choose_configuration(config: str, formalism: str) -> dict:
     }
     
     WORK = {
-        "formalism": {formalism},
         "parameter": np.array([0], dtype=float)
         # "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }
@@ -96,6 +95,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__nu"
             }
@@ -124,6 +126,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__bp"
             }
@@ -152,6 +157,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__lslow"
             }
@@ -180,6 +188,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__lshigh"
             }
@@ -217,6 +228,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "3",
+                "FACT": True,
+                "FACTMODE": "PASSIVE",
                 "nt": 100,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
@@ -246,6 +260,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "3",
+                "FACT": True,
+                "FACTMODE": "PASSIVE",
                 "nt": 100,
                 "path": f"{PROJECT["project_name"]}__longtest"
             }
@@ -271,10 +288,13 @@ def choose_configuration(config: str, formalism: str) -> dict:
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
                 "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB" : np.arange(0.10, 1.10, 0.10, dtype=float),
-                "kU" : np.arange(0.10, 1.10, 0.10, dtype=float)
+                "kB" : np.arange(0.10, 1.10, 0.20, dtype=float),
+                "kU" : np.arange(0.10, 1.10, 0.20, dtype=float)
             },
             "meta": {
+                "FORMALISM": "3",
+                "FACT": True,
+                "FACTMODE": "PASSIVE",
                 "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__perftest"
             }
@@ -305,6 +325,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__map"
             }
@@ -333,6 +356,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([0], dtype=float)
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__access"
             }
@@ -365,6 +391,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__accessrandom"
             }
@@ -398,6 +427,9 @@ def choose_configuration(config: str, formalism: str) -> dict:
 
             },
             "meta": {
+                "FORMALISM": "1",
+                "FACT": False,
+                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__accessperiodic"
             }

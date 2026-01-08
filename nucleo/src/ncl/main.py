@@ -22,7 +22,7 @@ def main():
     print('\n# --- Launched --- #\n')
     start_time = time.time()
     try:
-        execute_in_parallel(CONFIG, FORMALISM)
+        execute_in_parallel(CONFIG)
     except Exception as e:
         print(f"[ERROR] Process failed: {e}")
     elapsed = time.time() - start_time
@@ -37,10 +37,10 @@ def main():
 # EXE_MODE = "PC"
 
 # Options: /// NU / BP / LSLOW / LSHIGH /// SHORTTEST / LONGTEST / PERFTEST /// ACCESS / ACCESSRANDOM / ACCESSPERIODIC / MAP ///
-CONFIG = "PERFTEST"
+CONFIG = "SHORTTEST"
 
-# Options: /// "1" : One-step / "2" : Two-steps / "3" : Two-steps + FACT ///
-FORMALISM   = "3"
+# # Options: /// "1" : One-step / "2" : Two-steps / "3" : Two-steps + FACT ///
+# FORMALISM   = "3"
 
 # ─────────────────────────────────────────────
 # 4 : Entry point
