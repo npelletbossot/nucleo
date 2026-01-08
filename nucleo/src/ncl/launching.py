@@ -87,24 +87,22 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     probas      = cfg['probas']
     rates       = cfg['rates']
     meta        = cfg['meta']
-    work        = cfg['work']
 
     # The keys must be in arrays
     keys = [
         'landscape', 's', 'l', 'bpmin',
-        'mu', 'theta', 'lmbda', 'alphaf', 'alphao', 'beta',
+        'mu', 'theta', 'lmbda', 'alphaf', 'alphao', 'beta', 'alphad',
         'kB', 'kU', 'alphar',
-        'rtot_capt', 'rtot_rest',
-        'parameter'
+        'rtot_capt', 'rtot_rest'
     ]
     
     # All combinations
     values = product(
         geometry['landscape'], geometry['s'], geometry['l'], geometry['bpmin'],
-        probas['mu'], probas['theta'], probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'],
+        probas['mu'], probas['theta'], 
+        probas['lmbda'], probas['alphaf'], probas['alphao'], probas['beta'], probas['alphad'],
         rates['kB'], rates['kU'], probas['alphar'], 
-        rates['rtot_capt'], rates['rtot_rest'],
-        work['parameter']
+        rates['rtot_capt'], rates['rtot_rest']
     )
         
     return [

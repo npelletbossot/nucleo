@@ -36,7 +36,7 @@ from tls.writing import inspect_data_types, writing_parquet
 
 def checking_inputs(
     landscape, s, l, bpmin, 
-    mu, theta, lmbda, alphaf, alphao, beta,
+    mu, theta, lmbda, alphaf, alphao, beta, alphad,
     alphar, kB, kU,
     nt,
     Lmin, Lmax, bps, origin,
@@ -127,8 +127,8 @@ def checking_inputs(
             raise ValueError(f"Invalid value for mu: must be an int >= 0. Got {mu}.")
         if not isinstance(theta, np.integer) or theta < 0:
             raise ValueError(f"Invalid value for theta: must be an int >= 0. Got {theta}.")
-        for name, value in zip(["lmbda", "alphaf", "alphao", "beta", "alphar"], 
-                            [lmbda, alphaf, alphao, beta, alphar]):
+        for name, value in zip(["lmbda", "alphaf", "alphao", "beta", "alphad", "alphar"], 
+                            [lmbda, alphaf, alphao, beta, alphad, alphar]):
             if not ((0 <= value).all() and (value <= 1).all()):
                 raise ValueError(
                     f"{name} must be between 0 and 1. "
@@ -175,14 +175,13 @@ def checking_inputs(
 def sw_nucleo(
     landscape: str, s: int, l: int, bpmin: int,
     mu: float, theta: float, 
-    lmbda: float, alphaf: float, alphao: float, beta: float,
+    lmbda: float, alphaf: float, alphao: float, beta: float, alphad: float,
     rtot_capt: float, rtot_rest: float,
     alphar: float, kB: float, kU: float,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
     FORMALISM: str, FACT: str, FACTMODE:str,
-    nt: int, path: str,
-    parameter: float
+    nt: int, path: str
     ) -> None:
     """
     Simulates condensin dynamics along chromatin with specified parameters.
@@ -222,12 +221,12 @@ def sw_nucleo(
 
     # Title & Folder    
     title = (
-            f"FORMALISM={FORMALISM}__FACTMODE{FACTMODE}"
+            f"FORMALISM={FORMALISM}__FACTMODE={FACTMODE}__"
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
-            f"lmbda={lmbda:.2e}__rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
+            f"lmbda={lmbda:.2e}__alphad={alphad:.2e}__"
+            f"rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
             f"alphar={alphar:.2e}__kB={kB:.2e}__kU={kU:.2e}__"
-            f"parameter={parameter:.2e}__"
             f"nt={nt}__"
     )
     
@@ -266,7 +265,7 @@ def sw_nucleo(
             first_point = Lmin
             last_point = Lmax
             for i in range(len(alpha_matrix)):
-                alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], parameter, alphaf, alphao, first_point, last_point)
+                alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], alphad, alphaf, alphao, first_point, last_point)
 
         # Chromatin Analysis : Obstacles Linkers Distribution
         s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = calculate_obs_and_linker_distribution(
@@ -438,14 +437,12 @@ def sw_nucleo(
         #     'alphao'         : alphao,
         #     'beta'           : beta,
         #     'lmbda'          : lmbda,
+        #     'alphad'         : alphad,   
         #     'rtot_capt'      : rtot_capt,
         #     'rtot_rest'      : rtot_rest,
         #     'alphar'         : alphar,
         #     'kB'             : kB,
         #     'kU'             : kU,
-
-        #     # --- Working Parameter --- #
-        #     'parameter'      : parameter, 
 
         #     # --- Chromatin Parameters --- #
         #     'Lmin'           : Lmin,
@@ -531,9 +528,6 @@ def sw_nucleo(
         #     'G'              : G,
         #     'bound_low'      : bound_low,
         #     'bound_high'     : bound_high,
-            
-        #     # --- Work --- #
-        #     'parameter'      : parameter,
 
         #     }
         
@@ -623,6 +617,7 @@ def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
         alphaf=params['alphaf'],
         alphao=params['alphao'],
         beta=params['beta'],
+        alphad=params['alphad'],
         alphar=params['alphar'],
         kB=params['kB'],
         kU=params['kU'],
@@ -644,7 +639,7 @@ def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
     sw_nucleo(
         params['landscape'], params['s'], params['l'], params['bpmin'],
         params['mu'], params['theta'],
-        params['lmbda'], params['alphaf'], params['alphao'], params['beta'],
+        params['lmbda'], params['alphaf'], params['alphao'], params['beta'], params['alphad'],
         params['rtot_capt'], params['rtot_rest'],
         params['alphar'], params['kB'], params['kU'],
         
@@ -654,6 +649,4 @@ def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
         
         meta['FORMALISM'], meta['FACT'], meta['FACTMODE'],
         meta['nt'], meta['path'],
-
-        params['parameter'],
     )

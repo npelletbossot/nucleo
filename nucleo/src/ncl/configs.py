@@ -49,6 +49,7 @@ def choose_configuration(config: str) -> dict:
         "alphaf": 1.00,     # Probability of binding if linker
         "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to unbind
+        "alphad": 0.00,     # Probability of nucleosome to drop out
         "alphar": 0.90      # Probability of binding while FACT is there
     }
 
@@ -57,11 +58,6 @@ def choose_configuration(config: str) -> dict:
         "rtot_rest": 1/2,   # Rate of resting (1/6)
         "kB" : 0.50,        # Rate of FACT Binding
         "kU": 0.50,         # Rate of FACT Unbinding
-    }
-    
-    WORK = {
-        "parameter": np.array([0], dtype=float)
-        # "parameter": np.arange(0, 1+0.10, 0.10, dtype=float)
     }
 
     # ──────────────────────────────────
@@ -86,7 +82,8 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
+                "alphar": np.array([PROBAS["alphar"]], dtype=float),
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
@@ -117,6 +114,7 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
@@ -148,6 +146,7 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
@@ -179,6 +178,7 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
@@ -216,8 +216,7 @@ def choose_configuration(config: str) -> dict:
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
-                # "alphar": np.array([PROBAS["beta"]], dtype=float),
-                # "alphar": np.arange(0, 1.10, 0.10, dtype=float) 
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar" : np.linspace(0, 1.0, 11, dtype=float)
 
             },
@@ -251,6 +250,7 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
@@ -283,6 +283,7 @@ def choose_configuration(config: str) -> dict:
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar" : np.arange(0, 1.05, 0.050, dtype=float)
             },
             "rates": {
@@ -316,6 +317,7 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
@@ -347,6 +349,7 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([0], dtype=float)
             },
             "rates": {
@@ -382,6 +385,7 @@ def choose_configuration(config: str) -> dict:
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
@@ -417,6 +421,7 @@ def choose_configuration(config: str) -> dict:
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.array([PROBAS["alphar"]], dtype=float)
             },
             "rates": {
@@ -444,6 +449,5 @@ def choose_configuration(config: str) -> dict:
         **presets[config],
         "project": PROJECT,
         "chromatin": CHROMATIN,
-        "time": TIME,
-        "work": WORK,
+        "time": TIME
     }
