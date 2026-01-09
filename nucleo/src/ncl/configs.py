@@ -296,7 +296,7 @@ def choose_configuration(config: str) -> dict:
                 "FORMALISM": "3",
                 "FACT": True,
                 "FACTMODE": "PASSIVE",
-                "nt": 1_000,
+                "nt": 2_000,
                 "path": f"{PROJECT["project_name"]}__perftest"
             }
         },
