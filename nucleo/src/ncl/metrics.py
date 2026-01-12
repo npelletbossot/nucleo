@@ -542,7 +542,45 @@ def calculate_instantaneous_statistics(
 # 2.3 : Forward and Reverse steps
 
 
-def find_jumps(x_matrix: np.ndarray, t_matrix) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def identify_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    
+    # Getting all the times (non cumulated) from the t_matrix
+    t_array = np.diff(t_matrix, axis=1)
+    t_array = t_array.reshape(t_array.shape[0], -1, 2).sum(axis=2) # sum per couple (real + seal)
+    
+    # Getting all the positions per couple frome the x_matrix
+    x_array = x_matrix[0:, 1::2]
+
+    # Initilializaition and filtering where x[i][j] == x[i][j+1]
+    frwd_mask = np.zeros_like(x_matrix, dtype=bool)
+    equal_next = (x_matrix[:, :-1] == x_matrix[:, 1:])
+
+    # Transmit the True from capt to corresponding rest_time
+    frwd_mask[:, :-1] |= equal_next
+    frwd_mask[:,  1:] |= equal_next
+    frwd_mask = np.copy(frwd_mask[:, 1:])
+    frwd_mask = frwd_mask[:, 1::2]
+    rvrs_mask = ~ frwd_mask
+    
+    # Forward + Reverse : select the events
+    t_forward = frwd_mask * t_array
+    t_reverse = rvrs_mask * t_array    
+    x_forward = frwd_mask * x_array  
+    x_reverse = rvrs_mask * x_array
+    
+    # Filtering the zeros
+    t_forward = t_forward[t_forward != 0]
+    x_forward = x_forward[x_forward != 0]
+    t_reverse = t_reverse[t_reverse != 0]
+    x_reverse = x_reverse[x_reverse != 0]
+    
+    return (
+        x_forward, t_forward,
+        x_reverse, t_reverse
+    )
+
+
+def find_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Identifies forward and reverse jump times from position and time matrices.
 

@@ -37,7 +37,7 @@ def main():
 # EXE_MODE = "PC"
 
 # Options: /// NU / BP / LSLOW / LSHIGH /// SHORTTEST / LONGTEST / PERFTEST /// ACCESS / ACCESSRANDOM / ACCESSPERIODIC / MAP ///
-CONFIG = "PERFTEST"
+CONFIG = "SHORTTEST"
 
 # # Options: /// "1" : One-step / "2" : Two-steps / "3" : Two-steps + FACT ///
 # FORMALISM   = "3"
