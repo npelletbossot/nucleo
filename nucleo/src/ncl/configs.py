@@ -389,7 +389,7 @@ def choose_configuration(config: str) -> dict:
             "geometry": {
                 "landscape": np.array(['random', 'periodic']),
                 "s": np.array([35], dtype=int),
-                "l": np.array([10, 35, 100], dtype=int),
+                "l": np.arange(0, 101, 10, dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
