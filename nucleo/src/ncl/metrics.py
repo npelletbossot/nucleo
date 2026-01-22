@@ -25,7 +25,11 @@ from ncl.landscape import find_blocks
 # 2.1 : Landscape
 
 
-def calculate_linker_landscape(data, landscape ,nt, alphaf, Lmin, Lmax, view_size=10_000, threshold=10_000):
+def calculate_linker_landscape(
+    alpha_matrix: np.ndarray, 
+    landscape:str, alphaf: float, Lmin: int, Lmax: int,
+    nt: int,
+    view_size=10_000, threshold=10_000):
     """
     Calculate the average landscape around linker regions for multiple trajectories.
 
@@ -79,16 +83,14 @@ def calculate_linker_landscape(data, landscape ,nt, alphaf, Lmin, Lmax, view_siz
 
     # Conditions on inputs
     if landscape == "homogeneous":
-        view_mean = np.array(data[0][threshold:threshold+view_size], dtype=float)
+        view_mean = np.array(alpha_matrix[0][threshold:threshold+view_size], dtype=float)
         return view_mean
     if threshold > Lmax // 2:
         raise ValueError("You set the threshold too big !")
     if view_size > 10_000:
         raise ValueError("You set the view_size superior to 10_000!")
-    if len(data) == 1:
-        raise ValueError("You set data as an array and not as a matrix")
-    if len(data) != nt:
-        raise ValueError("You set nt not equal to len(data)")
+    if len(alpha_matrix) != nt:
+        raise ValueError("You set nt not equal to len(alpha_matrix)")
 
     # Calculation
     view_datas = np.empty((nt, view_size), dtype=float)                         # Futur return
@@ -97,7 +99,7 @@ def calculate_linker_landscape(data, landscape ,nt, alphaf, Lmin, Lmax, view_siz
     for _ in range(0,nt):
 
         # Extracting values
-        alpha_array = data[_]                                                   # Array data for one trajectory
+        alpha_array = alpha_matrix[_]                                           # Array data for one trajectory
         pairs_of_linkers = find_blocks(array=alpha_array, alpha_value=alphaf)   # All pairs of linker zones
         pairs_of_linkers = np.array(pairs_of_linkers, dtype=int)                # Conversion in array to get only the first values
         column_of_linkers = pairs_of_linkers[:, 0]                              # Extracting only the first values of couples : first point
@@ -425,7 +427,6 @@ def calculate_fpt_matrix(t_matrix: np.ndarray, x_matrix: np.ndarray, tmax: int, 
 def calculate_instantaneous_statistics(
     t_matrix: np.ndarray, 
     x_matrix: np.ndarray, 
-    nt: int, 
     first_bin: float = 0,
     last_bin: float = 1e5,
     bin_width: float = 1.0,
@@ -463,16 +464,19 @@ def calculate_instantaneous_statistics(
             - v_med (float): Median of the instantaneous speeds.
             - v_mp (float): Most probable instantaneous speed.
     """
+    
+    # Loop through each trajectory
+    n_traj = x_matrix.shape[0]
 
     # Initialize arrays for displacements, time intervals, and speeds
-    dx_array = np.array([None] * nt, dtype=object)
-    dt_array = np.array([None] * nt, dtype=object)
-    vi_array = np.array([None] * nt, dtype=object)
+    dx_array = np.array([None] * n_traj, dtype=object)
+    dt_array = np.array([None] * n_traj, dtype=object)
+    vi_array = np.array([None] * n_traj, dtype=object)
 
-    # Loop through each trajectory
-    for i in range(nt):
+    for i in range(n_traj):
         x = np.array(x_matrix[i])
         t = np.array(t_matrix[i])
+
 
         # Skip NaN-only lines
         if np.all(np.isnan(x)) or np.all(np.isnan(t)):
@@ -542,7 +546,7 @@ def calculate_instantaneous_statistics(
 # 2.3 : Forward and Reverse steps
 
 
-def identify_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def identify_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray, nt: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     
     # Getting all the times (non cumulated) from the t_matrix
     t_array = np.diff(t_matrix, axis=1)
@@ -573,6 +577,10 @@ def identify_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray) -> tuple[np.ndarr
     x_forward = x_forward[x_forward != 0]
     t_reverse = t_reverse[t_reverse != 0]
     x_reverse = x_reverse[x_reverse != 0]
+    
+    # Getting cumulatives times in order to stay in the proper formalism
+    t_forward = np.cumsum(t_forward)
+    t_reverse = np.cumsum(t_reverse)
     
     return (
         x_forward, t_forward,

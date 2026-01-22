@@ -17,6 +17,43 @@ import numpy as np
 # ─────────────────────────────────────────────
 
 
+def define_algorithm(study: str) -> dict:
+    """
+    Returns formalism parameters associated with the chosen algorithm.
+    """
+
+    if study == "1":
+        return {
+            "algorithm": "1",
+            "fact": False,
+            "factmode": None
+        }
+
+    elif study == "2":
+        return {
+            "algorithm": "2",
+            "fact": False,
+            "factmode": None
+        }
+
+    elif study == "3":
+        return {
+            "algorithm": "2",
+            "fact": True,
+            "factmode": "passive"
+        }
+        
+    elif study == "4":
+        return {
+            "algorithm": "2",
+            "fact": True,
+            "factmode": "active"
+        }
+
+    else:
+        raise ValueError(f"Unknown algorithm '{study}'")
+
+
 def choose_configuration(config: str) -> dict:
     """
     Returns a dictionary of study parameters organized in logical blocks.
@@ -29,7 +66,6 @@ def choose_configuration(config: str) -> dict:
     
     PROJECT = {
         "project_name": "nucleo"
-        # FORMALISM :
     }
 
     CHROMATIN = {
@@ -45,7 +81,7 @@ def choose_configuration(config: str) -> dict:
     }
 
     PROBAS = {
-        "lmbda": 0.00,      # Probability of in vitro condensin to reverse and not beeing accepted
+        "lmbda": 0.40,      # Probability of in vitro condensin to reverse and not beeing accepted
         "alphaf": 1.00,     # Probability of binding if linker
         "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to unbind
@@ -66,9 +102,14 @@ def choose_configuration(config: str) -> dict:
 
     presets = {
 
-        # STATIC
+        # ---- STATIC ---- #
         
         "NU": {
+            "formalism": {
+                **define_algorithm("1"),
+                "destroy": False
+            }
+            ,
             "geometry": {
                 "landscape": np.array(['random', 'periodic', 'homogeneous']),
                 "s": np.array([150], dtype=int),
@@ -92,15 +133,16 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__nu"
             }
         },
 
         "BP": {
+            "formalism": {
+                **define_algorithm("1"),
+                "destroy": False
+            },
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
@@ -124,15 +166,16 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__bp"
             }
         },
 
         "LSLOW": {
+            "formalism": {
+                **define_algorithm("1"),
+                "destroy": False
+            },
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
@@ -156,15 +199,16 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__lslow"
             }
         },
 
         "LSHIGH": {
+            "formalism": {
+                **define_algorithm("1"),
+                "destroy": False
+            },
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
@@ -188,17 +232,19 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__lshigh"
             }
         },
 
-        # TESTS
+        # ---- TESTS ---- #
 
         "SHORTTEST": {
+            "formalism": {
+                **define_algorithm("3"),
+                "destroy": False
+            }
+            ,
             "geometry": {
                 # "landscape": np.array(['homogeneous']),
                 # "landscape": np.array(['random', 'homogeneous']),
@@ -227,16 +273,16 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "3",
-                "FACT": True,
-                "FACTMODE": "PASSIVE",
-                "nt": 100,
+                "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },
         
-        
         "LONGTEST": {
+            "formalism": {
+                **define_algorithm("3"),
+                "destroy": False
+            },
             "geometry": {
                 "landscape": np.array(['random', 'periodic']),
                 "s": np.array([150], dtype=int),
@@ -260,16 +306,16 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "3",
-                "FACT": True,
-                "FACTMODE": "PASSIVE",
                 "nt": 100,
                 "path": f"{PROJECT["project_name"]}__longtest"
             }
         },
         
-        
         "PERFTEST": {
+            "formalism": {
+                **define_algorithm("3"),
+                "destroy": False
+            },
             "geometry": {
                 "landscape": np.array(['homogeneous', 'periodic', 'random']),
                 "s": np.array([35], dtype=int),
@@ -283,8 +329,8 @@ def choose_configuration(config: str) -> dict:
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar" : np.arange(0, 1.05, 0.050, dtype=float)
+                "alphad": np.arange(0, 1.05, 0.050, dtype=float),
+                "alphar": np.arange(0, 1.05, 0.050, dtype=float)
             },
             "rates": {
                 "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
@@ -293,49 +339,92 @@ def choose_configuration(config: str) -> dict:
                 "kU" : np.arange(0.10, 1.10, 0.20, dtype=float)
             },
             "meta": {
-                "FORMALISM": "3",
-                "FACT": True,
-                "FACTMODE": "PASSIVE",
                 "nt": 2_000,
                 "path": f"{PROJECT["project_name"]}__perftest"
             }
         },
 
-        # ACCESSIBILITY
-
         "MAP": {
+            "formalism": {
+                **define_algorithm("3"),
+                "destroy": False
+            },
             "geometry": {
-                "landscape": np.array(['homogeneous']),
-                "s": np.array([0], dtype=int),
-                "l": np.array([150], dtype=int),
+                "landscape": np.array(['homogeneous', 'random', 'periodic']),
+                "s": np.array([35], dtype=int),
+                "l": np.array([10, 35, 100], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
-                "mu": np.array([300]),
-                "theta": np.array([50]),
-                "lmbda": np.arange(0.10, 0.90, 0.20),
+                "mu": np.array([180]),
+                "theta": np.array([90]),
+                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
                 "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
+                "alphar": np.arange(0, 1.05, 0.10, dtype=float)
             },
             "rates": {
-                "rtot_capt": 1 / np.linspace(0.10, 20, 100),
-                "rtot_rest": 1 / np.linspace(0.10, 20, 100),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB" : np.arange(0.10, 1.10, 0.20, dtype=float),
+                "kU" : np.arange(0.10, 1.10, 0.20, dtype=float)
+                # "rtot_capt": 1 / np.linspace(0.10, 20, 100),
+                # "rtot_rest": 1 / np.linspace(0.10, 20, 100),
+                # "kB": np.array([RATES["kB"]], dtype=float),
+                # "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__map"
             }
         },
         
+            "PICTURE": {
+            "formalism": {
+                **define_algorithm("3"),
+                "destroy": False
+            },
+            "geometry": {
+                "landscape": np.array(['random', 'periodic']),
+                "s": np.array([35], dtype=int),
+                "l": np.array([10, 35, 100], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                "mu": np.array([180]),
+                "theta": np.array([90]),
+                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
+                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+                "alphao": np.array([PROBAS["alphao"]], dtype=float),
+                "beta": np.array([PROBAS["beta"]], dtype=float),
+                "alphad": np.array([0.00], dtype=float),
+                "alphar":np.array([0.00], dtype=float)
+            },
+            "rates": {
+                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+                "kB" : np.array([0.10], dtype=float),
+                "kU" : np.array([0.10], dtype=float)
+                # "rtot_capt": 1 / np.linspace(0.10, 20, 100),
+                # "rtot_rest": 1 / np.linspace(0.10, 20, 100),
+                # "kB": np.array([RATES["kB"]], dtype=float),
+                # "kU": np.array([RATES["kU"]], dtype=float)
+            },
+            "meta": {
+                "nt": 10_000,
+                "path": f"{PROJECT["project_name"]}__pic"
+            }
+        },
+        
+        # ---- ACCESSIBILITY ---- #
+    
         "ACCESS": {
+            "formalism": {
+                **define_algorithm("1"),
+                "destroy": True
+            },
             "geometry": {
                 "landscape": np.array(["random"]),
                 "s": np.array([150], dtype=int),
@@ -359,15 +448,16 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([0], dtype=float)
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__access"
             }
         },
         
         "ACCESSRANDOM": {
+            "formalism": {
+                **define_algorithm("1"),
+                "destroy": True
+            },
             "geometry": {
                 "landscape": np.array(["random"]),
                 "s": np.array([35], dtype=int),
@@ -395,15 +485,16 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__accessrandom"
             }
         },
         
         "ACCESSPERIODIC": {
+            "formalism": {
+                **define_algorithm("1"),
+                "destroy": True
+            },
             "geometry": {
                 "landscape": np.array(["periodic"]),
                 "s": np.array([35], dtype=int),
@@ -432,9 +523,6 @@ def choose_configuration(config: str) -> dict:
 
             },
             "meta": {
-                "FORMALISM": "1",
-                "FACT": False,
-                "FACTMODE": None,
                 "nt": 10_000,
                 "path": f"{PROJECT["project_name"]}__accessperiodic"
             }

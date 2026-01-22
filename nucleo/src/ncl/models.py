@@ -342,9 +342,9 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
 def remodelling_obstacle(
     s: int, alpha_array: np.ndarray, x: int,
     pos_obs: np.ndarray, start_obs: np.ndarray, end_obs: np.ndarray,
-    alphar: float, PF: float, r_FACT: float
+    alphar: float, PF: float, r_fact: float
 ):
-    if r_FACT < PF:
+    if r_fact < PF:
         mask = (start_obs <= x) & (x <= end_obs)
         hit_obs = mask.any()
         if hit_obs:
@@ -359,23 +359,23 @@ def remodelling_obstacle(
 
 
 def remodelling(
-    FACT_MODE: str, 
+    factmode: str, 
     s: int, alpha_array: np.ndarray, x: int,    
     pos_obs: np.ndarray, start_obs: np.ndarray, end_obs: np.ndarray,
-    K: float, Kz: float, Kp: float, kBp: float, kU: float, t_REST: float,
-    alphar: float, r_FACT: float
+    K: float, Kz: float, Kp: float, kBp: float, kU: float, t_rest: float,
+    alphar: float, r_fact: float
 ):
     
-    if FACT_MODE not in [False, "PASSIVE", "ACTIVE"]:
-        raise ValueError(f"You set FACT_MODE={FACT_MODE} for remodelling which is not a valid MODE")
+    if factmode not in [False, "passive", "active"]:
+        raise ValueError(f"You set factmode={factmode} for remodelling which is not a valid mode")
     
-    elif FACT_MODE == "PASSIVE":
+    elif factmode == "passive":
         PF = K
 
-    elif FACT_MODE == "ACTIVE":
-        PF = Kz * np.exp(-(kBp + kU) * t_REST) + Kp * (1 - np.exp(-(kBp + kU) * t_REST))
+    elif factmode == "active":
+        PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))
         
-    alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_FACT)
+    alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
         
     return np.array(alpha_array)
 
@@ -501,8 +501,8 @@ def gillespie_algorithm_two_steps(
     alphao: float,
     beta: float,
     lmbda: float,
-    rtot_CAPT: float,
-    rtot_REST: float,
+    rtot_capt: float,
+    rtot_rest: float,
     alphar: float,
     kB: float,
     kU: float,
@@ -512,8 +512,8 @@ def gillespie_algorithm_two_steps(
     L: np.ndarray,
     origin: int,
     bps: int,
-    FACT: bool,
-    FACT_MODE: str
+    fact: bool,
+    fact_mode: str
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Simulate multiple loop-extrusion trajectories using a two-step Gillespie-like algorithm.
@@ -636,7 +636,7 @@ def gillespie_algorithm_two_steps(
     x_matrix = np.empty(nt, dtype=object)
     
     # --- FACT Conditions for Homogeneous Landscapes --- #
-    if FACT and np.all(alpha_matrix == alpha_matrix[0, 0]):
+    if fact and np.all(alpha_matrix == alpha_matrix[0, 0]):
         # alpha_matrix *= F
         homogeneous = True
     else :
@@ -653,7 +653,7 @@ def gillespie_algorithm_two_steps(
             end_obs     = pos_obs[:, 1]
 
         # Initialization of starting values
-        t, t_CAPT, t_REST = 0, 0, 0         # First times
+        t, t_capt, t_rest = 0, 0, 0         # First times
         x = folding(alpha_array, origin)    # Initial calculation
         px, ox  = np.copy(x), np.copy(x)    # Previous_x and Origin_x
         i0, i   = 0, 0                      # Ranks of filling results
@@ -667,22 +667,22 @@ def gillespie_algorithm_two_steps(
         while (t<tmax) :
 
             # --- Unbinding : Stochasticity --- #
-            r0_UNBIND = np.random.rand()
-            if r0_UNBIND < (beta_matrix[n][x]):
+            r0_unbind = np.random.rand()
+            if r0_unbind < (beta_matrix[n][x]):
                 i = int(np.floor(t/dt))
                 j = int(min(np.floor(tmax/dt),i)+1)
                 results[n][i0:j] = int(px - ox)
                 break
 
             # --- Jumping : Destination --- #
-            x_JUMP  = np.random.choice(L, p=p)
-            x       += x_JUMP
-            r0_CAPT = np.random.rand()
-            r_CAPT  = alpha_array[x]
+            x_jump  = np.random.choice(L, p=p)
+            x       += x_jump
+            r0_capt = np.random.rand()
+            r_capt  = alpha_array[x]
             
             # --- Jumping : Times --- #
-            t_CAPT = - np.log(np.random.rand()) / rtot_CAPT
-            t_REST = - np.log(np.random.rand()) / rtot_REST
+            t_capt = - np.log(np.random.rand()) / rtot_capt
+            t_rest = - np.log(np.random.rand()) / rtot_rest
 
             # --- Jumping : Edge Conditions --- #
             if x >= (np.max(L) - origin) :
@@ -692,15 +692,15 @@ def gillespie_algorithm_two_steps(
                 break
             
             # --- FACT : Remodelling --- #
-            if not homogeneous and FACT and np.isclose(r_CAPT, alphao):
-                r_FACT = np.random.rand()
+            if not homogeneous and fact and np.isclose(r_capt, alphao):
+                r_fact = np.random.rand()
                 alpha_array = remodelling(
-                    FACT_MODE, s, alpha_array, x, 
+                    fact_mode, s, alpha_array, x, 
                     pos_obs, start_obs, end_obs, 
                     K, Kz, Kp, kBp, kU,
-                    t_REST, alphar, r_FACT
+                    t_rest, alphar, r_fact
                 )
-                r_CAPT  = alpha_array[x]
+                r_capt  = alpha_array[x]
                 
                 # if FACT_MODE == "PASSIVE":
                 #     PF = K
@@ -739,9 +739,9 @@ def gillespie_algorithm_two_steps(
                     #             alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
 
             # --- Capturing : Time Condition --- #
-            if np.isinf(t_CAPT) == True:
+            if np.isinf(t_capt) == True:
                 t = 1e308
-            t += t_CAPT
+            t += t_capt
 
             # --- Capturing : First Acquisition --- #
             t_list.append(t)
@@ -752,9 +752,9 @@ def gillespie_algorithm_two_steps(
             i0 = np.copy(i) + 1
             
             # --- Resting : Time Condition --- #
-            if np.isinf(t_REST) == True:
-                t_REST = 1e308
-            t += t_REST
+            if np.isinf(t_rest) == True:
+                t_rest = 1e308
+            t += t_rest
             
             # --- Resting : Second Acquisition 2.1 --- #
             i = int(np.floor(t/dt)) 
@@ -763,7 +763,7 @@ def gillespie_algorithm_two_steps(
             i0 = np.copy(i) + 1
                   
             # --- Capturing : Stochasticity --- #
-            if r0_CAPT < r_CAPT * (1-lmbda):
+            if r0_capt < r_capt * (1-lmbda):
                 LE = True
             else : 
                 LE = False

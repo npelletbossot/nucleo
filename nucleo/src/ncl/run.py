@@ -38,10 +38,10 @@ def checking_inputs(
     landscape, s, l, bpmin, 
     mu, theta, lmbda, alphaf, alphao, beta, alphad,
     alphar, kB, kU,
-    nt,
+    algorithm, fact, factmode,
     Lmin, Lmax, bps, origin,
     tmax, dt,
-    FORMALISM, FACT, FACTMODE
+    nt
 ):
     """
     Validate all input parameters for the simulation before execution.
@@ -140,6 +140,10 @@ def checking_inputs(
             else:
                 if (kB + kU) == 0:
                     raise ValueError(f"Invalid value for the sum of kB and kU : must be an floar >= 0.")
+                
+        # Formalism
+        if (algorithm == "1") and ((fact != False) or (factmode != None)):
+            raise ValueError(f"Error on algorithm you set : algorithm={algorithm} - fact={fact} - factmode={factmode}")
 
         # Chromatin
         if Lmin != 0:
@@ -150,10 +154,6 @@ def checking_inputs(
             raise ValueError(f"Invalid value for bps: must be an int >= 0. Got {bps}.")
         if not (0 <= origin < Lmax):
             raise ValueError(f"origin must be within [0, Lmax). Got origin={origin}, Lmax={Lmax}.")
-        
-        # Trajectories
-        if not isinstance(nt, int) or nt < 0:
-            raise ValueError(f"Invalid value for nt: must be an int >= 0. Got {nt}.")
 
         # Times
         if not isinstance(tmax, int) or tmax < 0:
@@ -161,9 +161,9 @@ def checking_inputs(
         if dt <= 0:
             raise ValueError(f"dt must be positive. Got {dt}.")
         
-        # Formalism
-        if (FORMALISM == "1") and ((FACT != False) or (FACTMODE != None)):
-            raise ValueError(f"Error on FORMALISM you set : FORMALISM={FORMALISM} - FACT={FACT} - FACTMODE={FACTMODE}")
+        # Trajectories
+        if not isinstance(nt, int) or nt < 0:
+            raise ValueError(f"Invalid value for nt: must be an int >= 0. Got {nt}.")
         
     except Exception as e:
         print(f"The error is in the checking_inputs() function and is : {e}")
@@ -178,9 +178,9 @@ def sw_nucleo(
     lmbda: float, alphaf: float, alphao: float, beta: float, alphad: float,
     rtot_capt: float, rtot_rest: float,
     alphar: float, kB: float, kU: float,
+    algorithm: str, fact: str, factmode:str, destroy: bool,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
-    FORMALISM: str, FACT: str, FACTMODE:str,
     nt: int, path: str
     ) -> None:
     """
@@ -221,11 +221,12 @@ def sw_nucleo(
 
     # Title & Folder    
     title = (
-            f"FORMALISM={FORMALISM}__FACTMODE={FACTMODE}__"
+            f"algorithm={algorithm}__fact={fact}__factmode={factmode}__destroy={destroy}__"
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
-            f"lmbda={lmbda:.2e}__alphad={alphad:.2e}__"
-            f"rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
+            f"lmbda={lmbda:.2e}__"
+            # f"rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
+            f"alphad={alphad:.2e}__"
             f"alphar={alphar:.2e}__kB={kB:.2e}__kU={kU:.2e}__"
             f"nt={nt}__"
     )
@@ -260,7 +261,6 @@ def sw_nucleo(
         )
             
         # Chromatin Generation : Destroying Obstacles
-        destroy = False
         if destroy:
             first_point = Lmin
             last_point = Lmax
@@ -274,7 +274,7 @@ def sw_nucleo(
 
         # Chromatin Analysis : Linker Profile
         l_view = calculate_linker_landscape(
-            alpha_matrix, landscape, nt, alphaf, Lmin, Lmax
+            alpha_matrix, landscape, alphaf, Lmin, Lmax, nt
         )
         
         # Chromatin Analysis : Mean Landscape - Array / Value / Calculated
@@ -305,26 +305,26 @@ def sw_nucleo(
     try:
         
         # Gillespie One-Step
-        if FORMALISM == "1":
+        if algorithm == "1":
             results, t_matrix, x_matrix = gillespie_algorithm_one_step(
                 nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
             )
             
         # Gillespie Two-Steps
-        elif FORMALISM == "2":
+        elif algorithm == "2":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT, FACTMODE
+                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, fact, factmode
             )
             
         # Gillespie Two-Steps + FACT
-        elif FORMALISM == "3":
+        elif algorithm == "3":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, FACT, FACTMODE
+                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, fact, factmode
             )
             
         # Else
         else:
-            raise ValueError(f"Invalid algorithm choice got : {FORMALISM} instead of 1 - 2 - 3.")   
+            raise ValueError(f"Invalid algorithm choice got : {algorithm} instead of 1 - 2 - 3.")   
 
         # Clean datas
         x_matrix = listoflist_into_matrix(x_matrix)
@@ -337,19 +337,29 @@ def sw_nucleo(
         
         
     # ------------------- Work ------------------- #
+    # ------------------- Analysis 4 - Rates and Taus ------------------- #
     
-
-    try:
+    # try:
     
-        if (FORMALISM == "2") or (FORMALISM == "3"):
+    #     if (FORMALISM == "2") or (FORMALISM == "3"):
             
-            x_forward, t_forward, x_reverse, t_reverse = identify_jumps(x_matrix, t_matrix)
-            print(x_matrix)
-            # print(calculate_instantaneous_statistics(t_forward, x_forward, nt))
+            # # Dwell times
+            # dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
+            #     t_matrix, x_matrix, t_fb, t_lb, t_bw
+            # )
+            # tau_forwards, tau_reverses = calculate_dwell_times(
+            #     dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+            # )
 
+            # # Rates and Taus
+            # fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
+            # tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
+            # rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+            # v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, FORMALISM)
             
-    except Exception as e:
-        print(f"Error in Work : {e} for {title}")
+    # except Exception as e:
+    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
+
 
     # ------------------- Analysis 1 - General results ------------------- #
     
@@ -400,35 +410,23 @@ def sw_nucleo(
         dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
         dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
         vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
-            t_matrix, x_matrix, nt
+            t_matrix, x_matrix
         )
+        
+        if algorithm in ("2", "3"):
+            
+            # Nature of jumps
+            x_forward, t_forward, x_reverse, t_reverse = identify_jumps(x_matrix, t_matrix, nt)
+            
+            # Instantaneous Speeds - Forward Jumps
+            _, _, _, _, _, \
+            _, _, _, _, _, \
+            vi_frwd_points, vi_frwd_distrib, vi_frwd_mean, vi_frwd_med, vi_frwd_mp = calculate_instantaneous_statistics(
+                np.array([t_forward]), np.array([x_forward])
+            )
         
     except Exception as e:
         print(f"Error in Analysis 3 - Speeds : {e} for {title}")
-        
-    
-    # ------------------- Analysis 4 - Rates and Taus ------------------- #
-    
-    # try:
-    
-    #     if (FORMALISM == "2") or (FORMALISM == "3"):
-            
-            # # Dwell times
-            # dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
-            #     t_matrix, x_matrix, t_fb, t_lb, t_bw
-            # )
-            # tau_forwards, tau_reverses = calculate_dwell_times(
-            #     dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
-            # )
-
-            # # Rates and Taus
-            # fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
-            # tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-            # rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-            # v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, FORMALISM)
-            
-    # except Exception as e:
-    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
 
 
     # ------------------- Writing ------------------- #
@@ -548,7 +546,10 @@ def sw_nucleo(
         data_result = {
             
             # Inputs
-            'FORMALISM'      : FORMALISM,                
+            'algorithm'      : algorithm,    
+            'fact'           : fact,
+            'factmode'       : factmode,
+                        
             'landscape'      : landscape,
             's'              : s,
             'l'              : l,
@@ -561,6 +562,7 @@ def sw_nucleo(
             'lmbda'          : lmbda,
             'rtot_capt'      : rtot_capt,
             'rtot_rest'      : rtot_rest,
+            'alphad'         : alphad,
             'alphar'         : alphar,
             'kB'             : kB,
             'kU'             : kU,
@@ -574,6 +576,11 @@ def sw_nucleo(
             'dt'             : dt,
             'times'          : times,            
             'nt'             : nt,
+            
+            # Datas
+            't_matrix'       : t_matrix,
+            'x_matrix'       : x_matrix,
+            'results_mean'   : results_mean,
             
             # Outputs
             'v_mean'         : v_mean,
@@ -589,6 +596,14 @@ def sw_nucleo(
             'vi_mean'        : vi_mean,
             'vi_med'         : vi_med,
             'vi_mp'          : vi_mp,
+            
+            # Forwards
+            'vi_frwd_points' : vi_frwd_points,
+            'vi_frwd_distrib': vi_frwd_distrib,
+            'vi_frwd_mean'   : vi_frwd_mean,
+            'vi_frwd_med'    : vi_frwd_med,
+            'vi_frwd_mp'     : vi_frwd_mp,
+            
             }
 
         # Types of data registered if needed
@@ -611,7 +626,7 @@ def sw_nucleo(
 # 2.3 : One run
 
 
-def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
+def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta:dict) -> None:
     """
     Executes one simulation with the given parameters and shared constants.
     
@@ -620,7 +635,7 @@ def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
         chromatin (dict): Dict with Lmin, Lmax, bps, origin.
         time (dict): Dict with tmax, dt.
     """
-    checking_inputs(
+    checking_inputs(        
         landscape=params['landscape'],
         s=params['s'],
         l=params['l'],
@@ -637,17 +652,17 @@ def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
         kU=params['kU'],
         nt=params['nt'],
         
+        algorithm=formalism["algorithm"],
+        fact=formalism["fact"],
+        factmode=formalism["factmode"],
+        
         Lmin=chromatin["Lmin"],
         Lmax=chromatin["Lmax"],
         bps=chromatin["bps"],
         origin=chromatin["origin"],
         
         tmax=time["tmax"],
-        dt=time["dt"],
-        
-        FORMALISM=meta["FORMALISM"],
-        FACT=meta["FACT"],
-        FACTMODE=meta["FACTMODE"]
+        dt=time["dt"],  
     )
 
     sw_nucleo(
@@ -657,10 +672,11 @@ def process_run(params: dict, chromatin: dict, time: dict, meta:dict) -> None:
         params['rtot_capt'], params['rtot_rest'],
         params['alphar'], params['kB'], params['kU'],
         
+        formalism['algorithm'], formalism['fact'], formalism['factmode'], formalism['destroy'],
+
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
         
         time["tmax"], time["dt"],
         
-        meta['FORMALISM'], meta['FACT'], meta['FACTMODE'],
         meta['nt'], meta['path'],
     )
