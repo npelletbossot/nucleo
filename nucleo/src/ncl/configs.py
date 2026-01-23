@@ -329,7 +329,7 @@ def choose_configuration(config: str) -> dict:
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.arange(0, 1.05, 0.050, dtype=float),
+                "alphad": np.array([PROBAS["alphad"]], dtype=float),
                 "alphar": np.arange(0, 1.05, 0.050, dtype=float)
             },
             "rates": {
