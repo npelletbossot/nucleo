@@ -273,7 +273,7 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "nt": 10_000,
+                "nt": 2,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },
@@ -356,8 +356,8 @@ def choose_configuration(config: str) -> dict:
                 "bpmin": np.array([0], dtype=int)
             },
             "probas": {
-                "mu": np.array([180]),
-                "theta": np.array([90]),
+                "mu": np.array([160, 180]),
+                "theta": np.array([20, 90]),
                 "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
                 "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
                 "alphao": np.array([PROBAS["alphao"]], dtype=float),

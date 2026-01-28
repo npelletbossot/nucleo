@@ -34,10 +34,10 @@ def main():
 # ─────────────────────────────────────────────
 
 # Options: /// PSMN / PC / SNAKEVIZ ///
-# EXE_MODE = "PC"
+# EXE_MODE = "PSMN"
 
 # Options: /// NU / BP / LSLOW / LSHIGH /// SHORTTEST / LONGTEST / PERFTEST / MAP / PICTURE /// ACCESS / ACCESSRANDOM / ACCESSPERIODIC ///
-CONFIG = "PICTURE"
+CONFIG = "SHORTTEST"
 
 # # Options: /// "1" : One-step / "2" : Two-steps / "3" : Two-steps + FACT ///
 # FORMALISM   = "3"
@@ -48,3 +48,11 @@ CONFIG = "PICTURE"
 
 if __name__ == '__main__':
     main()
+    
+
+# ─────────────────────────────────────────────
+# 5 : Exit point
+# ─────────────────────────────────────────────
+
+print("Done")
+

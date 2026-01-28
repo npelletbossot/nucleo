@@ -330,36 +330,9 @@ def sw_nucleo(
         x_matrix = listoflist_into_matrix(x_matrix)
         t_matrix = listoflist_into_matrix(t_matrix)
         
-
-        
     except Exception as e:
         print(f"Error in Simulations: {e} for {title}")
         
-        
-    # ------------------- Work ------------------- #
-    # ------------------- Analysis 4 - Rates and Taus ------------------- #
-    
-    # try:
-    
-    #     if (FORMALISM == "2") or (FORMALISM == "3"):
-            
-            # # Dwell times
-            # dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
-            #     t_matrix, x_matrix, t_fb, t_lb, t_bw
-            # )
-            # tau_forwards, tau_reverses = calculate_dwell_times(
-            #     dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
-            # )
-
-            # # Rates and Taus
-            # fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
-            # tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
-            # rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
-            # v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, FORMALISM)
-            
-    # except Exception as e:
-    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
-
 
     # ------------------- Analysis 1 - General results ------------------- #
     
@@ -427,6 +400,39 @@ def sw_nucleo(
         
     except Exception as e:
         print(f"Error in Analysis 3 - Speeds : {e} for {title}")
+        
+        
+    # ------------------- Analysis 4 - Rates and Taus ------------------- #
+    
+    # try:
+    
+    #     if (FORMALISM == "2") or (FORMALISM == "3"):
+            
+            # # Dwell times
+            # dwell_points, forward_result, reverse_result = calculate_dwell_distribution(
+            #     t_matrix, x_matrix, t_fb, t_lb, t_bw
+            # )
+            # tau_forwards, tau_reverses = calculate_dwell_times(
+            #     dwell_points, distrib_forwards=forward_result, distrib_reverses=reverse_result, xmax=100
+            # )
+
+            # # Rates and Taus
+            # fb_y, fr_y, rb_y, rr_y = calculate_nature_jump_distribution(t_matrix, x_matrix, t_fb, t_lb, t_bw)
+            # tau_fb, tau_fr, tau_rb, tau_rr = extracting_taus(fb_y, fr_y, rb_y, rr_y, t_bins)
+            # rtot_capt_fit, rtot_rest_fit = calculating_rates(tau_fb, tau_fr, tau_rb, tau_rr)
+            # v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, FORMALISM)
+            
+    # except Exception as e:
+    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
+    
+    
+    # ------------------- Analysis 5 - Speeds by Compactions ------------------- #
+
+    try:
+        print(x_matrix, t_matrix)
+        
+    except Exception as e:
+        print(f"Error in Analysis 5 - Speeds by Compactions : {e} for {title}")
 
 
     # ------------------- Writing ------------------- #
