@@ -933,3 +933,99 @@ def calculate_dwell_times(
     y0_reverses, tau_reverses = safe_fit(x_fit_rev, y_fit_rev, p0_rev)
 
     return tau_forwards, tau_reverses
+
+
+# 2.4 : Compaction
+
+
+def calculate_compaction(segment, alphaf, alphao, c_linker, c_nucleo):
+    n_alphaf = np.count_nonzero(segment == alphaf)
+    n_alphao = np.count_nonzero(segment == alphao)
+    n_tot = n_alphaf + n_alphao
+
+    if n_tot == 0:
+        return np.nan
+
+    return ((c_linker * n_alphaf) + (c_nucleo * n_alphao)) / n_tot
+
+    
+def calculate_compaction_statistics(
+    alpha_matrix: np.ndarray, t_matrix: np.ndarray, x_matrix: np.ndarray,
+    alphaf: float, alphao: float, c_linker: float, c_nucleo: float
+):
+    """
+    Compute compaction-corrected velocities (in base pairs per unit time)
+    from position and time trajectories over a chromatin landscape.
+
+    For each trajectory, the function computes the instantaneous velocity
+    between successive positions and renormalizes it by a local compaction
+    factor derived from the underlying chromatin landscape. The compaction
+    factor is computed as a weighted average of linker and nucleosomal
+    contributions over the genomic segment crossed during each jump.
+
+    The chromatin landscape is encoded in `alpha_matrix`, where values
+    `alphaf` and `alphao` represent linker and nucleosomal regions,
+    respectively.
+
+    NaN values in the input position arrays are ignored. Segments of zero
+    length are allowed but may yield NaN values if no landscape information
+    is available.
+
+    Parameters
+    ----------
+    alpha_matrix : np.ndarray
+        Array of chromatin landscapes. Each row corresponds to a trajectory
+        and encodes the chromatin state along the genome.
+    t_matrix : np.ndarray
+        Array of time points for each trajectory.
+    x_matrix : np.ndarray
+        Array of genomic positions corresponding to `t_matrix`.
+    alphaf : float
+        Value representing linker regions in `alpha_matrix`.
+    alphao : float
+        Value representing nucleosomal regions in `alpha_matrix`.
+    c_linker : float
+        Compaction factor associated with linker DNA.
+    c_nucleo : float
+        Compaction factor associated with nucleosomal DNA.
+
+    Returns
+    -------
+    np.ndarray
+        One-dimensional array containing all compaction-corrected velocities
+        (in base pairs per unit time) for all trajectories, with NaN values
+        removed.
+    """
+  
+    n = len(x_matrix)
+    bp_matrix = np.full_like(x_matrix, np.nan, dtype=float)
+    
+    for i in range(n):
+        t_list = t_matrix[i]
+        x_list = x_matrix[i]
+        alpha_list = alpha_matrix[i]
+        
+        # filtrer les indices valides (non NaN)
+        valid = ~np.isnan(x_list)
+        x_list_valid = x_list[valid]
+        t_list_valid = t_list[valid]
+        
+        if len(x_list_valid) < 2:
+            continue
+        
+        delta_x = x_list_valid[1:] - x_list_valid[:-1]
+        delta_t = t_list_valid[1:] - t_list_valid[:-1]
+        delta_v = delta_x / delta_t
+        delta_bp = np.zeros_like(delta_v, dtype=float)
+        
+        for j in range(len(delta_v)):
+            start = int(x_list_valid[j])
+            end   = int(x_list_valid[j+1])
+            segment = alpha_list[start:end]
+            c = calculate_compaction(segment, alphaf, alphao, c_linker, c_nucleo)
+            delta_bp[j] = delta_v[j] * c
+            
+        # mettre à jour la matrice finale
+        bp_matrix[i, :len(delta_bp)] = delta_bp
+        
+    return bp_matrix[~np.isnan(bp_matrix)]

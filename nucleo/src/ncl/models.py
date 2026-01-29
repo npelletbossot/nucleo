@@ -636,8 +636,7 @@ def gillespie_algorithm_two_steps(
     x_matrix = np.empty(nt, dtype=object)
     
     # --- FACT Conditions for Homogeneous Landscapes --- #
-    if fact and np.all(alpha_matrix == alpha_matrix[0, 0]):
-        # alpha_matrix *= F
+    if np.all(alpha_matrix == alpha_matrix[0, 0]):
         homogeneous = True
     else :
         homogeneous = False

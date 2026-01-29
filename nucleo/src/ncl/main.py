@@ -39,9 +39,6 @@ def main():
 # Options: /// NU / BP / LSLOW / LSHIGH /// SHORTTEST / LONGTEST / PERFTEST / MAP / PICTURE /// ACCESS / ACCESSRANDOM / ACCESSPERIODIC ///
 CONFIG = "SHORTTEST"
 
-# # Options: /// "1" : One-step / "2" : Two-steps / "3" : Two-steps + FACT ///
-# FORMALISM   = "3"
-
 # ─────────────────────────────────────────────
 # 4 : Entry point
 # ─────────────────────────────────────────────
@@ -49,10 +46,3 @@ CONFIG = "SHORTTEST"
 if __name__ == '__main__':
     main()
     
-
-# ─────────────────────────────────────────────
-# 5 : Exit point
-# ─────────────────────────────────────────────
-
-print("Done")
-

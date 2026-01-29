@@ -107,7 +107,12 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     )
         
     return [
-        dict(zip(keys, vals)) | {"algorithm": formalism['algorithm'], "fact": formalism['fact'], "factmode": formalism['factmode'], "nt": meta['nt'], "path": meta['path']}
+        dict(zip(keys, vals)) | {
+            "algorithm": formalism['algorithm'], 
+            "fact": formalism['fact'], 
+            "factmode": formalism['factmode'], 
+            "nt": meta['nt'], 
+            "path": meta['path']}
         for vals in values
     ]
 

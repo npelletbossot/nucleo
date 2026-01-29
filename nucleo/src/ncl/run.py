@@ -142,7 +142,7 @@ def checking_inputs(
                     raise ValueError(f"Invalid value for the sum of kB and kU : must be an floar >= 0.")
                 
         # Formalism
-        if (algorithm == "1") and ((fact != False) or (factmode != None)):
+        if (algorithm == "1") and ((fact != False) or (factmode != "none")):
             raise ValueError(f"Error on algorithm you set : algorithm={algorithm} - fact={fact} - factmode={factmode}")
 
         # Chromatin
@@ -386,17 +386,21 @@ def sw_nucleo(
             t_matrix, x_matrix
         )
         
-        if algorithm in ("2", "3"):
-            
-            # Nature of jumps
-            x_forward, t_forward, x_reverse, t_reverse = identify_jumps(x_matrix, t_matrix, nt)
-            
-            # Instantaneous Speeds - Forward Jumps
-            _, _, _, _, _, \
-            _, _, _, _, _, \
-            vi_frwd_points, vi_frwd_distrib, vi_frwd_mean, vi_frwd_med, vi_frwd_mp = calculate_instantaneous_statistics(
-                np.array([t_forward]), np.array([x_forward])
-            )
+        
+        # PROBLEME CAR CENSE FONCTIONNER SUR TOUS LES ALGOS 1 2 3 OU CA NE TROUVE QUE DES FORWARDS
+        # VERIFIER CA D'AILLEURS : IDENTIFY JUMPS QUI POSE PROBLEME
+        
+        # # Nature of jumps
+        # x_forward, t_forward, x_reverse, t_reverse = identify_jumps(x_matrix, t_matrix, nt)
+        
+        # # Instantaneous Speeds - Forward Jumps
+        # _, _, _, _, _, \
+        # _, _, _, _, _, \
+        # vi_frwd_points, vi_frwd_distrib, vi_frwd_mean, vi_frwd_med, vi_frwd_mp = calculate_instantaneous_statistics(
+        #     np.array([t_forward]), np.array([x_forward])
+        # )
+        
+        # print(vi_frwd_points)
         
     except Exception as e:
         print(f"Error in Analysis 3 - Speeds : {e} for {title}")
@@ -428,8 +432,20 @@ def sw_nucleo(
     
     # ------------------- Analysis 5 - Speeds by Compactions ------------------- #
 
+    # print(x_matrix, t_matrix)
+
     try:
-        print(x_matrix, t_matrix)
+        
+        c_linker = 10 / 10
+        c_nucleo = 150 / 35
+        
+        vi_bp_array = calculate_compaction_statistics(
+            alpha_matrix, t_matrix, x_matrix,
+            alphaf, alphao, c_linker, c_nucleo
+        )
+                
+        vi_bp_mean, vi_bp_med = np.mean(vi_bp_array), np.median(vi_bp_array)
+        vi_bp_points, vi_bp_distrib = calculate_distribution(vi_bp_array, x_fb, x_lb, x_bw)          
         
     except Exception as e:
         print(f"Error in Analysis 5 - Speeds by Compactions : {e} for {title}")
@@ -603,13 +619,22 @@ def sw_nucleo(
             'vi_med'         : vi_med,
             'vi_mp'          : vi_mp,
             
-            # Forwards
-            'vi_frwd_points' : vi_frwd_points,
-            'vi_frwd_distrib': vi_frwd_distrib,
-            'vi_frwd_mean'   : vi_frwd_mean,
-            'vi_frwd_med'    : vi_frwd_med,
-            'vi_frwd_mp'     : vi_frwd_mp,
+            # # Forwards
+            # 'vi_frwd_points' : vi_frwd_points,
+            # 'vi_frwd_distrib': vi_frwd_distrib,
+            # 'vi_frwd_mean'   : vi_frwd_mean,
+            # 'vi_frwd_med'    : vi_frwd_med,
+            # 'vi_frwd_mp'     : vi_frwd_mp,
             
+            # In Base Pairs
+            'c_linker'       : c_linker,
+            'c_nucleo'       : c_nucleo,
+            'vi_bp_array'    : vi_bp_array,
+            'vi_bp_mean'     : vi_bp_mean,
+            'vi_bp_med'      : vi_bp_med,
+            'vi_bp_points'   : vi_bp_points,
+            'vi_bp_distrib'  : vi_bp_distrib,           
+    
             }
 
         # Types of data registered if needed

@@ -26,14 +26,14 @@ def define_algorithm(study: str) -> dict:
         return {
             "algorithm": "1",
             "fact": False,
-            "factmode": None
+            "factmode": "none"
         }
 
     elif study == "2":
         return {
             "algorithm": "2",
             "fact": False,
-            "factmode": None
+            "factmode": "none"
         }
 
     elif study == "3":
@@ -273,7 +273,7 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "nt": 2,
+                "nt": 1_000,
                 "path": f"{PROJECT["project_name"]}__shorttest"
             }
         },

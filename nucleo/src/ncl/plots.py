@@ -26,12 +26,12 @@ fontsize = 16
 
 
 def plot_obstacle(s, l, origin, alpha_mean, xmin = 10_000, xmax = 1_000, text_size=fontsize, ax=None):
-    ax.set_title(f'Mean obstacle for s={s} and l={l}', size=text_size)
+    ax.set_title(f'Accessibility for s={s}, l={l}', size=text_size)
     ax.plot(alpha_mean[xmin:xmin+xmax], c='b', ls='-', label='mean obstacle', lw=1)
     # ax.fill_between(np.arange(0, len(alpha_mean), 1), alpha_mean, step='post', color='b', alpha=0.3, label='accessible binding sites')
     ax.axvline(x=origin, c='r', ls='--', label=f'origin={origin}')
-    ax.set_xlabel('x (a.u.)', fontsize=text_size)
-    ax.set_ylabel('alpha', fontsize=text_size)
+    ax.set_xlabel('x', fontsize=text_size)
+    ax.set_ylabel((r"$\alpha$"), fontsize=text_size)
     ax.set_xlim([0, xmax])
     ax.set_ylim([-0.10, 1.10])
     ax.grid(True, which='both')
@@ -105,12 +105,12 @@ def plot_linker_view(link_view, xmax = 5_000, text_size=fontsize, ax=None):
 
 
 def plot_probabilities(mu, theta, p, text_size=fontsize, ax=None):
-    ax.set_title(f'Input probability', size=text_size)
+    ax.set_title(f'Capture probability', size=text_size)
     ax.plot(p, label=f'mu={mu} - theta={theta}', c='r', lw=2)
     ax.set_xlim([0, 0+1000])
     ax.set_ylim([-0.005, 0.025])
-    ax.set_ylabel('p(d)', size=text_size)
-    ax.set_xlabel('d (a.u.)', size=text_size)
+    ax.set_ylabel((r"$p(\Delta x)$"), size=text_size)
+    ax.set_xlabel((r"$\Delta x$"), size=text_size)
     ax.grid(True, which='both')
     ax.legend(fontsize=text_size, loc='upper right')
 
@@ -125,8 +125,8 @@ def plot_trajectories(tmax, times, results, results_mean, results_med, results_s
     # ax.errorbar(x=times, y=results_mean, yerr=results_std, c='b', ls='-', label=f'mean_trajectory', lw=1)
     ax.plot(times, results_mean, c='r', ls='-', label=f'mean_trajectory \nv_mean={np.round(v_mean,2)}', lw=2)
     # ax.plot(times, results_med, c='g', ls='--', label=f'med_trajectory', lw=1)
-    ax.set_xlabel('t (a.u.)', fontsize=text_size)
-    ax.set_ylabel('x (a.u.)', fontsize=text_size)
+    ax.set_xlabel(r'time ($1 / \sigma k_0$) unit', fontsize=text_size)
+    ax.set_ylabel('x', fontsize=text_size)
     ax.set_xlim([0, tmax])
     ax.set_ylim([0, 7_000])
     ax.grid(True, which='both')
@@ -178,12 +178,12 @@ def plot_waiting_times(tbj_points, tbj_distrib, text_size=fontsize, ax=None):
 
 
 def plot_speed_distribution(vi_points, vi_distrib, vi_mean, vi_med, vi_mp, text_size=fontsize, ax=None):
-    ax.set_title(f'Distribution of instantaneous speeds', size=text_size)
+    ax.set_title(f'Instantaneous speeds', size=text_size)
     # ax.axvline(x=vi_mp, label=f'most probable : {np.round(vi_mp,2)}', c='r', ls='-')
     ax.axvline(x=vi_med, label=f'vi_med = {np.round(vi_med,2)}', c='r', ls='--')
     ax.plot(vi_points, vi_distrib, c='b')
     ax.grid(True, which='both')
-    ax.set_xlabel('speeds (a.u.)', size=text_size)
+    ax.set_xlabel(r'speeds in ($\sigma k_0$) unit', fontsize=text_size)
     ax.set_ylabel('distribution', size=text_size)
     ax.set_ylim([1e-5, 1e-1])
     ax.set_xlim([1e-1, 1e6])
