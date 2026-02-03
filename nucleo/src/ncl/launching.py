@@ -165,7 +165,7 @@ def execute_in_parallel(config: str,
         chunks      = np.array_split(all_params, num_tasks)
         this_params = list(chunks[task_id]) if num_tasks > 1 else all_params
         num_workers = num_cores
-        base_dir    = "/Xnfs/physbiochrom/npellet/nucleo_folder_Xnfs"
+        base_dir    = "/Xnfs/physbiochrom/npellet/Workspace"
         use_tqdm    = False
         task_suffix = str(task_id)
     else:

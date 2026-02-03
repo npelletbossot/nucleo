@@ -366,18 +366,21 @@ def remodelling(
     alphar: float, r_fact: float
 ):
     
-    if factmode not in [False, "passive", "active"]:
+    if factmode not in [False, "passive_full", "passive_memory", "active"]:
         raise ValueError(f"You set factmode={factmode} for remodelling which is not a valid mode")
     
-    elif factmode == "passive":
+    elif factmode == "passive_full":
         PF = K
+        
+    elif factmode == "passive_memory":
+        PF = K
+        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
 
     elif factmode == "active":
-        PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))
+        PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))        
+        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
         
-    alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
-        
-    return np.array(alpha_array)
+    return PF, np.array(alpha_array)
 
 
 # 2.3 : Gillespies
@@ -691,15 +694,22 @@ def gillespie_algorithm_two_steps(
                 break
             
             # --- FACT : Remodelling --- #
-            if not homogeneous and fact and np.isclose(r_capt, alphao):
-                r_fact = np.random.rand()
-                alpha_array = remodelling(
-                    fact_mode, s, alpha_array, x, 
-                    pos_obs, start_obs, end_obs, 
-                    K, Kz, Kp, kBp, kU,
-                    t_rest, alphar, r_fact
-                )
-                r_capt  = alpha_array[x]
+            if fact:
+                
+                if fact_mode == "passive_full":
+                    if not homogeneous and np.isclose(r_capt, alphao):
+                        r_fact = np.random.rand()
+                        
+                if fact_mode == "passive_memory":
+                    if not homogeneous and np.isclose(r_capt, alphao):
+                        r_fact = np.random.rand()
+                        alpha_array = remodelling(
+                            fact_mode, s, alpha_array, x, 
+                            pos_obs, start_obs, end_obs, 
+                            K, Kz, Kp, kBp, kU,
+                            t_rest, alphar, r_fact
+                        )
+                        r_capt  = alpha_array[x]
                 
                 # if FACT_MODE == "PASSIVE":
                 #     PF = K

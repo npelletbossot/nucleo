@@ -249,6 +249,8 @@ def sw_nucleo(
     t_bins = np.arange(t_fb, t_lb, t_bw)
     binx = int(1e0)
     bint = int(1e+1)
+    
+    # print("**PSMN**")
 
 
     # ------------------- Input 1 - Landscape ------------------- #
@@ -286,7 +288,7 @@ def sw_nucleo(
         obstacles = find_blocks(alpha_matrix[0], alphao)
     
     except Exception as e:
-        print(f"Error in Input 1 - Landscape : {e} for {title}")
+        print(f"Error in Input 1 - Landscape : {e}")
         
 
     # ------------------- Input 2 - Probability ------------------- #
@@ -297,7 +299,7 @@ def sw_nucleo(
         p = proba_gamma(mu, theta, L)
     
     except Exception as e:
-        print(f"Error in Input 2 - Probability : {e} for {title}")
+        print(f"Error in Input 2 - Probability : {e}")
     
     
     # ------------------- Simulations ------------------- #
@@ -331,7 +333,7 @@ def sw_nucleo(
         t_matrix = listoflist_into_matrix(t_matrix)
         
     except Exception as e:
-        print(f"Error in Simulations: {e} for {title}")
+        print(f"Error in Simulations: {e}")
         
 
     # ------------------- Analysis 1 - General results ------------------- #
@@ -353,10 +355,10 @@ def sw_nucleo(
         v_mean_th_eff = calculate_theoretical_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest)
     
     except Exception as e:
-        print(f"Error in Analysis 1 - General results: {e} for {title}")
+        print(f"Error in Analysis 1 - General results: {e}")
         
     
-    # ------------------- Analysis 2 - Jump size + Time size + First pass times ------------------- #
+    # ------------------- Analysis 2 - Jump size + Jump time + First pass times ------------------- #
     
     try:
 
@@ -366,13 +368,13 @@ def sw_nucleo(
         )
 
         # Time Size Distribution
-        tbj_points, tbj_distrib = calculate_timejump_distribution(t_matrix)
+        tbj_points, tbj_distrib = calculate_jumptime_distribution(t_matrix)
 
         # First Pass Times
         fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bint) 
         
     except Exception as e:
-        print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e} for {title}")
+        print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e}")
         
 
     # ------------------- Analysis 3 - Speeds ------------------- #
@@ -403,7 +405,7 @@ def sw_nucleo(
         # print(vi_frwd_points)
         
     except Exception as e:
-        print(f"Error in Analysis 3 - Speeds : {e} for {title}")
+        print(f"Error in Analysis 3 - Speeds : {e}")
         
         
     # ------------------- Analysis 4 - Rates and Taus ------------------- #
@@ -448,13 +450,13 @@ def sw_nucleo(
         vi_bp_points, vi_bp_distrib = calculate_distribution(vi_bp_array, x_fb, x_lb, x_bw)          
         
     except Exception as e:
-        print(f"Error in Analysis 5 - Speeds by Compactions : {e} for {title}")
+        print(f"Error in Analysis 5 - Speeds by Compactions : {e}")
 
 
     # ------------------- Writing ------------------- #
     
     try:
-
+        
         # data_result = {
             
         #     # --- Formalism --- #
@@ -649,7 +651,7 @@ def sw_nucleo(
         gc.collect()
         
     except Exception as e:
-        print(f"Error in Writing : {e} for {title}")
+        print(f"Error in Writing : {e}")
 
     return None
 

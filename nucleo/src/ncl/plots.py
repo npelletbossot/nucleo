@@ -125,7 +125,7 @@ def plot_trajectories(tmax, times, results, results_mean, results_med, results_s
     # ax.errorbar(x=times, y=results_mean, yerr=results_std, c='b', ls='-', label=f'mean_trajectory', lw=1)
     ax.plot(times, results_mean, c='r', ls='-', label=f'mean_trajectory \nv_mean={np.round(v_mean,2)}', lw=2)
     # ax.plot(times, results_med, c='g', ls='--', label=f'med_trajectory', lw=1)
-    ax.set_xlabel(r'time ($1 / \sigma k_0$) unit', fontsize=text_size)
+    ax.set_xlabel(r'time in ($1 / k_0$) unit', fontsize=text_size)
     ax.set_ylabel('x', fontsize=text_size)
     ax.set_xlim([0, tmax])
     ax.set_ylim([0, 7_000])

@@ -14,8 +14,7 @@ dependencies = [
   "tqdm",
   "pyarrow",
   "polars",
-  "scipy",
-  "utils @ file:///home/nicolas/Documents/PhD/Workspace/utils",   # ← si tu importes tls depuis ncl
+  "scipy"
 ]
 
 [tool.setuptools]

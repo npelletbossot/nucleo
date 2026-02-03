@@ -40,10 +40,17 @@ def define_algorithm(study: str) -> dict:
         return {
             "algorithm": "2",
             "fact": True,
-            "factmode": "passive"
+            "factmode": "passive_full"
         }
         
     elif study == "4":
+        return {
+            "algorithm": "2",
+            "fact": True,
+            "factmode": "passive_memory"
+        }
+    
+    elif study == "5":
         return {
             "algorithm": "2",
             "fact": True,
@@ -134,7 +141,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__nu"
+                "path": f"{PROJECT['project_name']}__nu"
             }
         },
 
@@ -167,7 +174,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__bp"
+                "path": f"{PROJECT['project_name']}__bp"
             }
         },
 
@@ -200,7 +207,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__lslow"
+                "path": f"{PROJECT['project_name']}__lslow"
             }
         },
 
@@ -233,7 +240,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__lshigh"
+                "path": f"{PROJECT['project_name']}__lshigh"
             }
         },
 
@@ -273,8 +280,8 @@ def choose_configuration(config: str) -> dict:
                 "kU": np.array([RATES["kU"]], dtype=float)
             },
             "meta": {
-                "nt": 1_000,
-                "path": f"{PROJECT["project_name"]}__shorttest"
+                "nt": 10,
+                "path": f"{PROJECT['project_name']}__shorttest"
             }
         },
         
@@ -307,7 +314,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 100,
-                "path": f"{PROJECT["project_name"]}__longtest"
+                "path": f"{PROJECT['project_name']}__longtest"
             }
         },
         
@@ -340,7 +347,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 2_000,
-                "path": f"{PROJECT["project_name"]}__perftest"
+                "path": f"{PROJECT['project_name']}__perftest"
             }
         },
 
@@ -377,7 +384,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 1_000,
-                "path": f"{PROJECT["project_name"]}__map"
+                "path": f"{PROJECT['project_name']}__map"
             }
         },
         
@@ -414,7 +421,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__pic"
+                "path": f"{PROJECT['project_name']}__pic"
             }
         },
         
@@ -449,7 +456,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__access"
+                "path": f"{PROJECT['project_name']}__access"
             }
         },
         
@@ -486,7 +493,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__accessrandom"
+                "path": f"{PROJECT['project_name']}__accessrandom"
             }
         },
         
@@ -524,7 +531,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 "nt": 10_000,
-                "path": f"{PROJECT["project_name"]}__accessperiodic"
+                "path": f"{PROJECT['project_name']}__accessperiodic"
             }
         },
         
