@@ -176,7 +176,7 @@ def execute_in_parallel(config: str,
         if cfg['meta']['nt'] == 10_000:
             num_workers = 2
         else:
-            num_workers = 10
+            num_workers = 12
 
     project_name   = project['project_name']
     folder_name    = f"{cfg['meta']['path']}_{task_suffix}"

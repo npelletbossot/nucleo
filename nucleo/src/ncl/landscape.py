@@ -246,8 +246,10 @@ def find_blocks(array: np.ndarray, alpha_value: float) -> list[tuple[int, int]]:
         A list of intervals (start_index, end_index) for each contiguous obstacle block.
     """
     array = np.asarray(array)
+    
     is_block = np.isclose(array, alpha_value, atol=1e-8)
     diff = np.diff(is_block.astype(int))
+    
     starts = np.where(diff == 1)[0] + 1
     ends = np.where(diff == -1)[0] + 1
 
@@ -308,7 +310,7 @@ def destroy_obstacles(array: np.ndarray, ratio: float, alphaf: float, alphao: fl
     # Looking for obstacles in the propre region
     region = array[begin:end].copy()
     couples = find_blocks(region, alphao)
-    if not couples:
+    if couples.size == 0:
         return array
 
     # Number of obstacles to destroy

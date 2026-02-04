@@ -138,8 +138,8 @@ def checking_inputs(
             if not ((0 <= value).all() and (value <= 1).all()):
                 raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
             else:
-                if (kB + kU) == 0:
-                    raise ValueError(f"Invalid value for the sum of kB and kU : must be an floar >= 0.")
+                if (kB + kU) < 0:
+                    raise ValueError(f"Invalid value for the sum of kB and kU : must be an float > 0.")
                 
         # Formalism
         if (algorithm == "1") and ((fact != False) or (factmode != "none")):
@@ -173,12 +173,12 @@ def checking_inputs(
 
 
 def sw_nucleo(
+    algorithm: str, fact: str, factmode:str, destroy: bool,
     landscape: str, s: int, l: int, bpmin: int,
     mu: float, theta: float, 
     lmbda: float, alphaf: float, alphao: float, beta: float, alphad: float,
     rtot_capt: float, rtot_rest: float,
     alphar: float, kB: float, kU: float,
-    algorithm: str, fact: str, factmode:str, destroy: bool,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
     nt: int, path: str
@@ -268,7 +268,7 @@ def sw_nucleo(
             last_point = Lmax
             for i in range(len(alpha_matrix)):
                 alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], alphad, alphaf, alphao, first_point, last_point)
-
+        
         # Chromatin Analysis : Obstacles Linkers Distribution
         s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = calculate_obs_and_linker_distribution(
             landscape, s, l, alpha_matrix[0], alphaf, alphao, binx
@@ -286,7 +286,7 @@ def sw_nucleo(
         
         # Chromatin Remodelling : Obstacles Positions
         obstacles = find_blocks(alpha_matrix[0], alphao)
-    
+        
     except Exception as e:
         print(f"Error in Input 1 - Landscape : {e}")
         
@@ -307,33 +307,27 @@ def sw_nucleo(
     try:
         
         # Gillespie One-Step
-        if algorithm == "1":
+        if algorithm == "one_step":
             results, t_matrix, x_matrix = gillespie_algorithm_one_step(
                 nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
             )
             
         # Gillespie Two-Steps
-        elif algorithm == "2":
-            results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
-                s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, fact, factmode
-            )
-            
-        # Gillespie Two-Steps + FACT
-        elif algorithm == "3":
+        elif algorithm == "two_steps":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
                 s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, fact, factmode
             )
             
         # Else
         else:
-            raise ValueError(f"Invalid algorithm choice got : {algorithm} instead of 1 - 2 - 3.")   
+            raise ValueError(f"Invalid algorithm choice got : {algorithm} instead of 1 - 2 .")   
 
         # Clean datas
         x_matrix = listoflist_into_matrix(x_matrix)
         t_matrix = listoflist_into_matrix(t_matrix)
         
     except Exception as e:
-        print(f"Error in Simulations: {e}")
+        print(f"Error in Simulations: {e} in {title}")
         
 
     # ------------------- Analysis 1 - General results ------------------- #
@@ -459,8 +453,10 @@ def sw_nucleo(
         
         # data_result = {
             
-        #     # --- Formalism --- #
-        #     'FORMALISM'      : FORMALISM,                
+            # # Inputs
+            # 'algorithm'      : algorithm,    
+            # 'fact'           : fact,
+            # 'factmode'       : factmode,         
             
         #     # --- Principal Parameters --- #
         #     'landscape'      : landscape,
@@ -699,17 +695,15 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
     )
 
     sw_nucleo(
+        formalism['algorithm'], formalism['fact'], formalism['factmode'], formalism['destroy'],
+
         params['landscape'], params['s'], params['l'], params['bpmin'],
         params['mu'], params['theta'],
         params['lmbda'], params['alphaf'], params['alphao'], params['beta'], params['alphad'],
         params['rtot_capt'], params['rtot_rest'],
         params['alphar'], params['kB'], params['kU'],
         
-        formalism['algorithm'], formalism['fact'], formalism['factmode'], formalism['destroy'],
-
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
-        
         time["tmax"], time["dt"],
-        
         meta['nt'], meta['path'],
     )

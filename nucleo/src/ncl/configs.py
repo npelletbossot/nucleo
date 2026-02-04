@@ -16,51 +16,6 @@ import numpy as np
 # 2 : Functions
 # ─────────────────────────────────────────────
 
-
-def define_algorithm(study: str) -> dict:
-    """
-    Returns formalism parameters associated with the chosen algorithm.
-    """
-
-    if study == "1":
-        return {
-            "algorithm": "1",
-            "fact": False,
-            "factmode": "none"
-        }
-
-    elif study == "2":
-        return {
-            "algorithm": "2",
-            "fact": False,
-            "factmode": "none"
-        }
-
-    elif study == "3":
-        return {
-            "algorithm": "2",
-            "fact": True,
-            "factmode": "passive_full"
-        }
-        
-    elif study == "4":
-        return {
-            "algorithm": "2",
-            "fact": True,
-            "factmode": "passive_memory"
-        }
-    
-    elif study == "5":
-        return {
-            "algorithm": "2",
-            "fact": True,
-            "factmode": "active"
-        }
-
-    else:
-        raise ValueError(f"Unknown algorithm '{study}'")
-
-
 def choose_configuration(config: str) -> dict:
     """
     Returns a dictionary of study parameters organized in logical blocks.
@@ -74,6 +29,45 @@ def choose_configuration(config: str) -> dict:
     PROJECT = {
         "project_name": "nucleo"
     }
+    
+    FORMALISMS = {
+        "alg1": {
+            "algorithm": "one_step",
+            "destroy": False,
+            "fact": False,
+            "factmode": "none",
+        },
+        "alg1_destroy": {
+            "algorithm": "one_step",
+            "destroy": True,
+            "fact": False,
+            "factmode": "none",
+        },
+        "alg2": {
+            "algorithm": "two_steps",
+            "destroy": False,
+            "fact": False,
+            "factmode": "none",
+        },
+        "alg2_passive_full": {
+            "algorithm": "two_steps",
+            "destroy": False,
+            "fact": True,
+            "factmode": "passive_full",
+        },
+        "alg2_passive_memory": {
+            "algorithm": "two_steps",
+            "destroy": False,
+            "fact": True,
+            "factmode": "passive_memory",
+        },
+        "alg2_active": {
+            "algorithm": "two_steps",
+            "destroy": False,
+            "fact": True,
+            "factmode": "active",
+        },
+    }
 
     CHROMATIN = {
         "Lmin": 0,          # First point of chromatin (included !)
@@ -84,7 +78,7 @@ def choose_configuration(config: str) -> dict:
 
     TIME = {
         "tmax": 100,        # Total time of modeling : 0 is taken into account
-        "dt": 1e-2          # Step of time
+        "dt": 1e0           # Step of time
     }
 
     PROBAS = {
@@ -102,6 +96,85 @@ def choose_configuration(config: str) -> dict:
         "kB" : 0.50,        # Rate of FACT Binding
         "kU": 0.50,         # Rate of FACT Unbinding
     }
+    
+    # ──────────────────────────────────
+    # Shared configurations
+    # ──────────────────────────────────
+    
+    NU_LS_BP__BASE = {
+        "formalism": {**FORMALISMS['alg1']},
+        "probas": {
+            "mu": np.arange(100, 605, 5),
+            "theta": np.arange(1, 101, 1),
+            "lmbda": np.array([0.00], dtype=float),
+            "alphao": np.array([PROBAS["alphao"]], dtype=float),
+            "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+            "beta": np.array([PROBAS["beta"]], dtype=float),
+            "alphad": np.array([0.00], dtype=float),
+            "alphar": np.array([0.00], dtype=float),
+        },
+        "rates": {
+            "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+            "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+            "kB": np.array([0.00], dtype=float),
+            "kU": np.array([0.00], dtype=float)
+        },
+        "meta": {
+            "nt": 10_000
+        }
+    }
+    
+    ACCESS__BASE = {
+        "formalism": {**FORMALISMS['alg1_destroy']},
+        "probas": {
+            "mu": np.array([150, 180, 210], dtype=int),
+            "theta": np.array([20, 90, 100], dtype=int),
+            "lmbda": np.array([0.00], dtype=float),
+            "alphao": np.array([PROBAS["alphao"]], dtype=float),
+            "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+            "beta": np.array([PROBAS["beta"]], dtype=float),
+            "alphad": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float),
+            "alphar": np.array([0.00], dtype=float)
+        },
+        "rates": {
+            "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+            "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+            "kB": np.array([0.00], dtype=float),
+            "kU": np.array([0.00], dtype=float),
+        },
+        "meta": {
+            "nt": 10_000
+        }
+    }
+    
+    TEST__BASE = {
+        "formalism": {**FORMALISMS['alg2']},
+        "geometry": {
+            "landscape": np.array(['homogeneous', 'periodic', 'random']),
+            "s": np.array([35], dtype=int),
+            "l": np.array([10], dtype=int),
+            "bpmin": np.array([0], dtype=int)
+        },
+        "probas": {
+            "mu": np.array([150, 180, 210], dtype=int),
+            "theta": np.array([20, 90, 100], dtype=int),
+            "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
+            "alphao": np.array([PROBAS["alphao"]], dtype=float),
+            "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+            "beta": np.array([PROBAS["beta"]], dtype=float),
+            "alphad": np.array([PROBAS["alphad"]], dtype=float),
+            "alphar": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float),
+        },
+        "rates": {
+            "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+            "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+            "kB": np.array([RATES["kB"]], dtype=float),
+            "kU": np.array([RATES["kU"]], dtype=float)
+        },
+        "meta": {
+            "nt": 10_000
+        }
+    }
 
     # ──────────────────────────────────
     # Presets for study configurations
@@ -112,429 +185,132 @@ def choose_configuration(config: str) -> dict:
         # ---- STATIC ---- #
         
         "NU": {
-            "formalism": {
-                **define_algorithm("1"),
-                "destroy": False
-            }
-            ,
+            **NU_LS_BP__BASE,
             "geometry": {
                 "landscape": np.array(['random', 'periodic', 'homogeneous']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
-            "probas": {
-                "mu": np.arange(100, 605, 5),
-                "theta": np.arange(1, 101, 1),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float),
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-            },
             "meta": {
-                "nt": 10_000,
+                **NU_LS_BP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__nu"
             }
         },
 
         "BP": {
-            "formalism": {
-                **define_algorithm("1"),
-                "destroy": False
-            },
+            **NU_LS_BP__BASE,
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([5, 10, 15], dtype=int)
             },
-            "probas": {
-                "mu": np.arange(100, 605, 5),
-                "theta": np.arange(1, 101, 1),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-            },
             "meta": {
-                "nt": 10_000,
+                **NU_LS_BP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__bp"
             }
         },
 
         "LSLOW": {
-            "formalism": {
-                **define_algorithm("1"),
-                "destroy": False
-            },
+            **NU_LS_BP__BASE,
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([5, 15, 20, 25], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
-            "probas": {
-                "mu": np.arange(100, 605, 5),
-                "theta": np.arange(1, 101, 1),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-            },
             "meta": {
-                "nt": 10_000,
+                **NU_LS_BP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__lslow"
             }
         },
 
         "LSHIGH": {
-            "formalism": {
-                **define_algorithm("1"),
-                "destroy": False
-            },
+            **NU_LS_BP__BASE,
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([50, 100, 150], dtype=int),
                 "bpmin": np.array([0], dtype=int)
             },
-            "probas": {
-                "mu": np.arange(100, 605, 5),
-                "theta": np.arange(1, 101, 1),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-            },
             "meta": {
-                "nt": 10_000,
+                **NU_LS_BP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__lshigh"
             }
         },
+            
+        # ---- ACCESSIBILITY WITH DESTRUCTION ---- #
 
-        # ---- TESTS ---- #
-
-        "SHORTTEST": {
-            "formalism": {
-                **define_algorithm("3"),
-                "destroy": False
-            }
-            ,
-            "geometry": {
-                # "landscape": np.array(['homogeneous']),
-                # "landscape": np.array(['random', 'homogeneous']),
-                # "landscape": np.array(['random', 'periodic']),
-                "landscape": np.array(['homogeneous', 'periodic', 'random']),
-                # "s": np.array([0, 35], dtype=int),
-                "s": np.array([35], dtype=int),
-                "l": np.array([10], dtype=int),
-                "bpmin": np.array([0], dtype=int)
-            },
-            "probas": {
-                "mu": np.array([180]),
-                "theta": np.array([90]),
-                "lmbda": np.array([0.50], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar" : np.linspace(0, 1.0, 11, dtype=float)
-
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-            },
-            "meta": {
-                "nt": 10,
-                "path": f"{PROJECT['project_name']}__shorttest"
-            }
-        },
-        
-        "LONGTEST": {
-            "formalism": {
-                **define_algorithm("3"),
-                "destroy": False
-            },
-            "geometry": {
-                "landscape": np.array(['random', 'periodic']),
-                "s": np.array([150], dtype=int),
-                "l": np.array([10, 50, 100, 150], dtype=int),
-                "bpmin": np.array([0, 10], dtype=int)
-            },
-            "probas": {
-                "mu": np.arange(100+1, 550+1, 50),
-                "theta": np.arange(1, 100+1, 10),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-            },
-            "meta": {
-                "nt": 100,
-                "path": f"{PROJECT['project_name']}__longtest"
-            }
-        },
-        
-        "PERFTEST": {
-            "formalism": {
-                **define_algorithm("3"),
-                "destroy": False
-            },
-            "geometry": {
-                "landscape": np.array(['homogeneous', 'periodic', 'random']),
-                "s": np.array([35], dtype=int),
-                "l": np.array([10, 20, 30, 40, 50, 100, 150], dtype=int),
-                "bpmin": np.array([0], dtype=int)
-            },
-            "probas": {
-                "mu": np.array([180]),
-                "theta": np.array([90]),
-                "lmbda": np.array([0.50], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.arange(0, 1.05, 0.050, dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB" : np.arange(0.10, 1.10, 0.20, dtype=float),
-                "kU" : np.arange(0.10, 1.10, 0.20, dtype=float)
-            },
-            "meta": {
-                "nt": 2_000,
-                "path": f"{PROJECT['project_name']}__perftest"
-            }
-        },
-
-        "MAP": {
-            "formalism": {
-                **define_algorithm("3"),
-                "destroy": False
-            },
-            "geometry": {
-                "landscape": np.array(['homogeneous', 'random', 'periodic']),
-                "s": np.array([35], dtype=int),
-                "l": np.array([10, 35, 100], dtype=int),
-                "bpmin": np.array([0], dtype=int)
-            },
-            "probas": {
-                "mu": np.array([160, 180]),
-                "theta": np.array([20, 90]),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.arange(0, 1.05, 0.10, dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB" : np.arange(0.10, 1.10, 0.20, dtype=float),
-                "kU" : np.arange(0.10, 1.10, 0.20, dtype=float)
-                # "rtot_capt": 1 / np.linspace(0.10, 20, 100),
-                # "rtot_rest": 1 / np.linspace(0.10, 20, 100),
-                # "kB": np.array([RATES["kB"]], dtype=float),
-                # "kU": np.array([RATES["kU"]], dtype=float)
-            },
-            "meta": {
-                "nt": 1_000,
-                "path": f"{PROJECT['project_name']}__map"
-            }
-        },
-        
-            "PICTURE": {
-            "formalism": {
-                **define_algorithm("3"),
-                "destroy": False
-            },
-            "geometry": {
-                "landscape": np.array(['random', 'periodic']),
-                "s": np.array([35], dtype=int),
-                "l": np.arange(0, 101, 10, dtype=int),
-                "bpmin": np.array([0], dtype=int)
-            },
-            "probas": {
-                "mu": np.array([180]),
-                "theta": np.array([90]),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([0.00], dtype=float),
-                "alphar":np.array([0.00], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB" : np.array([0.10], dtype=float),
-                "kU" : np.array([0.10], dtype=float)
-                # "rtot_capt": 1 / np.linspace(0.10, 20, 100),
-                # "rtot_rest": 1 / np.linspace(0.10, 20, 100),
-                # "kB": np.array([RATES["kB"]], dtype=float),
-                # "kU": np.array([RATES["kU"]], dtype=float)
-            },
-            "meta": {
-                "nt": 10_000,
-                "path": f"{PROJECT['project_name']}__pic"
-            }
-        },
-        
-        # ---- ACCESSIBILITY ---- #
-    
-        "ACCESS": {
-            "formalism": {
-                **define_algorithm("1"),
-                "destroy": True
-            },
+        "ACCESS__RANDOM": {
+            **ACCESS__BASE,
             "geometry": {
                 "landscape": np.array(["random"]),
                 "s": np.array([150], dtype=int),
-                "l": np.array([10], dtype=int),
-                "bpmin": np.array([0], dtype=int)
+                "l": np.arange(10, 450 + 10, 10, dtype=int),
+                "bpmin": np.arange(0, 20 + 5, 10, dtype=int),
             },
             "probas": {
-                "mu": np.array([180], dtype=int),
-                "theta": np.array([90], dtype=int),
-                "lmbda": np.array([0], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([0], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([0], dtype=float),
-                "kU": np.array([0], dtype=float)
+                **ACCESS__BASE["probas"],
+                "alphad": np.array([0.00], dtype=float)
             },
             "meta": {
-                "nt": 10_000,
-                "path": f"{PROJECT['project_name']}__access"
-            }
-        },
-        
-        "ACCESSRANDOM": {
-            "formalism": {
-                **define_algorithm("1"),
-                "destroy": True
-            },
-            "geometry": {
-                "landscape": np.array(["random"]),
-                "s": np.array([35], dtype=int),
-                # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
-                # "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
-                #                49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
-                #                8, 7, 6, 5, 4, 3, 2, 1]),
-                "l": np.arange(10, 450+1, 20, dtype=int), 
-                "bpmin": np.array([0, 5, 10, 15, 20], dtype=int)
-            },
-            "probas": {
-                "mu": np.array([180]),
-                "theta": np.array([90]),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-            },
-            "meta": {
-                "nt": 10_000,
+                **ACCESS__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__accessrandom"
             }
         },
         
-        "ACCESSPERIODIC": {
-            "formalism": {
-                **define_algorithm("1"),
-                "destroy": True
-            },
+        "ACCESS__PERIODIC": {
+            **ACCESS__BASE,
             "geometry": {
                 "landscape": np.array(["periodic"]),
-                "s": np.array([35], dtype=int),
-                # "l": np.array(1 - np.linspace(1/(35+200), 1/(35+0), 100), dtype=int),
-                # "l": np.array([450, 332, 261, 213, 178, 152, 131, 115, 101, 90, 81, 72, 65, 59, 54, 
-                #                49, 44, 40, 37, 34, 31, 28, 25, 23, 21, 19, 17, 15, 14, 12, 11, 9, 
-                #                8, 7, 6, 5, 4, 3, 2, 1]),
-                "l": np.arange(10, 35*5 + 10, 10, dtype=int), 
-                "bpmin": np.array([0], dtype=int)
+                "s": np.array([150], dtype=int),
+                "l": np.array([10], dtype=int),
+                "bpmin": np.array([0], dtype=int),
             },
             "probas": {
-                "mu": np.array([180]),
-                "theta": np.array([90]),
-                "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
-                "alphao": np.array([PROBAS["alphao"]], dtype=float),
-                "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
-                "beta": np.array([PROBAS["beta"]], dtype=float),
-                "alphad": np.array([PROBAS["alphad"]], dtype=float),
-                "alphar": np.array([PROBAS["alphar"]], dtype=float)
-            },
-            "rates": {
-                "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
-                "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-                "kB": np.array([RATES["kB"]], dtype=float),
-                "kU": np.array([RATES["kU"]], dtype=float)
-
+                **ACCESS__BASE["probas"],
+                "alphad": np.arange(0.00, 1.00 + 0.10, 0.10)
             },
             "meta": {
-                "nt": 10_000,
+                **ACCESS__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__accessperiodic"
             }
-        },
+        },      
         
+        # ---- TESTS ---- #
+        
+        "TEST_A": {
+            **TEST__BASE,
+            "formalism": {**FORMALISMS['alg2_passive_memory']},
+            "meta": {
+                **TEST__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__testA"
+            }
+        },
+
+        "TEST_B": {
+            **TEST__BASE,
+            "formalism": {**FORMALISMS['alg2_passive_full']},
+            "meta": {
+                **TEST__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__testB"
+            }
+        },
+
+        "TEST_C": {
+            **TEST__BASE,
+            "probas": {
+                **TEST__BASE["probas"],
+                "mu": np.arange(101, 551, 100),
+                "theta": np.arange(1, 101, 50)
+            },
+            "meta": {
+                **TEST__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__testC"
+            }
+        },
+
     }
 
     if config not in presets:
