@@ -42,10 +42,12 @@ CONFIG = [
     ["ACCESS__RANDOM", "ACCESS__PERIODIC"],
     ["TWO_STEPS"],
     ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY", "FACT_PHENO_FULL", "FACT_PHENO_MEMORY"],
-    ["TEST_A", "TEST_B", "TEST_C", "TEST_D"]
+    ["TEST_A", "TEST_B", "TEST_C", "TEST_D"],
+    ["ACCESS__RANDOM", "ACCESS__PERIODIC", "FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY", "FACT_PHENO_FULL", "FACT_PHENO_MEMORY"],
+
 ]
     
-rank_of_study = 3
+rank_of_study = len(CONFIG)-1
 
 # ─────────────────────────────────────────────
 # 4 : Entry point

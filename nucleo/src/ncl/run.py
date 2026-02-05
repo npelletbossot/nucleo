@@ -601,9 +601,11 @@ def sw_nucleo(
             'nt'             : nt,
             
             # Datas
-            't_matrix'       : t_matrix,
-            'x_matrix'       : x_matrix,
-            'results_mean'   : results_mean,
+            's_mean'         : s_mean,
+            'l_mean'         : l_mean,
+            'alpha_mean_a'   : alpha_mean_a,
+            'alpha_mean_v'   : alpha_mean_v,
+            'alpha_mean_c'   : alpha_mean_c,
             
             # Outputs
             'v_mean'         : v_mean,
