@@ -28,7 +28,10 @@ def main():
         except Exception as e:
             print(f"[ERROR in {config}] - Process failed: {e}")
         elapsed = time.time() - start_time
-        print(f"\n# --- Finished {config} the {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')} --- # --- Total time of execution : {int(elapsed // 60)}m --- #\n")
+        print(
+            f"\n# --- Finished {config} the {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')} --- # --- "
+            f"Total time of execution : {int(elapsed // 3600)}h {int((elapsed % 3600) // 60)}m --- #"
+            )
 
 # ─────────────────────────────────────────────
 # 3 : Execution parameters
@@ -38,8 +41,8 @@ def main():
 # EXE_MODE = "PSMN"
 
 # Options: /// NU / BP / LSLOW / LSHIGH /// ACCESS__RANDOM / ACCESS__PERIODIC /// TEST_1 / TEST_2 /// TEST_3  ///
-CONFIG = ["ACCESS__RANDOM", "ACCESS__PERIODIC", "TEST_A", "TEST_B"]
-# CONFIG = ["TEST_A", "TEST_B"]
+# CONFIG = ["ACCESS__RANDOM", "ACCESS__PERIODIC", "TEST_A", "TEST_B"]
+CONFIG = ["TEST_A", "TEST_B", "TEST_C", "TEST_D"]
 
 # ─────────────────────────────────────────────
 # 4 : Entry point

@@ -35,10 +35,10 @@ from tls.writing import inspect_data_types, writing_parquet
 
 
 def checking_inputs(
+    algorithm, fact, factmode,
     landscape, s, l, bpmin, 
     mu, theta, lmbda, alphaf, alphao, beta, alphad,
     alphar, kB, kU,
-    algorithm, fact, factmode,
     Lmin, Lmax, bps, origin,
     tmax, dt,
     nt
@@ -112,6 +112,13 @@ def checking_inputs(
     """
     
     try:
+                 
+        # Formalism
+        if (algorithm == "1") and ((fact != False) or (factmode != "none")):
+            raise ValueError(f"Error on algorithm you set : algorithm={algorithm} - fact={fact} - factmode={factmode}")
+        
+        if factmode not in [False, "passive_full", "passive_memory", "active_full","active_memory"]:
+            raise ValueError(f"You set factmode={factmode} for remodelling which is not a valid mode")  
 
         # Obstacles
         if landscape not in {"homogeneous", "periodic", "random"}:
@@ -139,11 +146,7 @@ def checking_inputs(
                 raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
             else:
                 if (kB + kU) < 0:
-                    raise ValueError(f"Invalid value for the sum of kB and kU : must be an float > 0.")
-                
-        # Formalism
-        if (algorithm == "1") and ((fact != False) or (factmode != "none")):
-            raise ValueError(f"Error on algorithm you set : algorithm={algorithm} - fact={fact} - factmode={factmode}")
+                    raise ValueError(f"Invalid value for the sum of kB and kU : must be an float > 0.")    
 
         # Chromatin
         if Lmin != 0:
@@ -664,7 +667,11 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         chromatin (dict): Dict with Lmin, Lmax, bps, origin.
         time (dict): Dict with tmax, dt.
     """
-    checking_inputs(        
+    checking_inputs(
+        algorithm=formalism["algorithm"],
+        fact=formalism["fact"],
+        factmode=formalism["factmode"], 
+            
         landscape=params['landscape'],
         s=params['s'],
         l=params['l'],
@@ -680,10 +687,6 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         kB=params['kB'],
         kU=params['kU'],
         nt=params['nt'],
-        
-        algorithm=formalism["algorithm"],
-        fact=formalism["fact"],
-        factmode=formalism["factmode"],
         
         Lmin=chromatin["Lmin"],
         Lmax=chromatin["Lmax"],

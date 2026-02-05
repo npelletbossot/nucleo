@@ -173,158 +173,103 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
 # 2.2 : Remodellings
 
 
-# def remodelling_phenomenological(kB: float, kU: float, K: float, tR: float) -> bool:
-#     """
-#     Determine whether FACT-mediated chromatin remodelling occurs during a rest period tR.
+def remodelling_obstacle(
+    s: int, alpha_array: np.ndarray, x: int,
+    pos_obs: np.ndarray, start_obs: np.ndarray, end_obs: np.ndarray,
+    alphar: float
+):
+    mask = (start_obs <= x) & (x <= end_obs)
+    hit_obs = mask.any()
+    if hit_obs:
+        start, end = pos_obs[mask][0]
+        if x == end:
+            alpha_array[end-s:end] = alphar
+        else:
+            rank_obs = int((x - start) / s)
+            alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
+                
+    return np.array(alpha_array)
 
-#     This function implements a two-state stochastic model for FACT binding dynamics:
-#     - State F  : FACT is bound to the nucleosome.
-#     - State NF : FACT is unbound.
-    
-#     At the beginning of the rest interval tR, the system is assigned a state according to
-#     the equilibrium probability:
-#         P(F) = K = kB / (kB + kU)
-#         P(NF) = 1 - K
-    
-#     Depending on the state, dwell times are drawn using exponential distributions:
-#         T_F   ~ Exp(kU)
-#         T_NF  ~ Exp(kB)
-    
-#     A random internal time T is drawn uniformly within the dwell interval 
-#     (i.e. T = TF * U or T = TNF * U with U ~ Uniform[0,1]).
-    
-#     During the rest period tR, remodelling may occur either:
-#     1. Immediately: if tR < (T_state - T)
-#     2. After a delayed event with probability:
-    
-#         PF  = K * [1 - exp(-(kB + kU) * (tR - (TF  - T)))]    for state F
-#         PNF = exp(-(kB + kU) * (tR - (TNF - T))) 
-#               + K * [1 - exp(-(kB + kU) * (tR - (TNF - T)))]  for state NF
-    
-#     Parameters
-#     ----------
-#     kB : float
-#         FACT binding rate (NF → F).
-#     kU : float
-#         FACT unbinding rate (F → NF).
-#     K : float
-#         Equilibrium occupancy of the FACT-bound state (kB / (kB + kU)).
-#     tR : float
-#         Rest period duration during which remodelling may occur.
-    
-#     Returns
-#     -------
-#     bool
-#         True if chromatin remodelling occurs during tR, False otherwise.
-#     """
 
-#     rF0 = np.random.rand()
+def remodelling_phenomenological(kB: float, kU: float, K: float, tR: float) -> bool:
+    """
+    Determine whether FACT-mediated chromatin remodelling occurs during a rest period tR.
+
+    This function implements a two-state stochastic model for FACT binding dynamics:
+    - State F  : FACT is bound to the nucleosome.
+    - State NF : FACT is unbound.
     
-#     # --- FACT state (F) --- #
-#     if rF0 < K:
-#         TF = -1 / kU * np.log(np.random.rand())
-#         rF1 = np.random.rand()
-#         T = TF * rF1
+    At the beginning of the rest interval tR, the system is assigned a state according to
+    the equilibrium probability:
+        P(F) = K = kB / (kB + kU)
+        P(NF) = 1 - K
+    
+    Depending on the state, dwell times are drawn using exponential distributions:
+        T_F   ~ Exp(kU)
+        T_NF  ~ Exp(kB)
+    
+    A random internal time T is drawn uniformly within the dwell interval 
+    (i.e. T = TF * U or T = TNF * U with U ~ Uniform[0,1]).
+    
+    During the rest period tR, remodelling may occur either:
+    1. Immediately: if tR < (T_state - T)
+    2. After a delayed event with probability:
+    
+        PF  = K * [1 - exp(-(kB + kU) * (tR - (TF  - T)))]    for state F
+        PNF = exp(-(kB + kU) * (tR - (TNF - T))) 
+              + K * [1 - exp(-(kB + kU) * (tR - (TNF - T)))]  for state NF
+    
+    Parameters
+    ----------
+    kB : float
+        FACT binding rate (NF → F).
+    kU : float
+        FACT unbinding rate (F → NF).
+    K : float
+        Equilibrium occupancy of the FACT-bound state (kB / (kB + kU)).
+    tR : float
+        Rest period duration during which remodelling may occur.
+    
+    Returns
+    -------
+    bool
+        True if chromatin remodelling occurs during tR, False otherwise.
+    """
+
+    rF0 = np.random.rand()
+    
+    # --- FACT state (F) --- #
+    if rF0 < K:
+        TF = -1 / kU * np.log(np.random.rand())
+        rF1 = np.random.rand()
+        T = TF * rF1
         
-#         # Immediate remodelling success
-#         if tR < (TF - T):
-#             return True
+        # Immediate remodelling success
+        if tR < (TF - T):
+            return True
         
-#         # Delayed remodelling
-#         rF2 = np.random.rand()
-#         PF = K * (1 - np.exp(-(kB + kU) * (tR - (TF - T))))
-#         return (rF2 < PF)
+        # Delayed remodelling
+        rF2 = np.random.rand()
+        PF = K * (1 - np.exp(-(kB + kU) * (tR - (TF - T))))
+        return (rF2 < PF)
             
-#     # --- Non-FACT state (NF) --- #       
-#     else:
-#         TNF = -1 / kB * np.log(np.random.rand())
-#         rF1 = np.random.rand() 
-#         T = TNF * rF1
+    # --- Non-FACT state (NF) --- #       
+    else:
+        TNF = -1 / kB * np.log(np.random.rand())
+        rF1 = np.random.rand() 
+        T = TNF * rF1
         
-#         # Immediate remodelling failure
-#         if tR < (TNF - T):
-#             return False
+        # Immediate remodelling failure
+        if tR < (TNF - T):
+            return False
             
-#         # Delayed remodelling
-#         rF2 = np.random.rand()
-#         PNF = (
-#             np.exp(-(kB + kU) * (tR - (TNF - T)))
-#             + K * (1 - np.exp(-(kB + kU) * (tR - (TNF - T))))
-#         )
-#         return (rF2 < PNF)
-    
-    
-# def remodelling_equilibrium(alphao: float, alphar: float, kB: float, kU: float) -> float:
-#     """
-#     Sample the instantaneous chromatin accessibility under FACT remodelling equilibrium.
-
-#     This function returns either the obstructed accessibility `alphao` or the 
-#     remodelled (facilitated) accessibility `alphar` according to the stationary
-#     probability of being in each state of the two-state system:
-    
-#         NF  --kB-->  F
-#         NF <--kU--  F
-
-#     The stationary probability of being in the remodelled state (F) is:
-    
-#         P(F) = kB / (kB + kU)
-    
-#     A uniform random draw determines whether the system is in the F or NF state
-#     at the sampled instant.
-
-#     Parameters
-#     ----------
-#     alphao : float
-#         Accessibility (or effective rate) when the nucleosome is in the 
-#         obstructed state NF (closed state).
-#     alphar : float
-#         Accessibility (or effective rate) when the nucleosome is in the 
-#         remodelled state F (opened state with FACT).
-#     kB : float
-#         Transition rate NF → F (FACT binding or remodelling rate).
-#     kU : float
-#         Transition rate F → NF (FACT unbinding or closing rate).
-
-#     Returns
-#     -------
-#     float
-#         Either `alphar` with probability kB / (kB + kU),
-#         or `alphao` with probability kU / (kB + kU).
-#     """
-    
-#     r0_FACT = np.random.rand()
-
-#     if r0_FACT < kB / (kB + kU):
-#         return alphar
-#     else:
-#         return alphao
-    
-    
-# def remodelling_passive(alphax: float, alphar: float, kB:float, kU: float):
-#     K = kB / (kB + kU)
-#     PF = K
-    
-#     r = np.random.rand()
-#     if r < PF:
-#         alphax = alphar
-#     else:
-#         alphax = alphax
-        
-#     return alphax
-
-
-# def remodelling_active(alphax: float, alphar: float, kBz: float, kBp: float, kU: float, t_rest: float):
-#     Kz = kBz / (kBz + kU)
-#     Kp = kBp / (kBp + kU)
-#     PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))
-    
-#     r = np.random.rand()
-#     if r < PF:
-#         alphax = alphar
-#     else:
-#         alphax = alphax
-    
-#     return alphax
+        # Delayed remodelling
+        rF2 = np.random.rand()
+        PNF = (
+            np.exp(-(kB + kU) * (tR - (TNF - T)))
+            + K * (1 - np.exp(-(kB + kU) * (tR - (TNF - T))))
+        )
+        return (rF2 < PNF)
 
 
 # def remodelling_global(alpha_array, x, alphao, alphar):
@@ -337,50 +282,6 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
 #         x_right += 1
 #     alpha_array[x_left:x_right + 1] = alphar
 #     return alpha_array
-
-
-def remodelling_obstacle(
-    s: int, alpha_array: np.ndarray, x: int,
-    pos_obs: np.ndarray, start_obs: np.ndarray, end_obs: np.ndarray,
-    alphar: float, PF: float, r_fact: float
-):
-    if r_fact < PF:
-        mask = (start_obs <= x) & (x <= end_obs)
-        hit_obs = mask.any()
-        if hit_obs:
-            start, end = pos_obs[mask][0]
-            if x == end:
-                alpha_array[end-s:end] = alphar
-            else:
-                rank_obs = int((x - start) / s)
-                alpha_array[start + rank_obs * s : start + (rank_obs + 1) * s] = alphar
-                
-    return np.array(alpha_array)
-
-
-# def remodelling(
-#     factmode: str, 
-#     s: int, alpha_array: np.ndarray, x: int,    
-#     pos_obs: np.ndarray, start_obs: np.ndarray, end_obs: np.ndarray,
-#     K: float, Kz: float, Kp: float, kBp: float, kU: float, t_rest: float,
-#     alphar: float, r_fact: float
-# ):
-    
-#     if factmode not in [False, "passive_full", "passive_memory", "active"]:
-#         raise ValueError(f"You set factmode={factmode} for remodelling which is not a valid mode")
-    
-#     elif factmode == "passive_full":
-#         PF = K
-        
-#     elif factmode == "passive_memory":
-#         PF = K
-#         alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
-
-#     elif factmode == "active":
-#         PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))        
-#         alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
-        
-#     return PF, np.array(alpha_array)
 
 
 # 2.3 : Gillespies
@@ -516,7 +417,7 @@ def gillespie_algorithm_two_steps(
     origin: int,
     bps: int,
     fact: bool,
-    fact_mode: str
+    factmode: str
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Simulate multiple loop-extrusion trajectories using a two-step Gillespie-like algorithm.
@@ -697,26 +598,30 @@ def gillespie_algorithm_two_steps(
             if fact:
                         
                 if not homogeneous and np.isclose(r_capt, alphao):
-                    r_fact = np.random.rand()
-                    
-                    if fact_mode not in [False, "passive_full", "passive_memory", "active"]:
-                        raise ValueError(f"You set factmode={fact_mode} for remodelling which is not a valid mode")               
+                    r_fact = np.random.rand()         
                         
-                    elif fact_mode == "passive_full":
+                    if factmode == "passive_full":
                         PF = K
                         if r_fact < PF:
                             r_capt = alphar
                         
-                    elif fact_mode == "passive_memory":
+                    elif factmode == "passive_memory":
                         PF = K
-                        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
-                        r_capt  = alpha_array[x]
+                        if r_fact < PF:
+                            alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar)
+                            r_capt  = alpha_array[x]
 
-                    elif fact_mode == "active":
+                    elif factmode == "active_full":
                         PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))        
-                        alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar, PF, r_fact)
-                        r_capt  = alpha_array[x]
+                        if r_fact < PF:
+                            r_capt = alphar
 
+                    elif factmode == "active_memory":
+                        PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))
+                        if r_fact < PF:
+                            alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar)
+                            r_capt  = alpha_array[x]
+            
             # --- Capturing : Time Condition --- #
             if np.isinf(t_capt) == True:
                 t = 1e308

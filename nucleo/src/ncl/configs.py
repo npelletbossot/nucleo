@@ -31,24 +31,31 @@ def choose_configuration(config: str) -> dict:
     }
     
     FORMALISMS = {
+        # one_step
         "alg1": {
             "algorithm": "one_step",
             "destroy": False,
             "fact": False,
             "factmode": "none",
         },
+        
+        # one_step + destruction
         "alg1_destroy": {
             "algorithm": "one_step",
             "destroy": True,
             "fact": False,
             "factmode": "none",
         },
+        
+        # two steps
         "alg2": {
             "algorithm": "two_steps",
             "destroy": False,
             "fact": False,
             "factmode": "none",
         },
+        
+        # two_steps + fact passive
         "alg2_passive_full": {
             "algorithm": "two_steps",
             "destroy": False,
@@ -61,11 +68,19 @@ def choose_configuration(config: str) -> dict:
             "fact": True,
             "factmode": "passive_memory",
         },
-        "alg2_active": {
+        
+        # two_steps + fact active
+        "alg2_active_full": {
             "algorithm": "two_steps",
             "destroy": False,
             "fact": True,
-            "factmode": "active",
+            "factmode": "active_full",
+        },
+        "alg2_active_memory": {
+            "algorithm": "two_steps",
+            "destroy": False,
+            "fact": True,
+            "factmode": "active_memory",
         },
     }
 
@@ -172,7 +187,7 @@ def choose_configuration(config: str) -> dict:
             "kU": np.array([RATES["kU"]], dtype=float)
         },
         "meta": {
-            "nt": 10_000
+            "nt": 100
         }
     }
 
@@ -282,7 +297,7 @@ def choose_configuration(config: str) -> dict:
         
         "TEST_A": {
             **TEST__BASE,
-            "formalism": {**FORMALISMS['alg2_passive_memory']},
+            "formalism": {**FORMALISMS['alg2_passive_full']},
             "meta": {
                 **TEST__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__testA"
@@ -291,23 +306,28 @@ def choose_configuration(config: str) -> dict:
 
         "TEST_B": {
             **TEST__BASE,
-            "formalism": {**FORMALISMS['alg2_passive_full']},
+            "formalism": {**FORMALISMS['alg2_passive_memory']},
             "meta": {
                 **TEST__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__testB"
             }
         },
-
+        
         "TEST_C": {
             **TEST__BASE,
-            "probas": {
-                **TEST__BASE["probas"],
-                "mu": np.arange(101, 551, 100),
-                "theta": np.arange(1, 101, 50)
-            },
+            "formalism": {**FORMALISMS['alg2_active_full']},
             "meta": {
                 **TEST__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__testC"
+            }
+        },
+    
+        "TEST_D": {
+            **TEST__BASE,
+            "formalism": {**FORMALISMS['alg2_active_memory']},
+            "meta": {
+                **TEST__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__testD"
             }
         },
 
