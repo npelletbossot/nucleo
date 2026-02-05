@@ -156,8 +156,8 @@ def choose_configuration(config: str) -> dict:
     ACCESS__BASE = {
         "formalism": {**FORMALISMS['alg1_destroy']},
         "probas": {
-            "mu": np.array([150, 180, 210], dtype=int),
-            "theta": np.array([20, 90, 100], dtype=int),
+            "mu": np.array([150, 180], dtype=int),
+            "theta": np.array([20, 90], dtype=int),
             "lmbda": np.array([0.00], dtype=float),
             "alphao": np.array([PROBAS["alphao"]], dtype=float),
             "alphaf": np.array([PROBAS["alphaf"]], dtype=float),

@@ -114,10 +114,12 @@ def checking_inputs(
     try:
                  
         # Formalism
-        if (algorithm == "1") and ((fact != False) or (factmode != "none")):
-            raise ValueError(f"Error on algorithm you set : algorithm={algorithm} - fact={fact} - factmode={factmode}")
+        if algorithm not in ["one_step", "two_steps"]:
+            raise ValueError(f"Invalid value for algorithm you set : algorithm={algorithm}")
+        if (algorithm == "one_step") and ((fact != False) or (factmode != "none")):
+            raise ValueError(f"Error with algorithm and fact you set : algorithm={algorithm} - fact={fact} - factmode={factmode}")
         
-        if factmode not in [False, "passive_full", "passive_memory", "active_full","active_memory", "pheno_full", "pheno_memory"]:
+        if factmode not in ["none", "passive_full", "passive_memory", "active_full","active_memory", "pheno_full", "pheno_memory"]:
             raise ValueError(f"You set factmode={factmode} for remodelling which is not a valid mode")  
 
         # Obstacles
@@ -266,7 +268,7 @@ def sw_nucleo(
         )
             
         # Chromatin Generation : Destroying Obstacles
-        if destroy:
+        if destroy and not np.isclose(alphad, 0.0, atol=1e-8):
             first_point = Lmin
             last_point = Lmax
             for i in range(len(alpha_matrix)):
