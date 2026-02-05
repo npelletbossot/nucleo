@@ -82,6 +82,20 @@ def choose_configuration(config: str) -> dict:
             "fact": True,
             "factmode": "active_memory",
         },
+        
+        # two_steps + fact phenomenological
+        "alg2_pheno_full": {
+            "algorithm": "two_steps",
+            "destroy": False,
+            "fact": True,
+            "factmode": "pheno_full",
+        },
+        "alg2_pheno_memory": {
+            "algorithm": "two_steps",
+            "destroy": False,
+            "fact": True,
+            "factmode": "pheno_memory",
+        },
     }
 
     CHROMATIN = {
@@ -116,7 +130,7 @@ def choose_configuration(config: str) -> dict:
     # Shared configurations
     # ──────────────────────────────────
     
-    NU_LS_BP__BASE = {
+    ONESTEP__BASE = {
         "formalism": {**FORMALISMS['alg1']},
         "probas": {
             "mu": np.arange(100, 605, 5),
@@ -162,6 +176,35 @@ def choose_configuration(config: str) -> dict:
         }
     }
     
+    TWOSTEPS__BASE = {
+        "formalism": {**FORMALISMS['alg2']},
+        "geometry": {
+            "landscape": np.array(['homogeneous', 'periodic', 'random']),
+            "s": np.array([35], dtype=int),
+            "l": np.array([10], dtype=int),
+            "bpmin": np.array([0], dtype=int)
+        },
+        "probas": {
+            "mu": np.array([150, 180, 210], dtype=int),
+            "theta": np.array([20, 90, 100], dtype=int),
+            "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
+            "alphao": np.array([PROBAS["alphao"]], dtype=float),
+            "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+            "beta": np.array([PROBAS["beta"]], dtype=float),
+            "alphad": np.array([PROBAS["alphad"]], dtype=float),
+            "alphar": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float),
+        },
+        "rates": {
+            "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
+            "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
+            "kB": np.array([RATES["kB"]], dtype=float),
+            "kU": np.array([RATES["kU"]], dtype=float)
+        },
+        "meta": {
+            "nt": 10
+        }
+    }
+    
     TEST__BASE = {
         "formalism": {**FORMALISMS['alg2']},
         "geometry": {
@@ -197,10 +240,10 @@ def choose_configuration(config: str) -> dict:
 
     presets = {
 
-        # ---- STATIC ---- #
+        # ---- STATIC : ONE STEP ---- #
         
         "NU": {
-            **NU_LS_BP__BASE,
+            **ONESTEP__BASE,
             "geometry": {
                 "landscape": np.array(['random', 'periodic', 'homogeneous']),
                 "s": np.array([150], dtype=int),
@@ -208,13 +251,13 @@ def choose_configuration(config: str) -> dict:
                 "bpmin": np.array([0], dtype=int)
             },
             "meta": {
-                **NU_LS_BP__BASE["meta"],
+                **ONESTEP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__nu"
             }
         },
 
         "BP": {
-            **NU_LS_BP__BASE,
+            **ONESTEP__BASE,
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
@@ -222,13 +265,13 @@ def choose_configuration(config: str) -> dict:
                 "bpmin": np.array([5, 10, 15], dtype=int)
             },
             "meta": {
-                **NU_LS_BP__BASE["meta"],
+                **ONESTEP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__bp"
             }
         },
 
         "LSLOW": {
-            **NU_LS_BP__BASE,
+            **ONESTEP__BASE,
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
@@ -236,13 +279,13 @@ def choose_configuration(config: str) -> dict:
                 "bpmin": np.array([0], dtype=int)
             },
             "meta": {
-                **NU_LS_BP__BASE["meta"],
+                **ONESTEP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__lslow"
             }
         },
 
         "LSHIGH": {
-            **NU_LS_BP__BASE,
+            **ONESTEP__BASE,
             "geometry": {
                 "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
@@ -250,14 +293,14 @@ def choose_configuration(config: str) -> dict:
                 "bpmin": np.array([0], dtype=int)
             },
             "meta": {
-                **NU_LS_BP__BASE["meta"],
+                **ONESTEP__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__lshigh"
             }
         },
             
         # ---- ACCESSIBILITY WITH DESTRUCTION ---- #
 
-        "ACCESS__RANDOM": {
+        "ACCESS_RANDOM": {
             **ACCESS__BASE,
             "geometry": {
                 "landscape": np.array(["random"]),
@@ -275,7 +318,7 @@ def choose_configuration(config: str) -> dict:
             }
         },
         
-        "ACCESS__PERIODIC": {
+        "ACCESS_PERIODIC": {
             **ACCESS__BASE,
             "geometry": {
                 "landscape": np.array(["periodic"]),
@@ -291,7 +334,79 @@ def choose_configuration(config: str) -> dict:
                 **ACCESS__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__accessperiodic"
             }
-        },      
+        },
+        
+        # ---- STATIC : TWO STEPS ---- #
+        
+        "RYU": {
+            **TWOSTEPS__BASE,
+            "geometry": {
+                "landscape": np.array(['random', 'periodic', 'homogeneous']),
+                "s": np.array([150], dtype=int),
+                "l": np.array([10], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "meta": {
+                **TWOSTEPS__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__ryu"
+            }
+        },
+
+        # ---- DYNAMIC ---- #
+        
+        "FACT_PASSIVE_FULL": {
+            **TWOSTEPS__BASE,
+            "formalism": {**FORMALISMS["alg2_passive_full"]},
+            "meta": {
+                **TWOSTEPS__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__fact_passive_full"
+            }
+        },
+
+        "FACT_PASSIVE_MEMORY": {
+            **TWOSTEPS__BASE,
+            "formalism": {**FORMALISMS["alg2_passive_memory"]},
+            "meta": {
+                **TWOSTEPS__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__fact_passive_memory"
+            }
+        },
+
+        "FACT_ACTIVE_FULL": {
+            **TWOSTEPS__BASE,
+            "formalism": {**FORMALISMS["alg2_active_full"]},
+            "meta": {
+                **TWOSTEPS__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__fact_active_full"
+            }
+        },
+
+        "FACT_ACTIVE_MEMORY": {
+            **TWOSTEPS__BASE,
+            "formalism": {**FORMALISMS["alg2_active_memory"]},
+            "meta": {
+                **TWOSTEPS__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__fact_active_memory"
+            }
+        },
+
+        "FACT_PHENO_FULL": {
+            **TWOSTEPS__BASE,
+            "formalism": {**FORMALISMS["alg2_pheno_full"]},
+            "meta": {
+                **TWOSTEPS__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__fact_pheno_full"
+            }
+        },
+
+        "FACT_PHENO_MEMORY": {
+            **TWOSTEPS__BASE,
+            "formalism": {**FORMALISMS["alg2_pheno_memory"]},
+            "meta": {
+                **TWOSTEPS__BASE["meta"],
+                "path": f"{PROJECT['project_name']}__fact_pheno_memory"
+            }
+        },
         
         # ---- TESTS ---- #
         
@@ -319,15 +434,6 @@ def choose_configuration(config: str) -> dict:
             "meta": {
                 **TEST__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__testC"
-            }
-        },
-    
-        "TEST_D": {
-            **TEST__BASE,
-            "formalism": {**FORMALISMS['alg2_active_memory']},
-            "meta": {
-                **TEST__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__testD"
             }
         },
 

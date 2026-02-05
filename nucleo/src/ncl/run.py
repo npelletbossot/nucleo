@@ -117,7 +117,7 @@ def checking_inputs(
         if (algorithm == "1") and ((fact != False) or (factmode != "none")):
             raise ValueError(f"Error on algorithm you set : algorithm={algorithm} - fact={fact} - factmode={factmode}")
         
-        if factmode not in [False, "passive_full", "passive_memory", "active_full","active_memory"]:
+        if factmode not in [False, "passive_full", "passive_memory", "active_full","active_memory", "pheno_full", "pheno_memory"]:
             raise ValueError(f"You set factmode={factmode} for remodelling which is not a valid mode")  
 
         # Obstacles

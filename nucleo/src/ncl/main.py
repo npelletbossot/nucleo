@@ -20,7 +20,7 @@ from ncl.launching import execute_in_parallel
 # ─────────────────────────────────────────────
 
 def main(): 
-    for config in CONFIG:
+    for config in CONFIG[rank_of_study]:
         print(f"\n# --- Launched {config} the {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')} --- #\n")
         start_time = time.time()
         try:
@@ -37,12 +37,15 @@ def main():
 # 3 : Execution parameters
 # ─────────────────────────────────────────────
 
-# Options: /// PSMN / PC / SNAKEVIZ ///
-# EXE_MODE = "PSMN"
-
-# Options: /// NU / BP / LSLOW / LSHIGH /// ACCESS__RANDOM / ACCESS__PERIODIC /// TEST_1 / TEST_2 /// TEST_3  ///
-# CONFIG = ["ACCESS__RANDOM", "ACCESS__PERIODIC", "TEST_A", "TEST_B"]
-CONFIG = ["TEST_A", "TEST_B", "TEST_C", "TEST_D"]
+CONFIG = [
+    ["NU", "BP", "LSLOW", "LSHIGH"],
+    ["ACCESS__RANDOM", "ACCESS__PERIODIC"],
+    ["TWO_STEPS"],
+    ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY", "FACT_PHENO_FULL", "FACT_PHENO_MEMORY"],
+    ["TEST_A", "TEST_B", "TEST_C", "TEST_D"]
+]
+    
+rank_of_study = 3
 
 # ─────────────────────────────────────────────
 # 4 : Entry point
