@@ -174,7 +174,7 @@ def choose_configuration(config: str) -> dict:
             "kU": np.array([0.00], dtype=float),
         },
         "meta": {
-            "nt": 100
+            "nt": 10_000
         }
     }
     
@@ -203,7 +203,7 @@ def choose_configuration(config: str) -> dict:
             "kU": np.array([RATES["kU"]], dtype=float)
         },
         "meta": {
-            "nt": 100
+            "nt": 10_000
         }
     }
     
