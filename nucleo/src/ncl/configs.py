@@ -155,6 +155,9 @@ def choose_configuration(config: str) -> dict:
     
     ACCESS__BASE = {
         "formalism": {**FORMALISMS['alg1_destroy']},
+        "geometry":{
+                "s": np.array([35], dtype=int)
+        }, 
         "probas": {
             "mu": np.array([150, 180], dtype=int),
             "theta": np.array([20, 90], dtype=int),
@@ -162,7 +165,6 @@ def choose_configuration(config: str) -> dict:
             "alphao": np.array([PROBAS["alphao"]], dtype=float),
             "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
             "beta": np.array([PROBAS["beta"]], dtype=float),
-            "alphad": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float),
             "alphar": np.array([0.00], dtype=float)
         },
         "rates": {
@@ -172,7 +174,7 @@ def choose_configuration(config: str) -> dict:
             "kU": np.array([0.00], dtype=float),
         },
         "meta": {
-            "nt": 10_000
+            "nt": 100
         }
     }
     
@@ -185,8 +187,8 @@ def choose_configuration(config: str) -> dict:
             "bpmin": np.array([0], dtype=int)
         },
         "probas": {
-            "mu": np.array([150, 180, 210], dtype=int),
-            "theta": np.array([20, 90, 100], dtype=int),
+            "mu": np.array([150, 180], dtype=int),
+            "theta": np.array([20, 90], dtype=int),
             "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
             "alphao": np.array([PROBAS["alphao"]], dtype=float),
             "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
@@ -201,7 +203,7 @@ def choose_configuration(config: str) -> dict:
             "kU": np.array([RATES["kU"]], dtype=float)
         },
         "meta": {
-            "nt": 10_000
+            "nt": 100
         }
     }
     
@@ -303,10 +305,10 @@ def choose_configuration(config: str) -> dict:
         "ACCESS_RANDOM": {
             **ACCESS__BASE,
             "geometry": {
+                **ACCESS__BASE["geometry"],
                 "landscape": np.array(["random"]),
-                "s": np.array([150], dtype=int),
-                "l": np.arange(10, 450 + 10, 10, dtype=int),
-                "bpmin": np.arange(0, 20 + 5, 10, dtype=int),
+                "l" : np.arange(10, 450 + 10, 10, dtype=int),
+                "bpmin": np.arange(0, 20 + 5, 5, dtype=int),
             },
             "probas": {
                 **ACCESS__BASE["probas"],
@@ -321,14 +323,14 @@ def choose_configuration(config: str) -> dict:
         "ACCESS_PERIODIC": {
             **ACCESS__BASE,
             "geometry": {
+                **ACCESS__BASE["geometry"],
                 "landscape": np.array(["periodic"]),
-                "s": np.array([150], dtype=int),
-                "l": np.array([10], dtype=int),
+                "l" : np.arange(10, 200 + 10, 10, dtype=int),
                 "bpmin": np.array([0], dtype=int),
             },
             "probas": {
                 **ACCESS__BASE["probas"],
-                "alphad": np.arange(0.00, 1.00 + 0.10, 0.10)
+                "alphad": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float),
             },
             "meta": {
                 **ACCESS__BASE["meta"],
@@ -359,7 +361,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS["alg2_passive_full"]},
             "meta": {
                 **TWOSTEPS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__fact_passive_full"
+                "path": f"{PROJECT['project_name']}__passivefull"
             }
         },
 
@@ -368,7 +370,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS["alg2_passive_memory"]},
             "meta": {
                 **TWOSTEPS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__fact_passive_memory"
+                "path": f"{PROJECT['project_name']}__passivememory"
             }
         },
 
@@ -377,7 +379,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS["alg2_active_full"]},
             "meta": {
                 **TWOSTEPS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__fact_active_full"
+                "path": f"{PROJECT['project_name']}__activefull"
             }
         },
 
@@ -386,7 +388,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS["alg2_active_memory"]},
             "meta": {
                 **TWOSTEPS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__fact_active_memory"
+                "path": f"{PROJECT['project_name']}__activememory"
             }
         },
 
@@ -395,7 +397,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS["alg2_pheno_full"]},
             "meta": {
                 **TWOSTEPS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__fact_pheno_full"
+                "path": f"{PROJECT['project_name']}__phenofull"
             }
         },
 
@@ -404,7 +406,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS["alg2_pheno_memory"]},
             "meta": {
                 **TWOSTEPS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__fact_pheno_memory"
+                "path": f"{PROJECT['project_name']}__phenomemory"
             }
         },
         

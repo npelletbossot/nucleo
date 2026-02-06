@@ -45,41 +45,35 @@ def set_working_environment(base_dir: str = Path.home() / "Documents" / "PhD" / 
 
 def prepare_value(value):
     """
-    Convert various data types to Parquet-compatible formats, including deep handling of NaNs.
-    Do not write in scientific number because it would become string and use more memory.
-
-    Args:
-        value: The value to be converted.
-
-    Returns:
-        The converted value in a compatible format.
-
-    Raises:
-        ValueError: If the data type is unsupported.
+    Convert various data types to Parquet-compatible formats
+    while preserving numerical dtypes (especially Float64).
     """
-    # Convert NumPy matrix or array to list
+
+    # NumPy arrays / matrices → list
     if isinstance(value, (np.ndarray, np.matrix)):
         return [prepare_value(v) for v in np.array(value).tolist()]
 
-    # Convert NumPy scalars to native scalars
-    elif isinstance(value, (np.integer, np.floating)):
-        if np.isnan(value):
-            return None
+    # NumPy scalars
+    elif isinstance(value, np.integer):
         return value.item()
 
-    # Handle float NaN explicitly
-    elif isinstance(value, float) and np.isnan(value):
-        return None
+    elif isinstance(value, np.floating):
+        # IMPORTANT: keep NaN as NaN (do NOT convert to None)
+        return float(value)
 
-    # Convert list recursively
+    # Python float
+    elif isinstance(value, float):
+        return value  # NaN stays NaN
+
+    # Lists
     elif isinstance(value, list):
         return [prepare_value(v) for v in value]
 
-    # Scalars and strings
-    elif isinstance(value, (int, float, str)):
+    # Native scalars / strings
+    elif isinstance(value, (int, str)):
         return value
 
-    # Optional: allow None to pass through
+    # None is allowed
     elif value is None:
         return None
 

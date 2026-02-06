@@ -632,8 +632,8 @@ def identify_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray, nt: int) -> tuple
     t_reverse = np.cumsum(t_reverse)
     
     return (
-        x_forward, t_forward,
-        x_reverse, t_reverse
+        np.array([x_forward]), np.array([t_forward]),
+        np.array([x_reverse]), np.array([t_reverse])
     )
 
 
@@ -1000,7 +1000,8 @@ def calculate_compaction(segment, alphaf, alphao, c_linker, c_nucleo):
     
 def calculate_compaction_statistics(
     alpha_matrix: np.ndarray, t_matrix: np.ndarray, x_matrix: np.ndarray,
-    alphaf: float, alphao: float, c_linker: float, c_nucleo: float
+    alphaf: float, alphao: float, c_linker: float, c_nucleo: float,
+    forward_filter: bool = False
 ):
     """
     Compute compaction-corrected velocities (in base pairs per unit time)
@@ -1054,7 +1055,7 @@ def calculate_compaction_statistics(
         x_list = x_matrix[i]
         alpha_list = alpha_matrix[i]
         
-        # filtrer les indices valides (non NaN)
+        # filtrering non NaN
         valid = ~np.isnan(x_list)
         x_list_valid = x_list[valid]
         t_list_valid = t_list[valid]
@@ -1074,7 +1075,10 @@ def calculate_compaction_statistics(
             c = calculate_compaction(segment, alphaf, alphao, c_linker, c_nucleo)
             delta_bp[j] = delta_v[j] * c
             
-        # mettre à jour la matrice finale
         bp_matrix[i, :len(delta_bp)] = delta_bp
-        
-    return bp_matrix[~np.isnan(bp_matrix)]
+        vi_bp_array = bp_matrix[~np.isnan(bp_matrix)]
+    
+    if forward_filter:
+        return vi_bp_array[vi_bp_array > 0]
+    else:
+        return vi_bp_array

@@ -236,7 +236,6 @@ def sw_nucleo(
             f"nt={nt}__"
     )
     
-
     # Chromatin
     L = np.arange(Lmin, Lmax, bps)
     lenght = (Lmax-Lmin) // bps
@@ -254,9 +253,6 @@ def sw_nucleo(
     t_bins = np.arange(t_fb, t_lb, t_bw)
     binx = int(1e0)
     bint = int(1e+1)
-    
-    # print("**PSMN**")
-
 
     # ------------------- Input 1 - Landscape ------------------- #
     
@@ -380,34 +376,63 @@ def sw_nucleo(
     
     try:
 
-        # Instantaneous Speeds
-        dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
-        dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
-        vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
-            t_matrix, x_matrix
-        )
+        if algorithm == "one_step":
+            
+            # Filter over nature
+            forward_filter = False
+
+            # Instantaneous Speeds
+            dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
+            dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
+            vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
+                t_matrix, x_matrix
+            )
         
+        elif algorithm == "two_steps":
+            
+            # Filter over nature
+            forward_filter = True
         
-        # PROBLEME CAR CENSE FONCTIONNER SUR TOUS LES ALGOS 1 2 3 OU CA NE TROUVE QUE DES FORWARDS
-        # VERIFIER CA D'AILLEURS : IDENTIFY JUMPS QUI POSE PROBLEME
+            # Nature of jumps
+            x_forward, t_forward, x_reverse, t_reverse = identify_jumps(x_matrix, t_matrix, nt)
         
-        # # Nature of jumps
-        # x_forward, t_forward, x_reverse, t_reverse = identify_jumps(x_matrix, t_matrix, nt)
-        
-        # # Instantaneous Speeds - Forward Jumps
-        # _, _, _, _, _, \
-        # _, _, _, _, _, \
-        # vi_frwd_points, vi_frwd_distrib, vi_frwd_mean, vi_frwd_med, vi_frwd_mp = calculate_instantaneous_statistics(
-        #     np.array([t_forward]), np.array([x_forward])
-        # )
-        
-        # print(vi_frwd_points)
+            # Instantaneous Speeds
+            dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
+            dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
+            vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
+                t_forward, x_forward
+            )
         
     except Exception as e:
         print(f"Error in Analysis 3 - Speeds : {e}")
         
         
-    # ------------------- Analysis 4 - Rates and Taus ------------------- #
+    # ------------------- Analysis 4 - Speeds by Compactions ------------------- #
+
+    try:
+        c_linker = 10 / 10
+        c_nucleo = 150 / 35
+        
+        vi_bp_array = calculate_compaction_statistics(
+            alpha_matrix, t_matrix, x_matrix,
+            alphaf, alphao, c_linker, c_nucleo,
+            forward_filter
+        )
+                
+        vi_bp_points, vi_bp_distrib = calculate_distribution(vi_bp_array, x_fb, x_lb, x_bw)    
+
+        if landscape == "homogeneous":
+            vi_bp_mean = vi_mean * (c_linker + c_nucleo) / 2
+            vi_bp_med  = vi_med * (c_linker + c_nucleo) / 2
+                        
+        else:  
+            vi_bp_mean, vi_bp_med = np.mean(vi_bp_array), np.median(vi_bp_array)
+                   
+    except Exception as e:
+        print(f"Error in Analysis 4 - Speeds by Compactions : {e}")
+        
+
+    # ------------------- Analysis 5 - Rates and Taus ------------------- #
     
     # try:
     
@@ -428,30 +453,9 @@ def sw_nucleo(
             # v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, FORMALISM)
             
     # except Exception as e:
-    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
+    #     print(f"Error in Analysis 5 - Rates and Taus : {e} for {title}")
     
     
-    # ------------------- Analysis 5 - Speeds by Compactions ------------------- #
-
-    # print(x_matrix, t_matrix)
-
-    try:
-        
-        c_linker = 10 / 10
-        c_nucleo = 150 / 35
-        
-        vi_bp_array = calculate_compaction_statistics(
-            alpha_matrix, t_matrix, x_matrix,
-            alphaf, alphao, c_linker, c_nucleo
-        )
-                
-        vi_bp_mean, vi_bp_med = np.mean(vi_bp_array), np.median(vi_bp_array)
-        vi_bp_points, vi_bp_distrib = calculate_distribution(vi_bp_array, x_fb, x_lb, x_bw)          
-        
-    except Exception as e:
-        print(f"Error in Analysis 5 - Speeds by Compactions : {e}")
-
-
     # ------------------- Writing ------------------- #
     
     try:
