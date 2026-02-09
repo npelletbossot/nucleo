@@ -38,7 +38,7 @@ def checking_inputs(
     algorithm, fact, factmode,
     landscape, s, l, bpmin, 
     mu, theta, lmbda, alphaf, alphao, beta, alphad,
-    alphar, kB, kU,
+    alphar, ktot, klist,
     Lmin, Lmax, bps, origin,
     tmax, dt,
     nt
@@ -143,12 +143,17 @@ def checking_inputs(
                     f"{name} must be between 0 and 1. "
                     f"Got array with min={value.min()}, max={value.max()}."
                 )
-        for name, value in [("kB", kB), ("kU", kU)]:
-            if not ((0 <= value).all() and (value <= 1).all()):
-                raise ValueError(f"Invalid value for {name}: must be an int >= 0. Got {value}.")
-            else:
-                if (kB + kU) < 0:
-                    raise ValueError(f"Invalid value for the sum of kB and kU : must be an float > 0.")    
+                
+        # Rates of Remodelling factors
+        if ktot <= 0:
+            raise ValueError(
+                f"Invalid ktot={ktot}: must be a float strictly > 0."
+            )
+        kcheck = np.asarray(klist)
+        if not np.all((0.0 <= kcheck) & (kcheck <= 1.0)):
+            raise ValueError(
+                f"Invalid K values: must be in [0, 1]. Got {kcheck}."
+            ) 
 
         # Chromatin
         if Lmin != 0:
@@ -183,10 +188,11 @@ def sw_nucleo(
     mu: float, theta: float, 
     lmbda: float, alphaf: float, alphao: float, beta: float, alphad: float,
     rtot_capt: float, rtot_rest: float,
-    alphar: float, kB: float, kU: float,
+    alphar: float, ktot: float, klist: float,
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
-    nt: int, path: str
+    nt: int, path: str,
+    total_return: bool = False
     ) -> None:
     """
     Simulates condensin dynamics along chromatin with specified parameters.
@@ -223,14 +229,20 @@ def sw_nucleo(
     """
 
     # ------------------- Initialization ------------------- #
+    
+    # Rates of Remodelling factors
+    kB = klist * ktot
+    kU = (1.0 - klist) * ktot
+    
+    # Compactions
+    c_linker = 10 / 10
+    c_nucleo = 150 / 35
 
     # Title & Folder    
     title = (
             f"algorithm={algorithm}__fact={fact}__factmode={factmode}__destroy={destroy}__"
             f"landscape={landscape}__s={s}__l={l}__bpmin={bpmin}__"
             f"mu={mu}__theta={theta}__"
-            f"lmbda={lmbda:.2e}__"
-            # f"rtotcapt={rtot_capt:.2e}__rtotrest={rtot_rest:.2e}__"
             f"alphad={alphad:.2e}__"
             f"alphar={alphar:.2e}__kB={kB:.2e}__kU={kU:.2e}__"
             f"nt={nt}__"
@@ -241,10 +253,10 @@ def sw_nucleo(
     lenght = (Lmax-Lmin) // bps
 
     # Time 
-    times = np.arange(0,tmax,dt)    # Discretisation of all times
+    times = np.arange(0,tmax,dt)
 
     # Linear factor
-    alpha0 = int(1e+0)             # Calibration on linear speed in order to multiplicate speeds by a linear number
+    alpha0 = int(1e+0)
 
     # Bins for Positions and Times : fb (firstbin) - lb (lastbin) - bw (binwidth)
     x_fb, x_lb, x_bw = 0, 10_000, 1
@@ -254,7 +266,8 @@ def sw_nucleo(
     binx = int(1e0)
     bint = int(1e+1)
 
-    # ------------------- Input 1 - Landscape ------------------- #
+
+    # ------------------- Input 1 : Landscape ------------------- #
     
     try:
 
@@ -292,7 +305,7 @@ def sw_nucleo(
         print(f"Error in Input 1 - Landscape : {e}")
         
 
-    # ------------------- Input 2 - Probability ------------------- #
+    # ------------------- Input 2 : Probability ------------------- #
 
     try:
         
@@ -317,11 +330,7 @@ def sw_nucleo(
         elif algorithm == "two_steps":
             results, t_matrix, x_matrix = gillespie_algorithm_two_steps(
                 s, alpha_matrix, p, alphao, beta, lmbda, rtot_capt, rtot_rest, alphar, kB, kU, nt, tmax, dt, L, origin, bps, fact, factmode
-            )
-            
-        # Else
-        else:
-            raise ValueError(f"Invalid algorithm choice got : {algorithm} instead of 1 - 2 .")   
+            )  
 
         # Clean datas
         x_matrix = listoflist_into_matrix(x_matrix)
@@ -331,7 +340,7 @@ def sw_nucleo(
         print(f"Error in Simulations: {e} in {title}")
         
 
-    # ------------------- Analysis 1 - General results ------------------- #
+    # ------------------- Analysis 1 : General results ------------------- #
     
     try:
 
@@ -353,86 +362,76 @@ def sw_nucleo(
         print(f"Error in Analysis 1 - General results: {e}")
         
     
-    # ------------------- Analysis 2 - Jump size + Jump time + First pass times ------------------- #
+    # ------------------- Analysis 2 : Jump size + Jump time + First pass times ------------------- #
+    
+    if total_return:
+        
+        try:
+
+            # Jump Size Distribution
+            xbj_points, xbj_distrib = calculate_jumpsize_distribution(
+                x_matrix, x_fb, x_lb, x_bw
+            )
+
+            # Time Size Distribution
+            tbj_points, tbj_distrib = calculate_jumptime_distribution(t_matrix)
+
+            # First Pass Times
+            fpt_distrib, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bint) 
+            
+        except Exception as e:
+            print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e}")
+        
+
+    # ------------------- Analysis 3 : Speeds + Compaction ------------------- #
     
     try:
 
-        # Jump Size Distribution
-        xbj_points, xbj_distrib = calculate_jumpsize_distribution(
-            x_matrix, x_fb, x_lb, x_bw
-        )
-
-        # Time Size Distribution
-        tbj_points, tbj_distrib = calculate_jumptime_distribution(t_matrix)
-
-        # First Pass Times
-        fpt_distrib_2D, fpt_number = calculate_fpt_matrix(t_matrix, x_matrix, tmax, bint) 
+        # Instantaneous Speeds
+        dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
+        dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
+        vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_speeds(
+            t_matrix, x_matrix
+        )            
         
-    except Exception as e:
-        print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e}")
-        
-
-    # ------------------- Analysis 3 - Speeds ------------------- #
-    
-    try:
-
-        if algorithm == "one_step":
-            
-            # Filter over nature
-            forward_filter = False
-
-            # Instantaneous Speeds
-            dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
-            dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
-            vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
-                t_matrix, x_matrix
+        # Instantaneous speeds with compaction (bp)
+        vi_bp_mean, vi_bp_med, vi_bp_points, vi_bp_distrib = (
+            calculate_compaction_statistics(
+                algorithm, landscape,
+                alphaf, alphao, c_linker, c_nucleo,
+                alpha_matrix, t_matrix, x_matrix,
+                vi_mean, vi_med,
+                x_fb, x_lb, x_bw,
             )
-        
-        elif algorithm == "two_steps":
-            
-            # Filter over nature
-            forward_filter = True
-        
-            # Nature of jumps
-            x_forward, t_forward, x_reverse, t_reverse = identify_jumps(x_matrix, t_matrix, nt)
-        
-            # Instantaneous Speeds
-            dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
-            dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
-            vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_statistics(
-                t_forward, x_forward
-            )
-        
-    except Exception as e:
-        print(f"Error in Analysis 3 - Speeds : {e}")
-        
-        
-    # ------------------- Analysis 4 - Speeds by Compactions ------------------- #
-
-    try:
-        c_linker = 10 / 10
-        c_nucleo = 150 / 35
-        
-        vi_bp_array = calculate_compaction_statistics(
-            alpha_matrix, t_matrix, x_matrix,
-            alphaf, alphao, c_linker, c_nucleo,
-            forward_filter
         )
-                
-        vi_bp_points, vi_bp_distrib = calculate_distribution(vi_bp_array, x_fb, x_lb, x_bw)    
-
-        if landscape == "homogeneous":
-            vi_bp_mean = vi_mean * (c_linker + c_nucleo) / 2
-            vi_bp_med  = vi_med * (c_linker + c_nucleo) / 2
-                        
-        else:  
-            vi_bp_mean, vi_bp_med = np.mean(vi_bp_array), np.median(vi_bp_array)
-                   
-    except Exception as e:
-        print(f"Error in Analysis 4 - Speeds by Compactions : {e}")
         
+        # Nature of jumps
+        t_forward, x_forward, t_reverse, x_reverse = identify_jumps(algorithm, t_matrix, x_matrix)
+        
+        
+        
+        # I
+        print(x_forward, t_forward)
 
-    # ------------------- Analysis 5 - Rates and Taus ------------------- #
+        # Instantaneous Speeds
+        _, _, _, _, _, \
+        _, _, _, _, _, \
+        vi_frwd_points, vi_frwd_distrib, vi_frwd_mean, vi_frwd_med, vi_frwd_mp = calculate_instantaneous_speeds(
+            t_forward, x_forward
+        )     
+            # # Forwards
+            # 'vi_frwd_points' : vi_frwd_points,
+            # 'vi_frwd_distrib': vi_frwd_distrib,
+            # 'vi_frwd_mean'   : vi_frwd_mean,
+            # 'vi_frwd_med'    : vi_frwd_med,
+            # 'vi_frwd_mp'     : vi_frwd_mp,
+        
+            
+    except Exception as e:
+        print(f"Error in Analysis 3 - Speeds + Compactions : {e}")
+         
+
+    # ------------------- Analysis 4 : Rates and Taus ------------------- #
     
     # try:
     
@@ -453,198 +452,164 @@ def sw_nucleo(
             # v_th_fit = calculate_theoretical_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt_fit, rtot_rest_fit, alphar, kB, kU, FORMALISM)
             
     # except Exception as e:
-    #     print(f"Error in Analysis 5 - Rates and Taus : {e} for {title}")
+    #     print(f"Error in Analysis 4 - Rates and Taus : {e} for {title}")
     
     
-    # ------------------- Writing ------------------- #
+    # ------------------- Data ------------------- #
     
     try:
         
-        # data_result = {
-            
-            # # Inputs
-            # 'algorithm'      : algorithm,    
-            # 'fact'           : fact,
-            # 'factmode'       : factmode,         
-            
-        #     # --- Principal Parameters --- #
-        #     'landscape'      : landscape,
-        #     's'              : s,
-        #     'l'              : l,
-        #     'bpmin'          : bpmin,
-        #     'mu'             : mu,
-        #     'theta'          : theta,
-        #     'alphaf'         : alphaf,
-        #     'alphao'         : alphao,
-        #     'beta'           : beta,
-        #     'lmbda'          : lmbda,
-        #     'alphad'         : alphad,   
-        #     'rtot_capt'      : rtot_capt,
-        #     'rtot_rest'      : rtot_rest,
-        #     'alphar'         : alphar,
-        #     'kB'             : kB,
-        #     'kU'             : kU,
-
-        #     # --- Chromatin Parameters --- #
-        #     'Lmin'           : Lmin,
-        #     'Lmax'           : Lmax,
-        #     'bps'            : bps,
-        #     'origin'         : origin,
-
-        #     # --- Time Parameters --- #
-        #     'tmax'           : tmax,
-        #     'dt'             : dt,
-        #     'times'          : times,
-            
-        #     # --- Bins --- #
-        #     'binx'          : binx,
-        #     'bint'          : bint,
-            
-        #     # --- Simulation --- #
-        #     'nt'             : nt,
-
-        #     # --- Chromatin --- #
-        #     's_mean'         : s_mean,
-        #     's_points'       : s_points,
-        #     's_distrib'      : s_distrib,
-        #     'l_mean'         : l_mean,
-        #     'l_points'       : l_points,
-        #     'l_distrib'      : l_distrib,
-        #     'l_view'         : l_view,
-        #     'alpha_mean_a'   : alpha_mean_a,
-        #     'alpha_mean_v'   : alpha_mean_v,
-        #     'alpha_mean_c'   : alpha_mean_c,
-            
-        #     # --- Raw Datas --- #
-        #     'p'              : p,
-        #     't_matrix'       : t_matrix,
-        #     'x_matrix'       : x_matrix,
-
-        #     # --- Results --- #
-        #     'results'        : results,
-        #     'results_mean'   : results_mean,
-        #     'results_med'    : results_med,
-        #     'results_std'    : results_std,
-        #     'v_mean'         : v_mean,
-        #     'v_med'          : v_med,
-        #     'v_mean_th'      : v_mean_th,
-        #     'v_mean_th_eff'  : v_mean_th_eff,
-        #     'vf'             : vf,
-        #     'Cf'             : Cf,
-        #     'wf'             : wf,
-        #     'vf_std'         : vf_std,
-        #     'Cf_std'         : Cf_std,
-        #     'wf_std'         : wf_std,
-
-        #     # --- Between Jumps --- #
-        #     'xbj_points'     : xbj_points,
-        #     'xbj_distrib'    : xbj_distrib,
-        #     'tbj_points'     : tbj_points,
-        #     'tbj_distrib'    : tbj_distrib,
-
-        #     # --- First Passage Time --- #
-        #     'fpt_distrib_2D' : fpt_distrib_2D,
-        #     'fpt_number'     : fpt_number,
-
-        #     # --- Instantaneous statistics --- #
-        #     'dx_points'      : dx_points,
-        #     'dx_distrib'     : dx_distrib,
-        #     'dx_mean'        : dx_mean,
-        #     'dx_med'         : dx_med,
-        #     'dx_mp'          : dx_mp,
-        #     'dt_points'      : dt_points,
-        #     'dt_distrib'     : dt_distrib,
-        #     'dt_mean'        : dt_mean,
-        #     'dt_med'         : dt_med,
-        #     'dt_mp'          : dt_mp,
-        #     'vi_points'      : vi_points,
-        #     'vi_distrib'     : vi_distrib,
-        #     'vi_mean'        : vi_mean,
-        #     'vi_med'         : vi_med,
-        #     'vi_mp'          : vi_mp,
-
-        #     # --- Fits --- #
-        #     'alpha0'         : alpha0,
-        #     'xt_over_t'      : xt_over_t,
-        #     'G'              : G,
-        #     'bound_low'      : bound_low,
-        #     'bound_high'     : bound_high,
-
-        #     }
-        
         data_result = {
-            
-            # Inputs
-            'algorithm'      : algorithm,    
-            'fact'           : fact,
-            'factmode'       : factmode,
-                        
-            'landscape'      : landscape,
-            's'              : s,
-            'l'              : l,
-            'bpmin'          : bpmin,
-            'mu'             : mu,
-            'theta'          : theta,
-            'alphaf'         : alphaf,
-            'alphao'         : alphao,
-            'beta'           : beta,
-            'lmbda'          : lmbda,
-            'rtot_capt'      : rtot_capt,
-            'rtot_rest'      : rtot_rest,
-            'alphad'         : alphad,
-            'alphar'         : alphar,
-            'kB'             : kB,
-            'kU'             : kU,
 
-            # Parameters
-            'Lmin'           : Lmin,
-            'Lmax'           : Lmax,
-            'bps'            : bps,
-            'origin'         : origin,
-            'tmax'           : tmax,
-            'dt'             : dt,
-            'times'          : times,            
-            'nt'             : nt,
-            
-            # Datas
-            's_mean'         : s_mean,
-            'l_mean'         : l_mean,
-            'alpha_mean_a'   : alpha_mean_a,
-            'alpha_mean_v'   : alpha_mean_v,
-            'alpha_mean_c'   : alpha_mean_c,
-            
-            # Outputs
-            'v_mean'         : v_mean,
-            'v_med'          : v_med,
-            'v_mean_th'      : v_mean_th,
-            'v_mean_th_eff'  : v_mean_th_eff,
-            'vf'             : vf,
-            'Cf'             : Cf,
-            'wf'             : wf,
-            'vf_std'         : vf_std,
-            'Cf_std'         : Cf_std,
-            'wf_std'         : wf_std,
-            'vi_mean'        : vi_mean,
-            'vi_med'         : vi_med,
-            'vi_mp'          : vi_mp,
-            
-            # # Forwards
-            # 'vi_frwd_points' : vi_frwd_points,
-            # 'vi_frwd_distrib': vi_frwd_distrib,
-            # 'vi_frwd_mean'   : vi_frwd_mean,
-            # 'vi_frwd_med'    : vi_frwd_med,
-            # 'vi_frwd_mp'     : vi_frwd_mp,
-            
-            # In Base Pairs
-            'c_linker'       : c_linker,
-            'c_nucleo'       : c_nucleo,
-            'vi_bp_array'    : vi_bp_array,
-            'vi_bp_mean'     : vi_bp_mean,
-            'vi_bp_med'      : vi_bp_med,
-            'vi_bp_points'   : vi_bp_points,
-            'vi_bp_distrib'  : vi_bp_distrib,           
-    
-            }
+            # --- Algorithm --- #
+            'algorithm' : algorithm,
+            'fact'      : fact,
+            'factmode'  : factmode,
+
+            # --- Principal Parameters --- #
+            'landscape' : landscape,
+            's'         : s,
+            'l'         : l,
+            'bpmin'     : bpmin,
+            'mu'        : mu,
+            'theta'     : theta,
+            'alphaf'    : alphaf,
+            'alphao'    : alphao,
+            'beta'      : beta,
+            'lmbda'     : lmbda,
+            'alphad'    : alphad,
+            'rtot_capt' : rtot_capt,
+            'rtot_rest' : rtot_rest,
+            'alphar'    : alphar,
+            'K'         : kB / (kB + kU),
+            'ktot'      : kB + kU,
+            'kB'        : kB,
+            'kU'        : kU,
+            'c_linker'  : c_linker,
+            'c_nucleo'  : c_nucleo,
+
+
+            # --- Chromatin Parameters --- #
+            'Lmin'      : Lmin,
+            'Lmax'      : Lmax,
+            'bps'       : bps,
+            'origin'    : origin,
+
+            # --- Time Parameters --- #
+            'tmax'      : tmax,
+            'dt'        : dt,
+            'times'     : times,
+
+            # --- Bins --- #
+            'binx'      : binx,
+            'bint'      : bint,
+
+            # --- Simulation --- #
+            'nt'        : nt,
+        }
+        
+        data_result.update({
+
+        # --- Means --- #
+        's_mean'        : s_mean,
+        'l_mean'        : l_mean,
+        'alpha_mean_a'  : alpha_mean_a,
+        'alpha_mean_v'  : alpha_mean_v,
+        'alpha_mean_c'  : alpha_mean_c,
+
+        # --- Linear Speeds --- #
+        'v_mean'        : v_mean,
+        'v_med'         : v_med,
+        'v_mean_th'     : v_mean_th,
+        'v_mean_th_eff' : v_mean_th_eff,
+        
+        # --- Fits --- #
+        'vf'            : vf,
+        'Cf'            : Cf,
+        'wf'            : wf,
+        'vf_std'        : vf_std,
+        'Cf_std'        : Cf_std,
+        'wf_std'        : wf_std,
+        
+        # --- Instantaneous Speeds --- #
+        'vi_mean'       : vi_mean,
+        'vi_med'        : vi_med,
+        'vi_mp'         : vi_mp,
+        
+        # --- Compaction --- #
+        'vi_bp_mean'    : vi_bp_mean,
+        'vi_bp_med'     : vi_bp_med,
+        
+        
+        })
+        
+        if total_return:
+            data_result.update({
+
+                # --- Chromatin (full) --- #
+                'obstacles'    : obstacles,
+                's_points'     : s_points,
+                's_distrib'    : s_distrib,
+                'l_points'     : l_points,
+                'l_distrib'    : l_distrib,
+                'l_view'       : l_view,
+
+                # --- Raw Datas --- #
+                'p'            : p,
+                # 't_matrix'     : t_matrix,
+                # 'x_matrix'     : x_matrix,
+
+                # --- Results --- #
+                'results'      : results,
+                'results_mean' : results_mean,
+                'results_med'  : results_med,
+                'results_std'  : results_std,
+
+                # --- Between Jumps --- #
+                'xbj_points'   : xbj_points,
+                'xbj_distrib'  : xbj_distrib,
+                'tbj_points'   : tbj_points,
+                'tbj_distrib'  : tbj_distrib,
+
+                # --- FPT --- #
+                'fpt_distrib'  : fpt_distrib,
+                'fpt_number'   : fpt_number,
+
+                # --- Instantaneous stats --- #
+                'dx_points'    : dx_points,
+                'dx_distrib'   : dx_distrib,
+                'dx_mean'      : dx_mean,
+                'dx_med'       : dx_med,
+                'dx_mp'        : dx_mp,
+
+                'dt_points'    : dt_points,
+                'dt_distrib'   : dt_distrib,
+                'dt_mean'      : dt_mean,
+                'dt_med'       : dt_med,
+                'dt_mp'        : dt_mp,
+
+                'vi_points'    : vi_points,
+                'vi_distrib'   : vi_distrib,
+                
+                'vi_bp_points' : vi_bp_points,
+                'vi_bp_distrib': vi_bp_distrib,    
+                            
+                'vi_frwd_points' : vi_frwd_points,
+                'vi_frwd_distrib': vi_frwd_distrib,
+                'vi_frwd_mean'   : vi_frwd_mean,
+                'vi_frwd_med'    : vi_frwd_med,
+                'vi_frwd_mp'     : vi_frwd_mp,
+
+                # --- Fits --- #
+                'alpha0'       : alpha0,
+                'xt_over_t'    : xt_over_t,
+                'G'            : G,
+                'bound_low'    : bound_low,
+                'bound_high'   : bound_high,
+            })
+
+
+        # ------------------- Writing ------------------- #
 
         # Types of data registered if needed
         inspect_data_types(data_result, launch=False)
@@ -659,6 +624,9 @@ def sw_nucleo(
         
     except Exception as e:
         print(f"Error in Writing : {e}")
+        
+        
+    # ------------------- Return ------------------- #
 
     return None
 
@@ -692,8 +660,8 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         beta=params['beta'],
         alphad=params['alphad'],
         alphar=params['alphar'],
-        kB=params['kB'],
-        kU=params['kU'],
+        ktot=params['ktot'],
+        klist=params['klist'],
         nt=params['nt'],
         
         Lmin=chromatin["Lmin"],
@@ -712,7 +680,7 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         params['mu'], params['theta'],
         params['lmbda'], params['alphaf'], params['alphao'], params['beta'], params['alphad'],
         params['rtot_capt'], params['rtot_rest'],
-        params['alphar'], params['kB'], params['kU'],
+        params['alphar'], params['ktot'], params['klist'],
         
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
         time["tmax"], time["dt"],

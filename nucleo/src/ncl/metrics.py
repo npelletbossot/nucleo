@@ -473,7 +473,7 @@ def calculate_fpt_matrix(t_matrix: np.ndarray, x_matrix: np.ndarray, tmax: int, 
     return fpt_results, fpt_number
 
 
-def calculate_instantaneous_statistics(
+def calculate_instantaneous_speeds(
     t_matrix: np.ndarray, 
     x_matrix: np.ndarray, 
     first_bin: float = 0,
@@ -595,7 +595,15 @@ def calculate_instantaneous_statistics(
 # 2.3 : Forward and Reverse steps
 
 
-def identify_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray, nt: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def identify_jumps(algorithm: str, t_matrix: np.ndarray, x_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    
+    if algorithm == "one_step":
+        x_reverse, t_reverse = np.empty_like(x_matrix), np.empty_like(t_matrix)
+        x_reverse[:], t_reverse[:] = np.nan, np.nan
+        return (
+        np.array(x_matrix), np.array(t_matrix),
+        np.array(x_reverse), np.array(t_reverse)
+        )
     
     # Getting all the times (non cumulated) from the t_matrix
     t_array = np.diff(t_matrix, axis=1)
@@ -632,8 +640,8 @@ def identify_jumps(x_matrix: np.ndarray, t_matrix: np.ndarray, nt: int) -> tuple
     t_reverse = np.cumsum(t_reverse)
     
     return (
-        np.array([x_forward]), np.array([t_forward]),
-        np.array([x_reverse]), np.array([t_reverse])
+        np.array(t_forward), np.array(x_forward),
+        np.array(t_reverse), np.array(x_reverse)
     )
 
 
@@ -998,10 +1006,9 @@ def calculate_compaction(segment, alphaf, alphao, c_linker, c_nucleo):
     return ((c_linker * n_alphaf) + (c_nucleo * n_alphao)) / n_tot
 
     
-def calculate_compaction_statistics(
-    alpha_matrix: np.ndarray, t_matrix: np.ndarray, x_matrix: np.ndarray,
-    alphaf: float, alphao: float, c_linker: float, c_nucleo: float,
-    forward_filter: bool = False
+def calculate_compaction_speeds(
+    algorithm: str, alphaf: float, alphao: float, c_linker: float, c_nucleo: float,
+    alpha_matrix: np.ndarray, t_matrix: np.ndarray, x_matrix: np.ndarray
 ):
     """
     Compute compaction-corrected velocities (in base pairs per unit time)
@@ -1078,7 +1085,65 @@ def calculate_compaction_statistics(
         bp_matrix[i, :len(delta_bp)] = delta_bp
         vi_bp_array = bp_matrix[~np.isnan(bp_matrix)]
     
-    if forward_filter:
-        return vi_bp_array[vi_bp_array > 0]
-    else:
+    if algorithm == "one_step":
         return vi_bp_array
+    elif algorithm == "two_steps":
+        return vi_bp_array[vi_bp_array > 0]
+    
+    
+def calculate_compaction_statistics(
+    algorithm: str, landscape: str, 
+    alphaf: float, alphao: float, c_linker: float, c_nucleo: float,
+    alpha_matrix: np.ndarray, t_matrix: np.ndarray, x_matrix: np.ndarray,
+    vi_mean: float, vi_med: float,
+    x_fb: float, x_lb: float, x_bw: float
+):
+    """
+    Compute instantaneous velocity statistics expressed in base pairs.
+
+    Instantaneous velocities are converted into base pairs using chromatin
+    compaction factors. The velocity distribution is computed, and the mean
+    and median are extracted depending on the chromatin landscape.
+
+    Parameters
+    ----------
+    alpha_matrix : np.ndarray
+    t_matrix : np.ndarray
+    x_matrix : np.ndarray
+    alphaf : float
+    alphao : float
+    c_linker : float
+    c_nucleo : float
+    landscape : {"homogeneous", "heterogeneous"}, optional
+        Type of chromatin landscape.
+    x_fb, x_lb, x_bw : float
+        Histogram bounds and bin width.
+
+    Returns
+    -------
+    vi_bp_mean : float
+        Mean instantaneous velocity (bp).
+    vi_bp_med : float
+        Median instantaneous velocity (bp).
+    vi_bp_points : np.ndarray
+        Histogram bin centers.
+    vi_bp_distrib : np.ndarray
+        Velocity distribution in base pairs.
+    """
+    
+    vi_bp_array = calculate_compaction_speeds(
+        algorithm, alphaf, alphao, c_linker, c_nucleo,
+        alpha_matrix, t_matrix, x_matrix
+    )
+        
+    vi_bp_points, vi_bp_distrib = calculate_distribution(vi_bp_array, x_fb, x_lb, x_bw)    
+
+    if landscape == "homogeneous":
+        vi_bp_mean = vi_mean * (c_linker + c_nucleo) / 2
+        vi_bp_med  = vi_med * (c_linker + c_nucleo) / 2
+                    
+    else:  
+        vi_bp_mean, vi_bp_med = np.mean(vi_bp_array), np.median(vi_bp_array)
+        
+    return vi_bp_mean, vi_bp_med, vi_bp_points, vi_bp_distrib
+

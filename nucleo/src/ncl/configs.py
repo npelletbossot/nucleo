@@ -122,8 +122,10 @@ def choose_configuration(config: str) -> dict:
     RATES = {
         "rtot_capt": 1/2,   # Rate of capturing (1/6)
         "rtot_rest": 1/2,   # Rate of resting (1/6)
-        "kB" : 0.50,        # Rate of FACT Binding
-        "kU": 0.50,         # Rate of FACT Unbinding
+        # "kB" : 0.50,        # Rate of FACT Binding
+        # "kU": 0.50,         # Rate of FACT Unbinding
+        "ktot": 1.0,       # New formalism
+        "klist": 1.0       # New formalism
     }
     
     # ──────────────────────────────────
@@ -145,8 +147,8 @@ def choose_configuration(config: str) -> dict:
         "rates": {
             "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
             "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-            "kB": np.array([0.00], dtype=float),
-            "kU": np.array([0.00], dtype=float)
+            "ktot": np.array([RATES["ktot"]], dtype=float),
+            "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
             "nt": 10_000
@@ -170,8 +172,8 @@ def choose_configuration(config: str) -> dict:
         "rates": {
             "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
             "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-            "kB": np.array([0.00], dtype=float),
-            "kU": np.array([0.00], dtype=float),
+            "ktot": np.array([RATES["ktot"]], dtype=float),
+            "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
             "nt": 10_000
@@ -183,7 +185,7 @@ def choose_configuration(config: str) -> dict:
         "geometry": {
             "landscape": np.array(['homogeneous', 'periodic', 'random']),
             "s": np.array([35], dtype=int),
-            "l": np.array([10], dtype=int),
+            "l": np.array([10, 30, 50, 100, 150], dtype=int),
             "bpmin": np.array([0], dtype=int)
         },
         "probas": {
@@ -199,11 +201,11 @@ def choose_configuration(config: str) -> dict:
         "rates": {
             "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
             "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-            "kB": np.array([RATES["kB"]], dtype=float),
-            "kU": np.array([RATES["kU"]], dtype=float)
+            "ktot": np.array([1.00], dtype=float),
+            "klist": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
         },
         "meta": {
-            "nt": 10_000
+            "nt": 10
         }
     }
     
@@ -228,11 +230,11 @@ def choose_configuration(config: str) -> dict:
         "rates": {
             "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
             "rtot_rest": np.array([RATES["rtot_rest"]], dtype=float),
-            "kB": np.array([RATES["kB"]], dtype=float),
-            "kU": np.array([RATES["kU"]], dtype=float)
+            "ktot": np.array([RATES["ktot"]], dtype=float),
+            "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
-            "nt": 100
+            "nt": 10
         }
     }
 
@@ -414,7 +416,7 @@ def choose_configuration(config: str) -> dict:
         
         "TEST_A": {
             **TEST__BASE,
-            "formalism": {**FORMALISMS['alg2_passive_full']},
+            "formalism": {**FORMALISMS['alg1']},
             "meta": {
                 **TEST__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__testA"
@@ -429,17 +431,10 @@ def choose_configuration(config: str) -> dict:
                 "path": f"{PROJECT['project_name']}__testB"
             }
         },
-        
-        "TEST_C": {
-            **TEST__BASE,
-            "formalism": {**FORMALISMS['alg2_active_full']},
-            "meta": {
-                **TEST__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__testC"
-            }
-        },
 
     }
+    
+    # ---- RETURN ---- #
 
     if config not in presets:
         raise ValueError(f"Unknown configuration: {config}")

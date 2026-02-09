@@ -551,18 +551,6 @@ def remodelling_obstacle(
     return np.array(alpha_array)
 
 
-# def remodelling_global(alpha_array, x, alphao, alphar):
-#     mask = (alpha_array == alphao)
-#     x_left = np.copy(x)
-#     while x_left > 0 and mask[x_left - 1]:
-#         x_left -= 1
-#     x_right = np.copy(x)
-#     while x_right < len(mask) - 1 and mask[x_right + 1]:
-#         x_right += 1
-#     alpha_array[x_left:x_right + 1] = alphar
-#     return alpha_array
-
-
 def fact_passive(K: float) -> bool:
     """
     Determine whether FACT-mediated chromatin remodelling occurs
