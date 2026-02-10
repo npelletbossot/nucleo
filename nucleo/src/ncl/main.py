@@ -65,7 +65,7 @@ CONFIG = [
     ["TEST_A", "TEST_B"]
 ]
     
-rank_of_study = 4
+rank_of_study = 3
 
 
 # ─────────────────────────────────────────────

@@ -386,12 +386,23 @@ def sw_nucleo(
     # ------------------- Analysis 3 : Speeds + Compaction ------------------- #
     
     try:
-
+        
+        # All Jumps
+        if algorithm == "one_step":
+            t_analysis = t_matrix
+            x_analysis = x_matrix
+        
+        # Forward Jumps
+        elif algorithm == "two_steps":
+            t_forward, x_forward, t_reverse, x_reverse = get_jumps(t_matrix, x_matrix)
+            t_analysis = np.cumsum(t_forward, axis=1) # t are not cumulatives here !
+            x_analysis = x_forward
+        
         # Instantaneous Speeds
         dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
         dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
         vi_points, vi_distrib, vi_mean, vi_med, vi_mp = calculate_instantaneous_speeds(
-            t_matrix, x_matrix
+            t_analysis, x_analysis
         )            
         
         # Instantaneous speeds with compaction (bp)
@@ -399,34 +410,12 @@ def sw_nucleo(
             calculate_compaction_statistics(
                 algorithm, landscape,
                 alphaf, alphao, c_linker, c_nucleo,
-                alpha_matrix, t_matrix, x_matrix,
+                alpha_matrix, t_analysis, x_analysis,
                 vi_mean, vi_med,
                 x_fb, x_lb, x_bw,
             )
-        )
-        
-        # Nature of jumps
-        t_forward, x_forward, t_reverse, x_reverse = identify_jumps(algorithm, t_matrix, x_matrix)
-        
-        
-        
-        # I
-        print(x_forward, t_forward)
-
-        # Instantaneous Speeds
-        _, _, _, _, _, \
-        _, _, _, _, _, \
-        vi_frwd_points, vi_frwd_distrib, vi_frwd_mean, vi_frwd_med, vi_frwd_mp = calculate_instantaneous_speeds(
-            t_forward, x_forward
-        )     
-            # # Forwards
-            # 'vi_frwd_points' : vi_frwd_points,
-            # 'vi_frwd_distrib': vi_frwd_distrib,
-            # 'vi_frwd_mean'   : vi_frwd_mean,
-            # 'vi_frwd_med'    : vi_frwd_med,
-            # 'vi_frwd_mp'     : vi_frwd_mp,
-        
-            
+        )        
+                    
     except Exception as e:
         print(f"Error in Analysis 3 - Speeds + Compactions : {e}")
          
@@ -540,7 +529,6 @@ def sw_nucleo(
         'vi_bp_mean'    : vi_bp_mean,
         'vi_bp_med'     : vi_bp_med,
         
-        
         })
         
         if total_return:
@@ -592,13 +580,7 @@ def sw_nucleo(
                 'vi_distrib'   : vi_distrib,
                 
                 'vi_bp_points' : vi_bp_points,
-                'vi_bp_distrib': vi_bp_distrib,    
-                            
-                'vi_frwd_points' : vi_frwd_points,
-                'vi_frwd_distrib': vi_frwd_distrib,
-                'vi_frwd_mean'   : vi_frwd_mean,
-                'vi_frwd_med'    : vi_frwd_med,
-                'vi_frwd_mp'     : vi_frwd_mp,
+                'vi_bp_distrib': vi_bp_distrib,
 
                 # --- Fits --- #
                 'alpha0'       : alpha0,
@@ -606,6 +588,7 @@ def sw_nucleo(
                 'G'            : G,
                 'bound_low'    : bound_low,
                 'bound_high'   : bound_high,
+                
             })
 
 

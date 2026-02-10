@@ -12,7 +12,7 @@ Analysis functions for analyzing results, etc.
 import numpy as np
 from scipy.optimize import curve_fit
 
-from tls.utils import calculate_distribution, exp_decay
+from tls.utils import *
 from ncl.fitting import linear_fit
 from ncl.landscape import find_blocks
 
@@ -261,51 +261,6 @@ def calculate_main_results(results: np.ndarray, dt: float, alpha_0: float, lb: i
     return mean_results, med_results, std_results, v_mean, v_med
 
 
-# def calculate_position_histogram(results: list, Lmax: int, origin: int, tmax: int, time_step: int = 1) -> np.ndarray:
-#     """
-#     Calculate the position histogram for a set of results over time.
-
-#     Args:
-#         results (list): A list of trajectories, where each trajectory is a list of positions over time.
-#         Lmax (int): Maximum length of the domain.
-#         origin (int): Offset or starting position for the domain.
-#         tmax (int): Maximum time for the simulation.
-#         time_step (int, optional): Time step interval for calculating histograms. Defaults to 1.
-
-#     Returns:
-#         np.ndarray: A 2D array representing the normalized histogram of positions over time.
-#             Rows correspond to bins, and columns correspond to time steps.
-
-#     Notes:
-#         - The domain is divided into bins ranging from 0 to `Lmax - 2 * origin`.
-#         - Histograms are calculated for each time step, and the resulting counts are normalized to probabilities.
-#         - If no data exists for a time step, the corresponding histogram is filled with zeros.
-#     """
-
-#     results_transposed = np.array(results).T                # Transpose the results to process positions at each time step
-#     num_bins = np.arange(0, Lmax - (2 * origin) + 1, 1)     # Define the bins for the histogram
-#     histograms = [None] * (tmax // time_step)               # Initialize the list for histograms
-
-#     # Calculate the histogram for each time step
-#     for t in range(0, tmax, time_step):
-#         bin_counts, _ = np.histogram(results_transposed[t], bins=num_bins)
-#         histograms[t] = bin_counts
-
-#     # Normalize the histograms to probabilities
-#     histograms_list = [arr.tolist() for arr in histograms]
-#     for t in range(0, tmax, time_step):
-#         total_count = np.sum(histograms_list[t])
-#         if total_count != 0:
-#             histograms_list[t] = np.divide(histograms_list[t], total_count)
-#         else:
-#             histograms_list[t] = np.zeros_like(histograms_list[t], dtype=np.float64)
-
-#     # Convert the list of histograms to a NumPy array and transpose it
-#     histograms_array = np.copy(histograms_list).T
-
-#     return histograms_array
-
-
 def calculate_position_histogram(results: list, Lmax: int, origin: int, tmax: int, time_step: int = 1) -> np.ndarray:
     """
     Calculate the position histogram for a set of results over time.
@@ -322,37 +277,33 @@ def calculate_position_histogram(results: list, Lmax: int, origin: int, tmax: in
             Rows correspond to bins, and columns correspond to time steps.
 
     Notes:
+        - The domain is divided into bins ranging from 0 to `Lmax - 2 * origin`.
+        - Histograms are calculated for each time step, and the resulting counts are normalized to probabilities.
         - If no data exists for a time step, the corresponding histogram is filled with zeros.
     """
 
-    # Convert results to array and transpose safely
-    results_array = np.array(results)
-    if results_array.size == 0:
-        return np.zeros((Lmax - 2 * origin, tmax // time_step), dtype=np.float64)
+    results_transposed = np.array(results).T                # Transpose the results to process positions at each time step
+    num_bins = np.arange(0, Lmax - (2 * origin) + 1, 1)     # Define the bins for the histogram
+    histograms = [None] * (tmax // time_step)               # Initialize the list for histograms
 
-    # Handle possible shorter trajectories
-    max_time = min(tmax, results_array.shape[1])
-    results_transposed = results_array[:, :max_time].T  # Transpose safely
+    # Calculate the histogram for each time step
+    for t in range(0, tmax, time_step):
+        bin_counts, _ = np.histogram(results_transposed[t], bins=num_bins)
+        histograms[t] = bin_counts
 
-    # Define bins
-    num_bins = np.arange(0, Lmax - 2 * origin + 1, 1)
-    num_time_steps = tmax // time_step
-    histograms = np.zeros((len(num_bins) - 1, num_time_steps), dtype=np.float64)  # pre-initialize
-
-    # Calculate histograms
-    for idx, t in enumerate(range(0, max_time, time_step)):
-        positions = results_transposed[t] if t < results_transposed.shape[0] else np.array([])
-        if positions.size > 0:
-            bin_counts, _ = np.histogram(positions, bins=num_bins)
-            total_count = bin_counts.sum()
-            if total_count > 0:
-                histograms[:, idx] = bin_counts / total_count
-            else:
-                histograms[:, idx] = np.zeros_like(bin_counts, dtype=np.float64)
+    # Normalize the histograms to probabilities
+    histograms_list = [arr.tolist() for arr in histograms]
+    for t in range(0, tmax, time_step):
+        total_count = np.sum(histograms_list[t])
+        if total_count != 0:
+            histograms_list[t] = np.divide(histograms_list[t], total_count)
         else:
-            histograms[:, idx] = np.zeros(len(num_bins) - 1, dtype=np.float64)
+            histograms_list[t] = np.zeros_like(histograms_list[t], dtype=np.float64)
 
-    return histograms
+    # Convert the list of histograms to a NumPy array and transpose it
+    histograms_array = np.copy(histograms_list).T
+
+    return histograms_array
 
 
 def calculate_jumpsize_distribution(x_matrix: np.ndarray, first_bin: int, last_bin: int, bin_width: float) -> tuple[np.ndarray, np.ndarray]:
@@ -990,6 +941,102 @@ def calculate_dwell_times(
     y0_reverses, tau_reverses = safe_fit(x_fit_rev, y_fit_rev, p0_rev)
 
     return tau_forwards, tau_reverses
+
+
+def get_jumps(
+    t_matrix: np.ndarray,
+    x_matrix: np.ndarray,
+    total_return: bool = False
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+    # Formalism 1
+    t_forward_all, x_forward_all = [], []
+    t_reverse_all, x_reverse_all = [], []
+    
+    # Formalism 2
+    if total_return:
+        t_try_all, x_try_all = [], []
+        t_rejected_all, x_rejected_all = [], []
+        t_accepted_all, x_accepted_all = [], []
+    
+    # Loop parameters
+    n_traj, n_steps = x_matrix.shape
+    
+    for i in range(n_traj):
+        
+        # Each Trajectory
+        t_traj = t_matrix[i]
+        x_traj = x_matrix[i]
+        
+        # Formalism 1
+        t_forward, x_forward = [0.0], [0] 
+        t_reverse, x_reverse = [0.0], [0]
+        
+        # Formalism 2
+        if total_return:
+            t_try, x_try = [0.0], [0] 
+            t_rejected, x_rejected = [0.0], [0]
+            t_accepted, x_accepted = [0.0], [0]
+        
+        for j in range(len(t_traj) - 1):
+            
+            dx = x_traj[j+1] - x_traj[j]
+            
+            if dx < 0:
+                t_reverse.append(t_traj[j+1] - t_traj[j-1])  
+                x_reverse.append(x_traj[j])
+                if total_return:
+                    t_rejected.append(t_traj[j+1] - t_traj[j])                
+
+            elif dx == 0:
+                t_forward.append(t_traj[j+1] - t_traj[j-1])      
+                x_forward.append(x_traj[j+1])
+                if total_return:
+                    t_accepted.append(t_traj[j+1] - t_traj[j])              
+            
+            elif dx > 0:
+                if total_return:
+                    t_try.append(t_traj[j+1] - t_traj[j])
+                    x_try.append(x_traj[j+1])
+                
+        if total_return:       
+            x_rejected = x_reverse
+            x_accepted = x_forward
+            
+        t_forward_all.append(t_forward)
+        x_forward_all.append(x_forward)
+        t_reverse_all.append(t_reverse)        
+        x_reverse_all.append(x_reverse)
+        
+        if total_return:
+            t_try_all.append(t_forward)
+            x_try_all.append(x_forward)
+            t_rejected_all.append(t_rejected) 
+            x_rejected_all.append(x_rejected) 
+            t_accepted_all.append(t_accepted) 
+            x_accepted_all.append(x_accepted) 
+        
+    if not total_return:
+        return (
+            listoflist_into_matrix(t_forward_all),
+            listoflist_into_matrix(x_forward_all),
+            listoflist_into_matrix(t_reverse_all),
+            listoflist_into_matrix(x_reverse_all),
+        )
+        
+    else:
+        return (
+            listoflist_into_matrix(t_forward_all),
+            listoflist_into_matrix(x_forward_all),
+            listoflist_into_matrix(t_reverse_all),
+            listoflist_into_matrix(x_reverse_all),
+            listoflist_into_matrix(t_try_all),
+            listoflist_into_matrix(x_try_all),
+            listoflist_into_matrix(t_rejected_all),
+            listoflist_into_matrix(x_rejected_all),
+            listoflist_into_matrix(t_accepted_all),
+            listoflist_into_matrix(x_accepted_all),
+        )
 
 
 # 2.4 : Compaction

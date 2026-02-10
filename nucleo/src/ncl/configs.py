@@ -205,7 +205,7 @@ def choose_configuration(config: str) -> dict:
             "klist": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
         },
         "meta": {
-            "nt": 10
+            "nt": 10_000
         }
     }
     
