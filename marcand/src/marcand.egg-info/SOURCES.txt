@@ -1,9 +1,0 @@
-pyproject.toml
-src/marcand.egg-info/PKG-INFO
-src/marcand.egg-info/SOURCES.txt
-src/marcand.egg-info/dependency_links.txt
-src/marcand.egg-info/requires.txt
-src/marcand.egg-info/top_level.txt
-src/mrc/__init__.py
-src/mrc/marcand.py
-src/mrc/plots.py

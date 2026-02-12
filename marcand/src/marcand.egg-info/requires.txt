@@ -1,8 +1,0 @@
-numpy
-matplotlib
-tqdm
-pyarrow
-polars
-nucleo@ file:///home/nicolas/Documents/PhD/Workspace/nucleo
-ploop@ file:///home/nicolas/Documents/PhD/Workspace/ploop
-utils@ file:///home/nicolas/Documents/PhD/Workspace/utils

@@ -1,7 +1,0 @@
-numpy
-matplotlib
-tqdm
-pyarrow
-polars
-scipy
-utils@ file:///home/nicolas/Documents/PhD/Workspace/utils

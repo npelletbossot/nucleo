@@ -1,2 +1,23 @@
-**/outputs/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# VS Code
+.vscode/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Outputs / résultats
+outputs/
+
+# Venv
 .venv/

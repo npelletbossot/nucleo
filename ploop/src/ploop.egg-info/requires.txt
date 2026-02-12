@@ -1,6 +1,0 @@
-numpy
-matplotlib
-tqdm
-pyarrow
-polars
-utils@ file:///home/nicolas/Documents/PhD/Workspace/utils
