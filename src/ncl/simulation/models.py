@@ -9,9 +9,12 @@ Modeling functions for generating results, etc.
 # 1 : Librairies
 # ─────────────────────────────────────────────
 
+# 1.1 : Standard 
 import numpy as np
 
-from ncl.landscape import find_blocks
+
+# 1.2 : Package 
+from ncl.simulation.chromatin import find_blocks
 
 
 # ─────────────────────────────────────────────

@@ -9,15 +9,52 @@ Analysis functions for analyzing landscape data.
 # 1 : Librairies
 # ─────────────────────────────────────────────
 
+# 1.1 : Standard 
 import numpy as np
 
-from tls.utils import *
-from ncl.landscape import find_blocks
+
+# 1.1 : Package
+from ncl.simulation.chromatin import find_blocks
+from ncl.metrics.utils import clc_distrib
 
 
 # ─────────────────────────────────────────────
 # 2 : Functions
 # ─────────────────────────────────────────────
+
+def clc_alpha_mean(alphaf: float, alphao: float, s: int, l: int) -> float:
+    """
+    Calculate the weighted average of alpha.
+    Chromatin related.
+    """
+    return((alphaf * l + alphao * s) / (l + s))
+
+
+def find_interval_containing_value(
+    intervals: list[tuple[int, int]], value: int
+) -> tuple[int, int]:
+    """
+    Return the first interval (start, end) that contains the specified value.
+
+    Parameters
+    ----------
+    intervals : list[tuple[int, int]]
+        A list of intervals (start, end) sorted or unsorted.
+    
+    value : int
+        The index or position to locate within the intervals.
+
+    Returns
+    -------
+    Optional[tuple[int, int]]
+        The interval that contains the value, or None if not found.
+    """
+    intervals_array = np.array(intervals)
+    mask = (intervals_array[:, 0] <= value) & (value < intervals_array[:, 1])
+
+    
+    if np.any(mask):
+        return tuple(intervals_array[mask][0])
 
 
 def clc_link_view(
@@ -164,7 +201,7 @@ def clc_obs_and_link_distrib(
 
     if counts_o.size > 0:
         mean_o = float(np.mean(counts_o))
-        points_o, distrib_o = calculate_distribution(
+        points_o, distrib_o = clc_distrib(
             data=counts_o,
             first_bin=0,
             last_bin=np.max(counts_o) + step,
@@ -182,7 +219,7 @@ def clc_obs_and_link_distrib(
 
     if counts_l.size > 0:
         mean_l = float(np.mean(counts_l))
-        points_l, distrib_l = calculate_distribution(
+        points_l, distrib_l = clc_distrib(
             data=counts_l,
             first_bin=0,
             last_bin=np.max(counts_l) + step,

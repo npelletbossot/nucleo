@@ -10,7 +10,6 @@ Utility functions for dictionary merging, math helpers, etc.
 # ─────────────────────────────────────────────
 
 from collections import defaultdict
-
 import numpy as np
 
 
@@ -68,7 +67,7 @@ def compute_mean_from_dict(input_dict: dict) -> dict:
 # 2.2 : Calculations
 
 
-def calculate_distribution(
+def clc_distrib(
     data: np.ndarray, 
     first_bin: float, 
     last_bin: float, 

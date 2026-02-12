@@ -9,10 +9,16 @@ Analysis functions for analyzing twosteps results.
 # 1 : Librairies
 # ─────────────────────────────────────────────
 
+# 1.1 : Standard
 import numpy as np
 from scipy.optimize import curve_fit
 
-from tls.utils import *
+# 1.2 : Package
+from ncl.metrics.utils import (
+    exp_decay,
+    clc_distrib, 
+    listoflist_into_matrix
+)
 
 
 # ─────────────────────────────────────────────
@@ -148,10 +154,10 @@ def calculate_nature_jump_distribution(t_matrix: np.ndarray,
     fb_array, fr_array, rb_array, rr_array = find_jumps(x_matrix, t_matrix)
     
     # Get the distributions of datas
-    _, fb_y = calculate_distribution(data=fb_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
-    _, fr_y = calculate_distribution(data=fr_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
-    _, rb_y = calculate_distribution(data=rb_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
-    _, rr_y = calculate_distribution(data=rr_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
+    _, fb_y = clc_distrib(data=fb_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
+    _, fr_y = clc_distrib(data=fr_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
+    _, rb_y = clc_distrib(data=rb_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
+    _, rr_y = clc_distrib(data=rr_array, first_bin=first_bin, last_bin=last_bin, bin_width=bin_width)
     
     return fb_y, fr_y, rb_y, rr_y
 
@@ -242,7 +248,7 @@ def getting_forwards(
     diff = np.diff(result)
     frwd_times = diff[diff > 0]
 
-    points, distrib_forwards = calculate_distribution(frwd_times, first_bin, last_bin, bin_width)
+    points, distrib_forwards = clc_distrib(frwd_times, first_bin, last_bin, bin_width)
     return points, distrib_forwards
 
 
@@ -284,7 +290,7 @@ def getting_reverses(
             if filter[i][j] == True:
                 dwell.append(times[i][j] - false_value)
 
-    points, distrib_reverses = calculate_distribution(np.array(dwell), first_bin, last_bin, bin_width)
+    points, distrib_reverses = clc_distrib(np.array(dwell), first_bin, last_bin, bin_width)
     return points, distrib_reverses
 
 
@@ -344,8 +350,8 @@ def calculate_dwell_distribution(t_matrix: list, x_matrix: list, first_bin: floa
 
     # Calculating the distributions of all extracted times
     dwell_points = np.arange(first_bin, last_bin, bin_width)
-    _, forward_result = calculate_distribution(t_forwards_filtered, first_bin, last_bin, bin_width)
-    _, reverse_result = calculate_distribution(t_reverses_filtered, first_bin, last_bin, bin_width)
+    _, forward_result = clc_distrib(t_forwards_filtered, first_bin, last_bin, bin_width)
+    _, reverse_result = clc_distrib(t_reverses_filtered, first_bin, last_bin, bin_width)
 
     return dwell_points, forward_result, reverse_result
 

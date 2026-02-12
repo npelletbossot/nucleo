@@ -9,11 +9,14 @@ Analysis functions for analyzing results data.
 # 1 : Librairies
 # ─────────────────────────────────────────────
 
+# 1.1 : Standard
 import numpy as np
 
-from tls.utils import *
-from ncl.landscape import clc_alpha_mean
-from ncl.fitting import linear_fit
+# 1.2 : Package
+from ncl.metrics.speeds import clc_bp_speeds
+
+from ncl.metrics.utils import clc_distrib
+from ncl.metrics.fitting import linear_fit
 
 
 # ─────────────────────────────────────────────
@@ -22,19 +25,6 @@ from ncl.fitting import linear_fit
 
 
 # 2.1 Sites
-
-
-def clc_th_speed(
-    alphaf: float, alphao: float, s: int, l: int, 
-    mu: float, lmbda: float, rtot_capt: float, rtot_rest: float,
-    ) -> float:
-    """
-    Calculate the theoretical average speed.
-    Loop Extrusion related.
-    """
-    alpha_mean = clc_alpha_mean(alphaf, alphao, s, l)
-    rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
-    return mu * (1 - lmbda) / rates_mean * alpha_mean
 
 
 def clc_site_results(results: np.ndarray, dt: float, alpha_0: float, lb: int) -> tuple:
@@ -122,7 +112,7 @@ def clc_bp_results(
         alpha_matrix, t_matrix, x_matrix
     )
         
-    vi_bp_points, vi_bp_distrib = calculate_distribution(vi_bp_array, x_fb, x_lb, x_bw)    
+    vi_bp_points, vi_bp_distrib = clc_distrib(vi_bp_array, x_fb, x_lb, x_bw)    
 
     if landscape == "homogeneous":
         vi_bp_mean = vi_mean * (c_linker + c_nucleo) / 2

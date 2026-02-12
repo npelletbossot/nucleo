@@ -9,7 +9,12 @@ Analysis functions for analyzing jump data.
 # 1 : Librairies
 # ─────────────────────────────────────────────
 
+# 1.1 : Standard
 import numpy as np
+
+
+# 1.2 : Package
+from ncl.metrics.utils import clc_distrib
 
 
 # ─────────────────────────────────────────────
@@ -78,7 +83,7 @@ def clc_jumpsize_distrib(x_matrix: np.ndarray, first_bin: int, last_bin: int, bi
 
     data = np.diff(x_matrix, axis=1)
     data = data[~np.isnan(data)]
-    points, distribution = calculate_distribution(data, first_bin, last_bin, bin_width)
+    points, distribution = clc_distrib(data, first_bin, last_bin, bin_width)
 
     return points, distribution
 

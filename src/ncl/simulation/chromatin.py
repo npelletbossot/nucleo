@@ -163,14 +163,6 @@ def clc_alpha_matrix(
     return alpha_matrix
 
 
-def clc_alpha_mean(alphaf: float, alphao: float, s: int, l: int) -> float:
-    """
-    Calculate the weighted average of alpha.
-    Chromatin related.
-    """
-    return((alphaf * l + alphao * s) / (l + s))
-
-
 # 2.3 Binding minimal size
 
 
@@ -270,33 +262,6 @@ def find_blocks(array: np.ndarray, alpha_value: float) -> list[tuple[int, int]]:
     return np.array(list(zip(starts, ends)))
 
 
-def find_interval_containing_value(
-    intervals: list[tuple[int, int]], value: int
-) -> tuple[int, int]:
-    """
-    Return the first interval (start, end) that contains the specified value.
-
-    Parameters
-    ----------
-    intervals : list[tuple[int, int]]
-        A list of intervals (start, end) sorted or unsorted.
-    
-    value : int
-        The index or position to locate within the intervals.
-
-    Returns
-    -------
-    Optional[tuple[int, int]]
-        The interval that contains the value, or None if not found.
-    """
-    intervals_array = np.array(intervals)
-    mask = (intervals_array[:, 0] <= value) & (value < intervals_array[:, 1])
-
-    
-    if np.any(mask):
-        return tuple(intervals_array[mask][0])
-
-
 def destroy_obstacles(array: np.ndarray, ratio: float, alphaf: float, alphao: float, begin: int, end: int) -> np.ndarray:
     """
     Randomly destroys a fraction of obstacles in a given 1D landscape array
@@ -337,6 +302,3 @@ def destroy_obstacles(array: np.ndarray, ratio: float, alphaf: float, alphao: fl
 
     array[begin:end] = region
     return array
-
-
-

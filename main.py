@@ -1,5 +1,20 @@
-#!/usr/bin/env python3
-from ncl.core.run import main
+"""
+nucleo.launching_functions
+------------------------
+Launching functions for simulations.
+"""
+
+
+# ─────────────────────────────────────────────
+# 1 : Package
+# ─────────────────────────────────────────────
+
+from ncl.core.launching import main
+
+
+# ─────────────────────────────────────────────
+# 2 : Call
+# ─────────────────────────────────────────────
 
 if __name__ == "__main__":
     main(

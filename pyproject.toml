@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "nucleo"
 version = "0.1.0"
 description = "My PhD tools for nucleo simulations"
-authors = [{ name = "Nicolas PELLET", email = "nicolas.pellet@ens-lyon.fr" }]
-requires-python = ">=3.10"
+authors = [{ name="Nicolas PELLET", email="nicolas.pellet@ens-lyon.fr" }]
+requires-python = ">=3.11"
 dependencies = [
   "numpy",
   "matplotlib",
@@ -16,9 +16,6 @@ dependencies = [
   "polars",
   "scipy"
 ]
-
-[tool.setuptools]
-package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]

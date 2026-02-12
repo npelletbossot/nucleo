@@ -1,7 +1,7 @@
 """
 nucleo.run_functions
 ------------------------
-Running functions for one simulation, etc.
+Running functions for one simulation.
 """
 
 
@@ -9,27 +9,53 @@ Running functions for one simulation, etc.
 # 1 : Librairies
 # ─────────────────────────────────────────────
 
-import gc
+# 1.1 : Standard 
+from __future__ import annotations
 import numpy as np
 
-from ncl.landscape import clc_alpha_matrix, clc_alpha_mean
-from ncl.landscape import destroy_obstacles, find_blocks
 
-from tls.probabilities import proba_gamma
+# 1.2 : Package
 
-from ncl.models import gillespie_algo_one_step, gillespie_algo_two_steps
+# 1.2.1 : Simulation
+from ncl.simulation.models import gillespie_algo_one_step, gillespie_algo_two_steps
+from ncl.simulation.chromatin import (
+    clc_alpha_matrix,
+    destroy_obstacles,
+    find_blocks
+)
+from ncl.simulation.chromatin import destroy_obstacles, find_blocks
+from ncl.simulation.probabilities import proba_gamma
 
-from tls.utils import listoflist_into_matrix
+# 1.2.2 : Tools
+from ncl.metrics.utils import listoflist_into_matrix
+from ncl.metrics.fitting import fitting_in_two_steps
 
-from ncl.metrics_landscape import clc_link_view, clc_obs_and_link_distrib
-from ncl.metrics_analysis import clc_alpha_mean, clc_th_speed, clc_site_results
-from ncl.metrics_analysis import clc_pos_hist, clc_jumpsize_distrib, clc_jumptime_distrib, clc_fpt_matrix
-from ncl.metrics_analysis import clc_inst_speeds, clc_bp, clc_bp_speeds, clc_bp_results
+# 1.2.3 : Metrics
+from ncl.metrics.landscape import (
+    clc_alpha_mean,
+    clc_link_view, 
+    clc_obs_and_link_distrib
+)
+from ncl.metrics.trajectories import (
+    clc_site_results, 
+    clc_bp_results
+)
+from ncl.metrics.jumps import (
+    clc_pos_hist,
+    clc_jumpsize_distrib,
+    clc_jumptime_distrib,
+    clc_fpt_matrix
+)
+from ncl.metrics.speeds import (
+    clc_th_speed,
+    clc_inst_speeds,
+    clc_bp,
+    clc_bp_speeds
+)
+from ncl.metrics.twosteps import get_jump_nature
 
-from ncl.metrics_twosteps import get_jump_nature
-
-from ncl.fitting import fitting_in_two_steps
-from tls.writing import inspect_data_types, writing_parquet
+# 1.2.4 : Writing
+from ncl.io.writing import inspect_data_types, writing_parquet
 
 
 # ─────────────────────────────────────────────
@@ -373,6 +399,11 @@ def sw_nucleo(
     if total_return:
         
         try:
+            
+            # Histogram Arrays
+            pos_hist = clc_pos_hist(
+                results, Lmax, origin, tmax
+            )
 
             # Jump Size Distribution
             xbj_points, xbj_distrib = clc_jumpsize_distrib(
@@ -560,6 +591,7 @@ def sw_nucleo(
                 'results_std'  : results_std,
 
                 # --- Between Jumps --- #
+                'pos_hist'     : pos_hist,
                 'xbj_points'   : xbj_points,
                 'xbj_distrib'  : xbj_distrib,
                 'tbj_points'   : tbj_points,

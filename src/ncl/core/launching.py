@@ -1,18 +1,21 @@
 """
 nucleo.launching_functions
 ------------------------
-Launching functions for simulations, etc.
+Launching functions for simulations.
 """
+
 
 # ─────────────────────────────────────────────
 # 1 : Libraries
 # ─────────────────────────────────────────────
 
+# 1.1 : Standard 
 from __future__ import annotations
 
 import os
 import cProfile
 import pstats
+
 from enum import Enum
 from pathlib import Path
 from itertools import product
@@ -22,10 +25,13 @@ from datetime import date
 
 import numpy as np
 from tqdm import tqdm
+import time
+from datetime import datetime
 
-from tls.writing import set_working_environment
-from ncl.configs import choose_configuration
-from ncl.run import process_run
+# 1.2 : Package 
+from ncl.core.configs import choose_configuration
+from ncl.core.one_run import process_run
+from ncl.io.writing import set_working_environment
 
 
 # ─────────────────────────────────────────────
@@ -75,8 +81,6 @@ def _choose_num_workers(default_workers: int = 2) -> int:
 # 3 : Functions
 # ─────────────────────────────────────────────
 
-
-# 3.1 : Before launching
 def generate_param_combinations(cfg: dict) -> list[dict]:
     """
     Generates the list of parameter combinations from the configuration.

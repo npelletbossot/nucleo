@@ -9,11 +9,12 @@ Analysis functions for analyzing speed data.
 # 1 : Librairies
 # ─────────────────────────────────────────────
 
+# 1.1 : Standard
 import numpy as np
 
-from tls.utils import *
-from ncl.landscape import clc_alpha_mean
-from ncl.fitting import linear_fit
+# 1.2 : Package
+from ncl.metrics.landscape import clc_alpha_mean
+from ncl.metrics.utils import clc_distrib
 
 
 # ─────────────────────────────────────────────
@@ -22,6 +23,19 @@ from ncl.fitting import linear_fit
 
 
 # 2.1 Sites
+
+
+def clc_th_speed(
+    alphaf: float, alphao: float, s: int, l: int, 
+    mu: float, lmbda: float, rtot_capt: float, rtot_rest: float,
+    ) -> float:
+    """
+    Calculate the theoretical average speed.
+    Loop Extrusion related.
+    """
+    alpha_mean = clc_alpha_mean(alphaf, alphao, s, l)
+    rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
+    return mu * (1 - lmbda) / rates_mean * alpha_mean
 
 
 def clc_inst_speeds(
@@ -101,9 +115,9 @@ def clc_inst_speeds(
         vi_array[i] = dv[valid_speed]
 
     # Datas
-    dx_list = [arr for arr in dx_array if arr is not None and len(arr) > 0]
-    dt_list = [arr for arr in dt_array if arr is not None and len(arr) > 0]
-    vi_list = [arr for arr in vi_array if arr is not None and len(arr) > 0]
+    dx_list = [a for a in dx_array if a is not None and len(a) > 0]
+    dt_list = [a for a in dt_array if a is not None and len(a) > 0]
+    vi_list = [a for a in vi_array if a is not None and len(a) > 0]
 
     # Float
     dx_array = np.concatenate(dx_list).astype(np.float64) if dx_list else np.array([], dtype=np.float64)
@@ -111,9 +125,9 @@ def clc_inst_speeds(
     vi_array = np.concatenate(vi_list).astype(np.float64) if vi_list else np.array([], dtype=np.float64)
 
     # Calculate distributions for Δx, Δt, and speeds
-    dx_points, dx_distrib = calculate_distribution(dx_array, first_bin, last_bin, bin_width)
-    dt_points, dt_distrib = calculate_distribution(dt_array, first_bin, last_bin, bin_width)
-    vi_points, vi_distrib = calculate_distribution(vi_array, first_bin, last_bin, bin_width)
+    dx_points, dx_distrib = clc_distrib(dx_array, first_bin, last_bin, bin_width)
+    dt_points, dt_distrib = clc_distrib(dt_array, first_bin, last_bin, bin_width)
+    vi_points, vi_distrib = clc_distrib(vi_array, first_bin, last_bin, bin_width)
 
     # Compute statistics (mean, median, most probable values)
     if vi_distrib.size > 0:
