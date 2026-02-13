@@ -1,0 +1,256 @@
+"""
+nucleo.speeds
+------------------------
+Analysis functions for analyzing speed data.
+"""
+
+
+# ─────────────────────────────────────────────
+# 1 : Librairies
+# ─────────────────────────────────────────────
+
+# 1.1 : Standard
+import numpy as np
+
+# 1.2 : Package
+from nucleo.metrics.landscape import clc_alpha_mean
+from nucleo.metrics.utils import clc_distrib
+
+
+# ─────────────────────────────────────────────
+# 2 : Functions
+# ─────────────────────────────────────────────
+
+
+# 2.1 Sites
+
+
+def clc_th_speed(
+    alphaf: float, alphao: float, s: int, l: int, 
+    mu: float, lmbda: float, rtot_capt: float, rtot_rest: float,
+    ) -> float:
+    """
+    Calculate the theoretical average speed.
+    Loop Extrusion related.
+    """
+    alpha_mean = clc_alpha_mean(alphaf, alphao, s, l)
+    rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
+    return mu * (1 - lmbda) / rates_mean * alpha_mean
+
+
+def clc_inst_speeds(
+    t_matrix: np.ndarray, 
+    x_matrix: np.ndarray, 
+    first_bin: float = 0,
+    last_bin: float = 1e5,
+    bin_width: float = 1.0,
+) -> tuple[
+    np.ndarray, np.ndarray, float, float, float, 
+    np.ndarray, np.ndarray, float, float, float, 
+    np.ndarray, np.ndarray, float, float, float
+]:
+    """
+    Calculate statistics for instantaneous speeds across multiple trajectories.
+
+    Args:
+        t_matrix (np.ndarray): Times for all trajectories.
+        x_matrix (np.ndarray): Positions for all trajectories.
+        n_t (int): Total number of trajectories.
+        first_bin (float, optional): Lower bound for the histogram bins. Defaults to 0.
+        last_bin (float, optional): Upper bound for the histogram bins. Defaults to 1e6.
+        bin_width (float, optional): Width of bins for the speed distribution. Defaults to 1.0.
+
+    Returns:
+        tuple: 
+            - dx_points (np.ndarray): Points (bin centers) for the displacement distribution (Δx).
+            - dx_distrib (np.ndarray): Normalized displacement distribution (Δx).
+            - dx_mean (float): Mean displacement (Δx).
+            - dx_med (float): Median displacement (Δx).
+            - dx_mp (float): Most probable displacement (Δx).
+            - dt_points (np.ndarray): Points (bin centers) for the time interval distribution (Δt).
+            - dt_distrib (np.ndarray): Normalized time interval distribution (Δt).
+            - dt_mean (float): Mean time interval (Δt).
+            - dt_med (float): Median time interval (Δt).
+            - dt_mp (float): Most probable time interval (Δt).
+            - v_points (np.ndarray): Points (bin centers) for the speed distribution.
+            - v_distrib (np.ndarray): Normalized speed distribution.
+            - v_mean (float): Mean of the instantaneous speeds.
+            - v_med (float): Median of the instantaneous speeds.
+            - v_mp (float): Most probable instantaneous speed.
+    """
+    
+    # Loop through each trajectory
+    n_traj = x_matrix.shape[0]
+
+    # Initialize arrays for displacements, time intervals, and speeds
+    dx_array = np.array([None] * n_traj, dtype=object)
+    dt_array = np.array([None] * n_traj, dtype=object)
+    vi_array = np.array([None] * n_traj, dtype=object)
+
+    for i in range(n_traj):
+        x = np.array(x_matrix[i])
+        t = np.array(t_matrix[i])
+
+
+        # Skip NaN-only lines
+        if np.all(np.isnan(x)) or np.all(np.isnan(t)):
+            continue
+
+        # Calculate displacements (Δx) and time intervals (Δt)
+        dx = x[1:] - x[:-1]
+        dt = t[1:] - t[:-1]
+
+        # Avoid division by zero or invalid intervals
+        valid = (~np.isnan(dx)) & (~np.isnan(dt)) & (dt != 0)
+
+        # Calculate instantaneous speeds (Δx / Δt)
+        dx = dx[valid]
+        dt = dt[valid]
+        dv = dx / dt
+
+        # Filter out non-finite speeds
+        valid_speed = np.isfinite(dv)
+        dx_array[i] = dx[valid_speed]
+        dt_array[i] = dt[valid_speed]
+        vi_array[i] = dv[valid_speed]
+
+    # Datas
+    dx_list = [a for a in dx_array if a is not None and len(a) > 0]
+    dt_list = [a for a in dt_array if a is not None and len(a) > 0]
+    vi_list = [a for a in vi_array if a is not None and len(a) > 0]
+
+    # Float
+    dx_array = np.concatenate(dx_list).astype(np.float64) if dx_list else np.array([], dtype=np.float64)
+    dt_array = np.concatenate(dt_list).astype(np.float64) if dt_list else np.array([], dtype=np.float64)
+    vi_array = np.concatenate(vi_list).astype(np.float64) if vi_list else np.array([], dtype=np.float64)
+
+    # Calculate distributions for Δx, Δt, and speeds
+    dx_points, dx_distrib = clc_distrib(dx_array, first_bin, last_bin, bin_width)
+    dt_points, dt_distrib = clc_distrib(dt_array, first_bin, last_bin, bin_width)
+    vi_points, vi_distrib = clc_distrib(vi_array, first_bin, last_bin, bin_width)
+
+    # Compute statistics (mean, median, most probable values)
+    if vi_distrib.size > 0:
+        dx_mean = float(np.mean(dx_array)) if dx_array.size else 0.0
+        dx_med = float(np.median(dx_array)) if dx_array.size else 0.0
+        dx_mp  = float(dx_points[np.argmax(dx_distrib)]) if dx_distrib.size else 0.0
+
+        dt_mean = float(np.mean(dt_array)) if dt_array.size else 0.0
+        dt_med  = float(np.median(dt_array)) if dt_array.size else 0.0
+        dt_mp   = float(dt_points[np.argmax(dt_distrib)]) if dt_distrib.size else 0.0
+
+        vi_mean = float(np.mean(vi_array)) if vi_array.size else 0.0
+        vi_med  = float(np.median(vi_array)) if vi_array.size else 0.0
+        vi_mp   = float(vi_points[np.argmax(vi_distrib)]) if vi_distrib.size else 0.0
+
+    # Default values if distributions are empty
+    else:
+        dx_mean = dx_med = dx_mp = 0.0
+        dt_mean = dt_med = dt_mp = 0.0
+        vi_mean = vi_med = vi_mp = 0.0
+
+    # Return results
+    return (
+        dx_points, dx_distrib, dx_mean, dx_med, dx_mp,
+        dt_points, dt_distrib, dt_mean, dt_med, dt_mp,
+        vi_points, vi_distrib, vi_mean, vi_med, vi_mp
+    )
+
+
+# 2.2 Base Pairs
+
+
+def clc_bp(segment, alphaf, alphao, c_linker, c_nucleo):
+    n_alphaf = np.count_nonzero(segment == alphaf)
+    n_alphao = np.count_nonzero(segment == alphao)
+    n_tot = n_alphaf + n_alphao
+
+    if n_tot == 0:
+        return np.nan
+
+    return ((c_linker * n_alphaf) + (c_nucleo * n_alphao)) / n_tot
+
+    
+def clc_bp_speeds(
+    algorithm: str, alphaf: float, alphao: float, c_linker: float, c_nucleo: float,
+    alpha_matrix: np.ndarray, t_matrix: np.ndarray, x_matrix: np.ndarray
+):
+    """
+    Compute compaction-corrected velocities (in base pairs per unit time)
+    from position and time trajectories over a chromatin landscape.
+
+    For each trajectory, the function computes the instantaneous velocity
+    between successive positions and renormalizes it by a local compaction
+    factor derived from the underlying chromatin landscape. The compaction
+    factor is computed as a weighted average of linker and nucleosomal
+    contributions over the genomic segment crossed during each jump.
+
+    The chromatin landscape is encoded in `alpha_matrix`, where values
+    `alphaf` and `alphao` represent linker and nucleosomal regions,
+    respectively.
+
+    NaN values in the input position arrays are ignored. Segments of zero
+    length are allowed but may yield NaN values if no landscape information
+    is available.
+
+    Parameters
+    ----------
+    alpha_matrix : np.ndarray
+        Array of chromatin landscapes. Each row corresponds to a trajectory
+        and encodes the chromatin state along the genome.
+    t_matrix : np.ndarray
+        Array of time points for each trajectory.
+    x_matrix : np.ndarray
+        Array of genomic positions corresponding to `t_matrix`.
+    alphaf : float
+        Value representing linker regions in `alpha_matrix`.
+    alphao : float
+        Value representing nucleosomal regions in `alpha_matrix`.
+    c_linker : float
+        Compaction factor associated with linker DNA.
+    c_nucleo : float
+        Compaction factor associated with nucleosomal DNA.
+
+    Returns
+    -------
+    np.ndarray
+        One-dimensional array containing all compaction-corrected velocities
+        (in base pairs per unit time) for all trajectories, with NaN values
+        removed.
+    """
+  
+    n = len(x_matrix)
+    bp_matrix = np.full_like(x_matrix, np.nan, dtype=float)
+    
+    for i in range(n):
+        t_list = t_matrix[i]
+        x_list = x_matrix[i]
+        alpha_list = alpha_matrix[i]
+        
+        # filtrering non NaN
+        valid = ~np.isnan(x_list)
+        x_list_valid = x_list[valid]
+        t_list_valid = t_list[valid]
+        
+        if len(x_list_valid) < 2:
+            continue
+        
+        delta_x = x_list_valid[1:] - x_list_valid[:-1]
+        delta_t = t_list_valid[1:] - t_list_valid[:-1]
+        delta_v = delta_x / delta_t
+        delta_bp = np.zeros_like(delta_v, dtype=float)
+        
+        for j in range(len(delta_v)):
+            start = int(x_list_valid[j])
+            end   = int(x_list_valid[j+1])
+            segment = alpha_list[start:end]
+            c = clc_bp(segment, alphaf, alphao, c_linker, c_nucleo)
+            delta_bp[j] = delta_v[j] * c
+            
+        bp_matrix[i, :len(delta_bp)] = delta_bp
+        vi_bp_array = bp_matrix[~np.isnan(bp_matrix)]
+    
+    if algorithm == "one_step":
+        return vi_bp_array
+    elif algorithm == "two_steps":
+        return vi_bp_array[vi_bp_array > 0]

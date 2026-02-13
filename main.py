@@ -9,7 +9,7 @@ Launching functions for simulations.
 # 1 : Package
 # ─────────────────────────────────────────────
 
-from ncl.core.launching import main
+from nucleo.core.launching import main
 
 
 # ─────────────────────────────────────────────
