@@ -12,6 +12,7 @@ Running functions for one simulation.
 # 1.1 : Standard 
 from __future__ import annotations
 import numpy as np
+import gc
 
 
 # 1.2 : Package
@@ -299,7 +300,7 @@ def sw_nucleo(
     bint = int(1e+1)
 
 
-    # ------------------- Input 1 : Landscape ------------------- #
+    # ------------------- Input 1 : Chromatin ------------------- #
     
     try:
 
@@ -314,27 +315,9 @@ def sw_nucleo(
             last_point = Lmax
             for i in range(len(alpha_matrix)):
                 alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], alphad, alphaf, alphao, first_point, last_point)
-        
-        # Chromatin Analysis : Obstacles Linkers Distribution
-        s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = clc_obs_and_link_distrib(
-            landscape, s, l, alpha_matrix[0], alphaf, alphao, binx
-        )
-
-        # Chromatin Analysis : Linker Profile
-        l_view = clc_link_view(
-            alpha_matrix, landscape, alphaf, Lmin, Lmax, nt
-        )
-        
-        # Chromatin Analysis : Mean Landscape - Array / Value / Calculated
-        alpha_mean_a = np.mean(alpha_matrix, axis=0)
-        alpha_mean_v = np.mean(alpha_mean_a)
-        alpha_mean_c = clc_alpha_mean(alphaf, alphao, s_mean, l_mean)
-        
-        # Chromatin Remodelling : Obstacles Positions
-        obstacles = find_blocks(alpha_matrix[0], alphao)
-        
+                
     except Exception as e:
-        print(f"Error in Input 1 - Landscape : {e}")
+        print(f"Error in Input 1 - Chromatin : {e}")
         
 
     # ------------------- Input 2 : Probability ------------------- #
@@ -371,8 +354,34 @@ def sw_nucleo(
     except Exception as e:
         print(f"Error in Simulations: {e} in {title}")
         
+        
+    # ------------------- Analysis 1 : Landscape ------------------- #
 
-    # ------------------- Analysis 1 : General results ------------------- #
+    try:
+        
+        # Chromatin Analysis : Obstacles Linkers Distribution
+            s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = clc_obs_and_link_distrib(
+                landscape, s, l, alpha_matrix[0], alphaf, alphao, binx
+            )
+
+            # Chromatin Analysis : Linker Profile
+            l_view = clc_link_view(
+                alpha_matrix, landscape, alphaf, Lmin, Lmax, nt
+            )
+            
+            # Chromatin Analysis : Mean Landscape - Array / Value / Calculated
+            alpha_mean_a = np.mean(alpha_matrix, axis=0)
+            alpha_mean_v = np.mean(alpha_mean_a)
+            alpha_mean_c = clc_alpha_mean(alphaf, alphao, s_mean, l_mean)
+            
+            # Chromatin Remodelling : Obstacles Positions
+            obstacles = find_blocks(alpha_matrix[0], alphao)
+        
+    except Exception as e:
+        print(f"Error in Analysis 1 - Landscape : {e}")
+        
+
+    # ------------------- Analysis 2 : Trajectories ------------------- #
     
     try:
 
@@ -391,7 +400,7 @@ def sw_nucleo(
         v_mean_th_eff = clc_th_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest)
     
     except Exception as e:
-        print(f"Error in Analysis 1 - General results: {e}")
+        print(f"Error in Analysis 2 - Trajectories: {e}")
         
     
     # ------------------- Analysis 2 : Jump size + Jump time + First pass times ------------------- #
@@ -417,10 +426,10 @@ def sw_nucleo(
             fpt_distrib, fpt_number = clc_fpt_matrix(t_matrix, x_matrix, tmax, bint) 
             
         except Exception as e:
-            print(f"Error in Analysis 2 - Jump size + Time size + First pass times : {e}")
+            print(f"Error in Analysis 3 - Jump size + Time size + First pass times : {e}")
         
 
-    # ------------------- Analysis 3 : Speeds + Compaction ------------------- #
+    # ------------------- Analysis 4 : Speeds ------------------- #
     
     try:
         
@@ -454,7 +463,7 @@ def sw_nucleo(
         )        
                     
     except Exception as e:
-        print(f"Error in Analysis 3 - Speeds + Compactions : {e}")
+        print(f"Error in Analysis 4 - Speeds : {e}")
          
 
     # ------------------- Analysis 4 : Rates and Taus ------------------- #

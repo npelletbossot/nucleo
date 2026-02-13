@@ -89,7 +89,7 @@ def clc_distrib(
     """
 
     # Everything in float
-    arr = np.asarray(arr, dtype=np.float64)
+    arr = np.asarray(data, dtype=np.float64)
     arr = arr[np.isfinite(arr)]
 
     # Handle empty data array
@@ -98,11 +98,12 @@ def clc_distrib(
 
     # Points and not bins
     bins = np.arange(first_bin, last_bin + bin_width, bin_width, dtype=np.float64)
-    counts, edges = np.histogram(arr, bins=bins, dtype=np.float64)
+    counts, edges = np.histogram(arr, bins=bins)
     
     # Normalizing
     counts = counts.astype(np.float64)
     total = counts.sum()
+    
     if total > 0.0:
         distrib = counts / total
     else:

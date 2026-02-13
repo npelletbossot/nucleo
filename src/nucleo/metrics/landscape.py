@@ -166,7 +166,7 @@ def clc_obs_and_link_distrib(
     alpha_scenario: str, s: int, l: int,
     alpha_array: np.ndarray, alphaf: float, alphao: float,
     step: int
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[float, np.ndarray, np.ndarray, float, np.ndarray, np.ndarray]:
     """
     Process a 1D alpha array to calculate lengths of linker and obstacle sequences
     and their distributions.
@@ -187,7 +187,10 @@ def clc_obs_and_link_distrib(
     
     # Concerning flat landscape
     if alpha_scenario == "homogeneous":
-        return np.float64(s), np.array([0.0]), np.array([0.0]), np.float64(l), np.array([0.0]), np.array([0.0])
+        return (
+            np.float64(s), np.array([0.0]), np.array([0.0]), 
+            np.float64(l), np.array([0.0]), np.array([0.0])
+        )
     
     # Masks for obstacles and linkers
     mask_o = alpha_array == alphao
