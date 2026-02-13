@@ -57,36 +57,36 @@ def plot_obs_linker_distrib(s, s_points, s_distrib, l_points, l_distrib, text_si
         ax1 = fig.add_subplot(gs[0])
         ax2 = fig.add_subplot(gs[1])
         
+    # Linker distribution
+    ax1.plot(l_points, l_distrib, label='linkers',
+             color='r', alpha=0.75, marker='o')
+
+    # ax2.set_title('Linker distribution', size=text_size)
+    ax1.set_xlabel('Size of linker (a.u.)', fontsize=text_size)
+    ax1.set_ylabel('distribution', fontsize=text_size)
+    ax1.set_ylim([-0.10, 0.30])
+    ax1.grid(True)
+    ax1.legend(fontsize=text_size)
+        
     # Filtering logic
     if plot_s:
         mask_s = (s_distrib != 0)
         s_points = s_points[mask_s]
         s_distrib = s_distrib[mask_s]
-        ax1.plot(s_points//s, s_distrib, label='obstacles',
+        ax2.plot(s_points//s, s_distrib, label='obstacles',
              color='b', alpha=0.75, marker='o')
-        ax1.set_xticks(np.arange(1, 6, 1, dtype=int))
-        ax1.set_xlabel("Count of obstacle", size=text_size)
+        ax2.set_xticks(np.arange(1, 6, 1, dtype=int))
+        ax2.set_xlabel("Count of obstacle", size=text_size)
 
     else:
     # Obstacle distribution
-        ax1.plot(s_points, s_distrib, label='obstacles',
+        ax2.plot(s_points, s_distrib, label='obstacles',
              color='b', alpha=0.75, marker='o')
-        ax1.set_xlabel("Lenght of obstacle (a.u.)", size=text_size)
+        ax2.set_xlabel("Lenght of obstacle (a.u.)", size=text_size)
 
     # ax1.set_title('Obstacle distribution', size=text_size)
-    ax1.set_ylabel('distribution', fontsize=text_size)
-    ax1.set_ylim([-0.10, 1.10])
-    ax1.grid(True)
-    ax1.legend(fontsize=text_size)
-
-    # Linker distribution
-    ax2.plot(l_points, l_distrib, label='linkers',
-             color='r', alpha=0.75, marker='o')
-
-    # ax2.set_title('Linker distribution', size=text_size)
-    ax2.set_xlabel('Size of linker (a.u.)', fontsize=text_size)
     ax2.set_ylabel('distribution', fontsize=text_size)
-    ax2.set_ylim([-0.10, 0.30])
+    ax2.set_ylim([-0.10, 1.10])
     ax2.grid(True)
     ax2.legend(fontsize=text_size)
 
