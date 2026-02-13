@@ -8,6 +8,8 @@ __pycache__/
 build/
 dist/
 .venv_nucleo/
+venv_nucleo_PSMN/
+venv_*/
 
 ########################
 # Jupyter
