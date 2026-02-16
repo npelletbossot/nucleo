@@ -20,4 +20,4 @@ dist/
 outputs/
 
 # Venv
-.venv/
+.venv*
