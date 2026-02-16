@@ -174,7 +174,7 @@ def execute_in_parallel(config: str,
         task_suffix = str(task_id)
     else:
         this_params = all_params
-        base_dir    = Path.home() / "Documents" / "PhD" / "Workspace"
+        base_dir    = Path.home() / "Documents" / "Workspace"
         use_tqdm    = True
         task_suffix = str(slurm_params.get('task_id', 0))
         if cfg['meta']['nt'] == 10_000:

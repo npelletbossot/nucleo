@@ -11,20 +11,19 @@ Merging parquet files in order to calculate heatmaps.
 
 import os
 import pickle
-import collections
 import json
 
 import numpy as np
-import polars as pl
 from pathlib import Path
 from tqdm import tqdm
-from dataclasses import fields
+
+import polars as pl
+import polars.selectors as cs
 
 
 # ─────────────────────────────────────────────
 # 2 : Functions
 # ─────────────────────────────────────────────
-
 
 # 2.1 : Dialog box 
 
@@ -38,7 +37,7 @@ def ask_confirmation_input():
 # 2.2 : Merging into one file
 
 
-def merging_parquet_files(root_directory, nt, tmax, dt, alphaf, alphao, beta, Lmin, Lmax, origin, bps, SimulationData):
+def merging_parquet_files(root_directory, nt, tmax, dt, alphaf, alphao, beta, Lmin, Lmax, origin, bps):
     """
     Merges all the .parquet files from our simulations while filtering only columns of types str, i64, and f64.
 
@@ -87,18 +86,10 @@ def merging_parquet_files(root_directory, nt, tmax, dt, alphaf, alphao, beta, Lm
                             try:
                                 # Read the parquet file
                                 df_parquet = pl.read_parquet(pq_path)
-                                df_columns = df_parquet.columns
-                                class_columns = set(f.name for f in fields(SimulationData))
-
-                                if collections.Counter(df_columns) == collections.Counter(class_columns):
-
-                                    # Filter only columns of type str, i64, or f64
-                                    filtered_df = df_parquet.select([
-                                        col for col, dtype in zip(df_parquet.columns, df_parquet.dtypes)
-                                        if dtype in [pl.Utf8, pl.Int64, pl.Float64]
-                                    ])
-                                    
-                                    dataframes.append(filtered_df)
+                                filtered_df = df_parquet.select(
+                                    cs.numeric() | cs.boolean() | cs.string()
+                                )
+                                dataframes.append(filtered_df)
 
                             except Exception as e:
                                 print(f"Error loading Parquet file: {e}")
@@ -279,9 +270,8 @@ def compute_heatmap_data(df: pl.DataFrame, config_list: list, speed_cols: list, 
 # 3 : Call
 # ─────────────────────────────────────────────
 
-
 # 3.0 : Root
-root = Path.home() / "Documents" / "PhD" / "Workspace" / "nucleo" / "outputs" / "2025-01-01_PSMN"
+root = Path.home() / "Documents" / "Workspace" / "nucleo" / "outputs" / "2025-01-01_PSMN"
 root_parquet = root / "ncl_output.parquet"
 
 
@@ -289,8 +279,12 @@ root_parquet = root / "ncl_output.parquet"
 ask_confirmation_input()
 
 
-# 3.2 : Merging
-merged_df = merging_parquet_files(root_directory=root, nt=10000, tmax=100, dt=1, alphaf=1, alphao=0, beta=0, Lmin=0, Lmax=50000, origin=10000, bps=1)
+# 3.2 : Merging    
+merged_df = merging_parquet_files(
+    root_directory=root, nt=10000, tmax=100, dt=1, 
+    alphaf=1, alphao=0, beta=0, 
+    Lmin=0, Lmax=50000, origin=10000, bps=1, 
+)
 merged_df = pl.read_parquet(root_parquet)
 print(merged_df.head(5))
 

@@ -7,8 +7,14 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+
+
+########################
+# Environments
+########################
 .venv_nucleo/
-venv_nucleo_PSMN/
+.venv_nucleo_PSMN/
+.venv_*/
 venv_*/
 
 ########################
