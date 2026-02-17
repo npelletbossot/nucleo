@@ -225,7 +225,7 @@ def sw_nucleo(
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
     nt: int, path: str,
-    total_return: bool = False
+    data_return: bool = True, total_return: bool = True
     ) -> None:
     """
     Simulates condensin dynamics along chromatin with specified parameters.
@@ -396,8 +396,8 @@ def sw_nucleo(
         )
                 
         # Theoretical
-        v_mean_th = clc_th_speed(alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest)
-        v_mean_th_eff = clc_th_speed(alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest)
+        v_mean_th = clc_th_speed(algorithm, alphaf, alphao, s, l, mu, lmbda, rtot_capt, rtot_rest)
+        v_mean_th_eff = clc_th_speed(algorithm, alphaf, alphao, s_mean, l_mean, mu, lmbda, rtot_capt, rtot_rest)
     
     except Exception as e:
         print(f"Error in Analysis 2 - Trajectories: {e}")
@@ -576,6 +576,13 @@ def sw_nucleo(
         'vi_bp_med'     : vi_bp_med,
         
         })
+
+        if data_return:
+            data_result.update({
+                't_matrix'     : t_matrix,
+                'x_matrix'     : x_matrix,
+                'results'      : results,
+            })
         
         if total_return:
             data_result.update({
@@ -590,11 +597,8 @@ def sw_nucleo(
 
                 # --- Raw Datas --- #
                 'p'            : p,
-                # 't_matrix'     : t_matrix,
-                # 'x_matrix'     : x_matrix,
 
                 # --- Results --- #
-                'results'      : results,
                 'results_mean' : results_mean,
                 'results_med'  : results_med,
                 'results_std'  : results_std,

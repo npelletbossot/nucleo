@@ -51,7 +51,7 @@ def getting_main_file_with_verifications(
     """
 
     selected_columns = {
-        "landscape", "s", "l", "bpmin", 
+        "alpha_choice", "s", "l", "bpmin", 
         "mu", "theta", 
         "nt", "tmax", "dt", "times", 
         "alphao", "alphaf", "beta",

@@ -213,6 +213,7 @@ def main(rank_of_study):
         ["ACCESS_RANDOM", "ACCESS_PERIODIC"],
         ["TWO_STEPS"],
         ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
+        ["FIGURES"],
         ["TEST_A", "TEST_B"]
     ]
     

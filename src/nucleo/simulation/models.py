@@ -199,6 +199,9 @@ def gillespie_algo_one_step(
         tuple[np.ndarray, np.ndarray, np.ndarray]: matrix of results, all time, all positions
     """
 
+    # --- Random Seed --- #
+    np.random.seed(None)
+
     # --- Starting values --- #
     beta_matrix = np.tile(np.full(lenght, beta), (nt, 1))
 

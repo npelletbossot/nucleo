@@ -26,6 +26,7 @@ from nucleo.metrics.utils import clc_distrib
 
 
 def clc_th_speed(
+    algorithm: str,
     alphaf: float, alphao: float, s: int, l: int, 
     mu: float, lmbda: float, rtot_capt: float, rtot_rest: float,
     ) -> float:
@@ -34,8 +35,13 @@ def clc_th_speed(
     Loop Extrusion related.
     """
     alpha_mean = clc_alpha_mean(alphaf, alphao, s, l)
-    rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
-    return mu * (1 - lmbda) / rates_mean * alpha_mean
+
+    if algorithm == "one_step":
+        return mu * alpha_mean
+    
+    elif algorithm == "two_steps":
+        rates_mean = (1 / (rtot_capt)) + (1 / (rtot_rest))
+        return mu * (1 - lmbda) / rates_mean * alpha_mean
 
 
 def clc_inst_speeds(
