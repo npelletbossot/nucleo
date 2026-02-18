@@ -177,11 +177,15 @@ def plot_waiting_times(tbj_points, tbj_distrib, text_size=fontsize, ax=None):
     ax.legend(fontsize=text_size)
 
 
-def plot_speed_distribution(vi_points, vi_distrib, vi_mean, vi_med, vi_mp, text_size=fontsize, ax=None):
-    ax.set_title(f'Instantaneous speeds', size=text_size)
+def plot_speed_distribution(vi_points, vi_distrib, vi_mean, vi_med, vi_mp, text_size=fontsize, ax=None, color="b", label=None, title="homogeneous"):
+    if title == "constant_mean":
+        title = "homogeneous"
+    elif title == "nt_random":
+        title = "random"
+    ax.set_title(f"{title}", size=text_size)
     # ax.axvline(x=vi_mp, label=f'most probable : {np.round(vi_mp,2)}', c='r', ls='-')
-    ax.axvline(x=vi_med, label=f'vi_med = {np.round(vi_med,2)}', c='r', ls='--')
-    ax.plot(vi_points, vi_distrib, c='b')
+    ax.plot(vi_points, vi_distrib, label=f"{label}", c=color, ls="-", lw=2, alpha=0.70)
+    # ax.axvline(x=vi_med, label=f'{label} : vi_med = {np.round(vi_med,2)}', c=color, ls='--', lw=2, alpha=0.50)
     ax.grid(True, which='both')
     ax.set_xlabel(r'speeds in ($\sigma k_0$) unit', fontsize=text_size)
     ax.set_ylabel('distribution', size=text_size)
