@@ -18,5 +18,5 @@ from nucleo.core.launching import main
 
 if __name__ == "__main__":
     main(
-    rank_of_study = 1
+    rank_of_study = 5
 )

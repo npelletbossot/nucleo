@@ -30,7 +30,7 @@ from datetime import datetime
 
 # 1.2 : Package 
 from nucleo.core.configs import choose_configuration
-from nucleo.core.one_run import process_run
+from nucleo.core.run_simulation import process_run
 from nucleo.io.writing import set_working_environment
 
 
@@ -214,7 +214,7 @@ def main(rank_of_study):
         ["TWO_STEPS"],
         ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
         ["FIGURES"],
-        ["TEST_A", "TEST_B"]
+        ["TEST_A"]
     ]
     
     configs = CONFIG[rank_of_study]

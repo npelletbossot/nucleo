@@ -116,7 +116,7 @@ def choose_configuration(config: str) -> dict:
         "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to unbind
         "alphad": 0.00,     # Probability of nucleosome to drop out
-        "alphar": 0.90      # Probability of binding while FACT is there
+        "alphar": 0.00      # Probability of binding while FACT is there
     }
 
     RATES = {
@@ -218,14 +218,14 @@ def choose_configuration(config: str) -> dict:
             "bpmin": np.array([0], dtype=int)
         },
         "probas": {
-            "mu": np.array([150, 180, 210], dtype=int),
-            "theta": np.array([20, 90, 100], dtype=int),
+            "mu": np.array([210], dtype=int),
+            "theta": np.array([90], dtype=int),
             "lmbda": np.array([PROBAS["lmbda"]], dtype=float),
             "alphao": np.array([PROBAS["alphao"]], dtype=float),
             "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
             "beta": np.array([PROBAS["beta"]], dtype=float),
             "alphad": np.array([PROBAS["alphad"]], dtype=float),
-            "alphar": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float),
+            "alphar": np.array([PROBAS["alphar"]], dtype=float),
         },
         "rates": {
             "rtot_capt": np.array([RATES["rtot_capt"]], dtype=float),
@@ -234,7 +234,7 @@ def choose_configuration(config: str) -> dict:
             "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
-            "nt": 100
+            "nt": 1_000
         }
     }
 
