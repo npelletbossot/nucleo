@@ -61,7 +61,7 @@ def clc_link_view(
     alpha_matrix: np.ndarray, 
     landscape:str, alphaf: float, Lmin: int, Lmax: int,
     nt: int,
-    view_size=10_000, threshold=10_000):
+    view_size=1_000, threshold=1_000):
     """
     Calculate the average landscape around linker regions for multiple trajectories.
 
@@ -119,13 +119,13 @@ def clc_link_view(
         return view_mean
     if threshold > Lmax // 2:
         raise ValueError("You set the threshold too big !")
-    if view_size > 10_000:
-        raise ValueError("You set the view_size superior to 10_000!")
-    if len(alpha_matrix) != nt:
-        raise ValueError("You set nt not equal to len(alpha_matrix)")
+    if view_size > Lmax // 2:
+        raise ValueError("You set the view_size superior to Lmax // 2!")
+    if Lmax == 50_000:
+        view_size, threshold = 10_000, 10_000
 
     # Calculation
-    view_datas = np.empty((nt, view_size), dtype=float)                         # Futur return
+    view_datas = np.empty((nt, view_size), dtype=float)
 
     # Main loop                   
     for _ in range(0,nt):

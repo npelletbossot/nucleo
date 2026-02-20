@@ -20,6 +20,7 @@ def choose_configuration(config: str) -> dict:
     """
     Returns a dictionary of study parameters organized in logical blocks.
     All list-like parameters are converted to np.array.
+    3 levels logic.
     """
 
     # ──────────────────────────────────
@@ -83,26 +84,13 @@ def choose_configuration(config: str) -> dict:
             "factmode": "active_memory",
         },
         
-        # two_steps + fact phenomenological
-        "alg2_pheno_full": {
-            "algorithm": "two_steps",
-            "destroy": False,
-            "fact": True,
-            "factmode": "pheno_full",
-        },
-        "alg2_pheno_memory": {
-            "algorithm": "two_steps",
-            "destroy": False,
-            "fact": True,
-            "factmode": "pheno_memory",
-        },
     }
 
     CHROMATIN = {
         "Lmin": 0,          # First point of chromatin (included !)
-        "Lmax": 50_000,     # Last point of chromatin (excluded !)
+        "Lmax": 10_000,     # Last point of chromatin (excluded !)
         "bps": 1,           # Based pair step 1 per 1
-        "origin": 10_000    # Falling point of condensin on chromatin 
+        "origin": 1_000    # Falling point of condensin on chromatin 
     }
 
     TIME = {
@@ -120,8 +108,8 @@ def choose_configuration(config: str) -> dict:
     }
 
     RATES = {
-        "rtot_capt": 1/2,   # Rate of capturing (1/6)
-        "rtot_rest": 1/2,   # Rate of resting (1/6)
+        "rtot_capt": 1/6,   # Rate of capturing (1/6)
+        "rtot_rest": 1/6,   # Rate of resting (1/6)
         # "kB" : 0.50,        # Rate of FACT Binding
         # "kU": 0.50,         # Rate of FACT Unbinding
         "ktot": 1.0,       # New formalism
@@ -151,7 +139,9 @@ def choose_configuration(config: str) -> dict:
             "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
-            "nt": 10_000
+            "nt": 10_000,
+            "data_return": True,
+            "total_return": True
         }
     }
     
@@ -176,7 +166,9 @@ def choose_configuration(config: str) -> dict:
             "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
-            "nt": 10_000
+            "nt": 10_000,
+            "data_return": True,
+            "total_return": True
         }
     }
     
@@ -205,7 +197,9 @@ def choose_configuration(config: str) -> dict:
             "klist": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
         },
         "meta": {
-            "nt": 10_000
+            "nt": 10_000,
+            "data_return": True,
+            "total_return": True
         }
     }
     
@@ -234,7 +228,9 @@ def choose_configuration(config: str) -> dict:
             "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
-            "nt": 1_000
+            "nt": 100,
+            "data_return": True,
+            "total_return": True
         }
     }
 
@@ -396,24 +392,14 @@ def choose_configuration(config: str) -> dict:
         
         # ---- TESTS ---- #
         
-        "TEST_A": {
+        "TEST": {
             **TEST__BASE,
             "formalism": {**FORMALISMS['alg1']},
             "meta": {
                 **TEST__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__testA"
+                "path": f"{PROJECT['project_name']}__test"
             }
         },
-
-        "TEST_B": {
-            **TEST__BASE,
-            "formalism": {**FORMALISMS['alg2_passive_memory']},
-            "meta": {
-                **TEST__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__testB"
-            }
-        },
-
 
         # ---- FIGURES ---- #
 

@@ -73,7 +73,7 @@ def checking_inputs(
     alphar, ktot, klist,
     Lmin, Lmax, bps, origin,
     tmax, dt,
-    nt
+    nt, path, data_return, total_return
 ):
     """
     Validate all input parameters for the simulation before execution.
@@ -196,6 +196,13 @@ def checking_inputs(
             raise ValueError(f"Invalid value for bps: must be an int >= 0. Got {bps}.")
         if not (0 <= origin < Lmax):
             raise ValueError(f"origin must be within [0, Lmax). Got origin={origin}, Lmax={Lmax}.")
+        
+        # Density of pattern to avoid boundary effects
+        if (s > 50) and (Lmax - Lmin) < 10_000:
+            raise ValueError(
+                f"You cannot give this values of s={s} and  Lmax-Lmin={Lmax-Lmin}"
+                "because it will cause boundary effects."
+            )
 
         # Times
         if not isinstance(tmax, int) or tmax < 0:
@@ -203,9 +210,15 @@ def checking_inputs(
         if dt <= 0:
             raise ValueError(f"dt must be positive. Got {dt}.")
         
-        # Trajectories
+        # Meta
         if not isinstance(nt, int) or nt < 0:
             raise ValueError(f"Invalid value for nt: must be an int >= 0. Got {nt}.")
+        if not isinstance(path, str):
+            raise ValueError(f"Invalid format for path: must be an str. Got {type(path)}.")
+        if not isinstance(data_return, bool):
+            raise ValueError(f"Invalid format for data_return: must be a bool. Got {type(data_return)}.")
+        if not isinstance(total_return, bool):
+            raise ValueError(f"Invalid format for total_return: must be a bool. Got {type(total_return)}.")
         
     except Exception as e:
         print(f"The error is in the checking_inputs() function and is : {e}")
@@ -224,7 +237,7 @@ def sw_nucleo(
     Lmin: int, Lmax: int, bps: int, origin: int,
     tmax: float, dt: float,
     nt: int, path: str,
-    data_return: bool = True, total_return: bool = True
+    data_return: bool = False, total_return: bool = False
     ) -> None:
     """
     Simulates condensin dynamics along chromatin with specified parameters.
@@ -681,6 +694,7 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         s=params['s'],
         l=params['l'],
         bpmin=params['bpmin'],
+
         mu=params['mu'],
         theta=params['theta'],
         lmbda=params['lmbda'],
@@ -691,7 +705,6 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         alphar=params['alphar'],
         ktot=params['ktot'],
         klist=params['klist'],
-        nt=params['nt'],
         
         Lmin=chromatin["Lmin"],
         Lmax=chromatin["Lmax"],
@@ -699,19 +712,27 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         origin=chromatin["origin"],
         
         tmax=time["tmax"],
-        dt=time["dt"],  
+        dt=time["dt"],
+
+        nt=meta["nt"],
+        path=meta["path"],
+        data_return=meta["data_return"],
+        total_return=meta["total_return"]
     )
 
     sw_nucleo(
-        formalism['algorithm'], formalism['fact'], formalism['factmode'], formalism['destroy'],
+        formalism["algorithm"], formalism["fact"], formalism["factmode"], formalism["destroy"],
 
-        params['landscape'], params['s'], params['l'], params['bpmin'],
-        params['mu'], params['theta'],
-        params['lmbda'], params['alphaf'], params['alphao'], params['beta'], params['alphad'],
-        params['rtot_capt'], params['rtot_rest'],
-        params['alphar'], params['ktot'], params['klist'],
+        params["landscape"], params["s"], params["l"], params["bpmin"],
+
+        params["mu"], params["theta"],
+        params["lmbda"], params["alphaf"], params["alphao"], params["beta"], params["alphad"],
+        params["rtot_capt"], params["rtot_rest"],
+        params["alphar"], params["ktot"], params["klist"],
         
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
+
         time["tmax"], time["dt"],
-        meta['nt'], meta['path'],
+
+        meta["nt"], meta["path"], meta["data_return"], meta["total_return"]
     )

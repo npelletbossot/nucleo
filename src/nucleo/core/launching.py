@@ -121,7 +121,7 @@ def generate_param_combinations(cfg: dict) -> list[dict]:
     ]
 
 
-def run_parallel(params: list[dict], formalism: dict, chromatin: dict, time: dict, meta:dict, num_workers: int, use_tqdm: bool = False) -> None:
+def run_parallel(params: list[dict], formalism: dict, chromatin: dict, time: dict, meta: dict, num_workers: int, use_tqdm: bool = False) -> None:
     """
     Runs processes in parallel with optional progress bar.
     """
@@ -206,18 +206,22 @@ def execute_in_parallel(config: str,
 # 4 : Main
 # ─────────────────────────────────────────────
 
-def main(rank_of_study):
+def main(STUDY):
     
-    CONFIG = [
-        ["NU", "BP", "LSLOW", "LSHIGH"],
-        ["ACCESS_RANDOM", "ACCESS_PERIODIC"],
-        ["TWO_STEPS"],
-        ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
-        ["FIGURES"],
-        ["TEST_A"]
-    ]
-    
-    configs = CONFIG[rank_of_study]
+    CONFIG = {
+        "NUCLEO": ["NU", "BP", "LSLOW", "LSHIGH"],
+        "ACCESS": ["ACCESS_RANDOM", "ACCESS_PERIODIC"],
+        "RYU": ["TWO_STEPS"],
+        "FACT": ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
+        "FIGURES": ["FIGURES"],
+        "TEST": ["TEST"]
+    }
+
+    all_values = [v for values in CONFIG.values() for v in values]
+    if STUDY not in CONFIG and STUDY not in all_values:
+        raise ValueError(f"You gave STUDY={STUDY} which is not in {CONFIG}.")
+
+    configs = CONFIG[STUDY]
     n_configs = len(configs)
 
     print(f"\nNumber of configurations to launch: {n_configs}\n")

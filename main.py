@@ -16,7 +16,9 @@ from nucleo.core.launching import main
 # 2 : Call
 # ─────────────────────────────────────────────
 
+# Options : 
+
 if __name__ == "__main__":
     main(
-    rank_of_study = 5
+    STUDY = "ACCESS"
 )

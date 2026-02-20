@@ -239,6 +239,16 @@ def gillespie_algo_one_step(
             #     results[_][i0:] = x-ox          # Filling with the last value
             #     break                           # Breaking the loop
 
+            # except ValueError as e:
+            #     if "broadcast" in str(e):
+            #         results[_][t/dt:tmax].fill(np.nan)
+            #         t_matrix[_][len(t_matrix)-1:] = np.nan
+            #         x_matrix[_][len(x_matrix)-1:] = np.nan
+            #         continue
+            #     else:
+            #         raise
+
+
             # Next time and rate of reaction
             t = t - np.log(np.random.rand())/r_tot
             r0 = np.random.rand()
