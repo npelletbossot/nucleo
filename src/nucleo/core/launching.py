@@ -224,7 +224,7 @@ def main(STUDY):
     configs = CONFIG[STUDY]
     n_configs = len(configs)
 
-    print(f"\nNumber of configurations to launch: {n_configs}\n")
+    print(f"\nNumber of configurations to launch: {n_configs}\n STUDY = {CONFIG[STUDY]}")
 
     for i, config in enumerate(
         tqdm(configs, desc="Global progress", unit="config"),

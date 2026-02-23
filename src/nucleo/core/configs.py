@@ -88,9 +88,9 @@ def choose_configuration(config: str) -> dict:
 
     CHROMATIN = {
         "Lmin": 0,          # First point of chromatin (included !)
-        "Lmax": 10_000,     # Last point of chromatin (excluded !)
+        "Lmax": 50_000,     # Last point of chromatin (excluded !)
         "bps": 1,           # Based pair step 1 per 1
-        "origin": 1_000    # Falling point of condensin on chromatin 
+        "origin": 10_000    # Falling point of condensin on chromatin 
     }
 
     TIME = {
@@ -166,7 +166,7 @@ def choose_configuration(config: str) -> dict:
             "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
-            "nt": 10_000,
+            "nt": 10,
             "data_return": True,
             "total_return": True
         }
@@ -406,7 +406,7 @@ def choose_configuration(config: str) -> dict:
         "FIGURES": {
             **ONESTEP__BASE,
             "geometry": {
-                "landscape": np.array(['homogeneous']),
+                "landscape": np.array(['random']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
@@ -414,11 +414,11 @@ def choose_configuration(config: str) -> dict:
             "probas": {
                 **ONESTEP__BASE["probas"],
                 "mu": np.array([150]),
-                "theta": np.array([50, 100, 150]),
+                "theta": np.array([50]),
             },
             "meta": {
                 **ONESTEP__BASE["meta"],
-                "nt": 10_000,
+                "nt": 1_000,
                 "path": f"{PROJECT['project_name']}__fig"
             }
         },

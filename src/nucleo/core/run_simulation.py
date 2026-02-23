@@ -370,6 +370,13 @@ def sw_nucleo(
     # ------------------- Analysis 1 : Landscape ------------------- #
 
     try:
+            
+        fig1_obs_points = np.empty(shape=(nt), dtype=object)
+        fig1_obs_distrib = np.empty(shape=(nt), dtype=object)
+        fig1_link_points = np.empty(shape=(nt), dtype=object)
+        fig1_link_distrib = np.empty(shape=(nt), dtype=object)
+
+        for i in range(nt):
         
         # Chromatin Analysis : Obstacles Linkers Distribution
             s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = clc_obs_and_link_distrib(
@@ -388,7 +395,18 @@ def sw_nucleo(
             
             # Chromatin Remodelling : Obstacles Positions
             obstacles = find_blocks(alpha_matrix[0], alphao)
-        
+
+            fig1_obs_points[i] = s_points
+            fig1_obs_distrib[i] = s_distrib
+            fig1_link_points[i] = l_points
+            fig1_link_distrib[i] = l_distrib
+
+        obs_points = np.mean(fig1_obs_points, axis=0)
+        obs_distrib = np.mean(fig1_obs_distrib, axis=0)
+        link_points = np.mean(fig1_link_points, axis=0)
+        link_distrib = np.mean(fig1_link_distrib, axis=0)
+
+
     except Exception as e:
         print(f"Error in Analysis 1 - Landscape : {e}")
         
@@ -647,7 +665,12 @@ def sw_nucleo(
                 'G'            : G,
                 'bound_low'    : bound_low,
                 'bound_high'   : bound_high,
-                
+
+                # --- Figure --- #
+                'link_points'   : link_points,
+                'link_distrib'  : link_distrib,
+                'obs_points'    : obs_points,
+                'obs_distrib'   : obs_distrib,
             })
 
 
