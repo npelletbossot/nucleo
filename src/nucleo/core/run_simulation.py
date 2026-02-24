@@ -330,7 +330,7 @@ def sw_nucleo(
                 
     except Exception as e:
         print(f"Error in Input 1 - Chromatin : {e}")
-        
+            
 
     # ------------------- Input 2 : Probability ------------------- #
 
@@ -370,41 +370,24 @@ def sw_nucleo(
     # ------------------- Analysis 1 : Landscape ------------------- #
 
     try:
-            
-        fig1_obs_points = np.empty(shape=(nt), dtype=object)
-        fig1_obs_distrib = np.empty(shape=(nt), dtype=object)
-        fig1_link_points = np.empty(shape=(nt), dtype=object)
-        fig1_link_distrib = np.empty(shape=(nt), dtype=object)
-
-        for i in range(nt):
         
-        # Chromatin Analysis : Obstacles Linkers Distribution
-            s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = clc_obs_and_link_distrib(
-                landscape, s, l, alpha_matrix[0], alphaf, alphao, binx
-            )
+    # Chromatin Analysis : Obstacles Linkers Distribution
+        s_mean, s_points, s_distrib, l_mean, l_points, l_distrib = clc_obs_and_link_distrib(
+            landscape, s, l, alpha_matrix[0], alphaf, alphao, binx
+        )
 
-            # Chromatin Analysis : Linker Profile
-            l_view = clc_link_view(
-                alpha_matrix, landscape, alphaf, Lmin, Lmax, nt
-            )
-            
-            # Chromatin Analysis : Mean Landscape - Array / Value / Calculated
-            alpha_mean_a = np.mean(alpha_matrix, axis=0)
-            alpha_mean_v = np.mean(alpha_mean_a)
-            alpha_mean_c = clc_alpha_mean(alphaf, alphao, s_mean, l_mean)
-            
-            # Chromatin Remodelling : Obstacles Positions
-            obstacles = find_blocks(alpha_matrix[0], alphao)
-
-            fig1_obs_points[i] = s_points
-            fig1_obs_distrib[i] = s_distrib
-            fig1_link_points[i] = l_points
-            fig1_link_distrib[i] = l_distrib
-
-        obs_points = np.mean(fig1_obs_points, axis=0)
-        obs_distrib = np.mean(fig1_obs_distrib, axis=0)
-        link_points = np.mean(fig1_link_points, axis=0)
-        link_distrib = np.mean(fig1_link_distrib, axis=0)
+        # Chromatin Analysis : Linker Profile
+        l_view = clc_link_view(
+            alpha_matrix, landscape, alphaf, Lmin, Lmax, nt
+        )
+        
+        # Chromatin Analysis : Mean Landscape - Array / Value / Calculated
+        alpha_mean_a = np.mean(alpha_matrix, axis=0)
+        alpha_mean_v = np.mean(alpha_mean_a)
+        alpha_mean_c = clc_alpha_mean(alphaf, alphao, s_mean, l_mean)
+        
+        # Chromatin Remodelling : Obstacles Positions
+        obstacles = find_blocks(alpha_matrix[0], alphao)
 
 
     except Exception as e:
@@ -457,7 +440,7 @@ def sw_nucleo(
             
         except Exception as e:
             print(f"Error in Analysis 3 - Jump size + Time size + First pass times : {e}")
-        
+
 
     # ------------------- Analysis 4 : Speeds ------------------- #
     
@@ -465,14 +448,19 @@ def sw_nucleo(
         
         # All Jumps
         if algorithm == "one_step":
-            t_analysis = np.copy(t_matrix)
-            x_analysis = np.copy(x_matrix)
+            pass
+            t_analysis = t_matrix   # Does not use memory
+            x_analysis = x_matrix   # Does not use memory
         
         # Forward Jumps
         elif algorithm == "two_steps":
             t_forward, x_forward, t_reverse, x_reverse = get_jump_nature(t_matrix, x_matrix)
-            t_analysis = np.cumsum(t_forward, axis=1) # t are not cumulatives here !
+            t_analysis = np.cumsum(t_forward, axis=1)
+            del t_forward  # libère mémoire
+            gc.collect()
             x_analysis = x_forward
+            del x_forward
+            gc.collect()
         
         # Instantaneous Speeds [Sites][vi_*]
         dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
@@ -517,6 +505,11 @@ def sw_nucleo(
     # ------------------- Data ------------------- #
     
     try:
+
+        # Cleaning data for memory
+        del alpha_matrix
+        gc.collect()
+
         
         data_result = {
 
@@ -604,7 +597,6 @@ def sw_nucleo(
 
         if data_return:
             data_result.update({
-                'alpha_matrix' : alpha_matrix,
                 't_matrix'     : t_matrix,
                 'x_matrix'     : x_matrix,
                 'results'      : results,
@@ -666,11 +658,6 @@ def sw_nucleo(
                 'bound_low'    : bound_low,
                 'bound_high'   : bound_high,
 
-                # --- Figure --- #
-                'link_points'   : link_points,
-                'link_distrib'  : link_distrib,
-                'obs_points'    : obs_points,
-                'obs_distrib'   : obs_distrib,
             })
 
 
@@ -683,7 +670,6 @@ def sw_nucleo(
         writing_parquet(file=path, title=title, data_result=data_result)
 
         # Clean raw datas
-        del alpha_matrix
         del data_result
         gc.collect()
         

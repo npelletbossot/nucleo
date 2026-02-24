@@ -122,7 +122,7 @@ def listoflist_into_matrix(listoflist: list) -> np.ndarray:
     padding shorter rows with np.nan so that all rows have equal length.
     """
     len_max = max(len(row) for row in listoflist)
-    matrix = np.full((len(listoflist), len_max), np.nan)
+    matrix = np.full((len(listoflist), len_max), np.nan, dtype=np.float32)
     for i, row in enumerate(listoflist):
         matrix[i, :len(row)] = row
     return matrix

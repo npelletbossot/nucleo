@@ -124,8 +124,9 @@ def clc_bp_speeds(
 
 
 def clc_compaction_landscape(alpha_matrix: np.ndarray) -> np.ndarray:
+    # Cumsumed for memory issues
     return(
-        alpha_matrix + (150/35) * (1 - alpha_matrix)
+        np.cumsum(alpha_matrix + (150/35) * (1 - alpha_matrix), axis=1)
     )
 
 
@@ -138,9 +139,6 @@ def clc_compaction_speeds(
     n_i, n_j = len(t_matrix), len(t_matrix[0])
     vc_array = np.full((n_i, n_j - 1), np.nan)
 
-    # Précompute cumulative sums
-    cumsum_alpha = np.cumsum(alpha_matrix_c, axis=1)
-
     for i in range(n_i):
         for j in range(n_j - 1):
 
@@ -151,7 +149,7 @@ def clc_compaction_speeds(
                 xi = int(x_matrix[i, j])
                 xf = int(xf_float)
 
-                dx_c = cumsum_alpha[i, xf] - cumsum_alpha[i, xi]
+                dx_c = alpha_matrix_c[i, xf] - alpha_matrix_c[i, xi]
                 dt = t_matrix[i, j+1] - t_matrix[i, j]
 
                 if dt > 0:

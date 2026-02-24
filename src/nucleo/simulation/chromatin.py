@@ -158,7 +158,7 @@ def clc_alpha_matrix(
             alpha_matrix[i] = alpha_random(s, l, alphaf, alphao, Lmin, Lmax, bps)
 
     # Values
-    alpha_matrix = np.array([binding_length(alpha_list, alphaf, alphao, bpmin) for alpha_list in alpha_matrix], dtype=float)
+    alpha_matrix = np.array([binding_length(alpha_list, alphaf, alphao, bpmin) for alpha_list in alpha_matrix], dtype=np.float32)
     
     return alpha_matrix
 
