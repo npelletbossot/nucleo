@@ -177,25 +177,66 @@ def plot_waiting_times(tbj_points, tbj_distrib, text_size=fontsize, ax=None):
     ax.legend(fontsize=text_size)
 
 
-def plot_speed_distribution(vi_points, vi_distrib, v_mean,  vi_mean, vi_med, vi_mp, text_size=fontsize, ax=None, color="b", label=None, title="homogeneous"):
+def plot_speed_distribution(
+    vi_points,
+    vi_distrib,
+    v_mean,
+    vi_mean,
+    vi_med,
+    vi_mp,
+    text_size=16,
+    ax=None,
+    color="b",
+    label=None,
+    title="homogeneous"
+):
+
+    if ax is None:
+        ax = plt.gca()
+
+    # --- Clean title ---
     if title == "constant_mean":
         title = "Homogeneous"
     elif title == "nt_random":
         title = "Random"
     elif title == "periodic":
         title = "Periodic"
+
     ax.set_title(f"{title}", size=text_size)
-    # ax.axvline(x=vi_mp, label=f'most probable : {np.round(vi_mp,2)}', c='r', ls='-')
-    ax.plot(vi_points, vi_distrib, label=f"{label}", c=color, ls="-", lw=2, alpha=1)
-    ax.axvline(x=v_mean/2, label=rf"$v_{{mean}}$ = {v_mean:.2f}", c=color, ls='--', lw=2, alpha=1)
-    ax.grid(True, which='both')
+
+    # --- Simulation curve (ONLY thing in legend for color) ---
+    ax.plot(
+        vi_points,
+        vi_distrib,
+        c=color,
+        ls="-",
+        lw=2,
+        alpha=0.80,
+        label=label
+    )
+
+    # --- Mean line (no legend entry) ---
+    ax.axvline(
+        x=v_mean / 2,
+        c=color,
+        ls=':',
+        lw=2,
+        alpha=1,
+        label="_nolegend_"
+    )
+
+    # --- Formatting ---
+    ax.grid(True, which='both', alpha=0.3)
     ax.set_xlabel(r'speeds in ($\sigma k_0$) unit', fontsize=text_size)
     ax.set_ylabel('Distribution', size=text_size)
-    ax.set_ylim([1e-5, 1e-1])
-    ax.set_xlim([1e-2, 1e3])
+
+    ax.set_ylim([1e-7, 1e1])
+    ax.set_xlim([1e-1, 1e4])
+
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.legend(ncol=2, fontsize=text_size)
+
+    return ax
 
 
 # - Fig2. Line 1 + Line 2 - #
