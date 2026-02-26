@@ -20,6 +20,5 @@ from nucleo.core.launching import main
 
 if __name__ == "__main__":
     main(
-    STUDY = "FIGURES"
+    STUDY = "FIGURE_1"
 )
-    

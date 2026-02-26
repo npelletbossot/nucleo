@@ -178,9 +178,9 @@ def execute_in_parallel(config: str,
         use_tqdm    = True
         task_suffix = str(slurm_params.get('task_id', 0))
         if cfg['meta']['nt'] == 10_000:
-            num_workers = 1
+            num_workers = 2
         else:
-            num_workers = 10
+            num_workers = 12
 
     project_name   = project['project_name']
     folder_name    = f"{cfg['meta']['path']}_{task_suffix}"
@@ -208,24 +208,33 @@ def execute_in_parallel(config: str,
 
 def main(STUDY):
     
+    # All valuable configurations
     CONFIG = {
         "NUCLEO": ["NU", "BP", "LSLOW", "LSHIGH"],
-        "ACCESS": ["ACCESS_RANDOM", "ACCESS_PERIODIC"],
+        "COMPACTION": ["COMPACTION_RANDOM", "COMPACTION_PERIODIC"],
         "RYU": ["TWO_STEPS"],
         "FACT": ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
-        "FIGURES": ["FIGURES"],
+        "FIGURES": ["FIGURE_1", "FIGURE_2", "FIGURE_3"],
         "TEST": ["TEST"]
     }
 
     all_values = [v for values in CONFIG.values() for v in values]
+
+    # Error if outsides of our studies
     if STUDY not in CONFIG and STUDY not in all_values:
         raise ValueError(f"You gave STUDY={STUDY} which is not in {CONFIG}.")
+    
+    # Filter in sort that we can either launch a config or a list of congifs
+    if STUDY in CONFIG:
+        configs = CONFIG[STUDY]
+    else:
+        configs = [STUDY]  
 
-    configs = CONFIG[STUDY]
+    # Lenght of the study
     n_configs = len(configs)
+    print(f"\nNumber of configurations to launch: {n_configs}\n STUDY = {configs}")
 
-    print(f"\nNumber of configurations to launch: {n_configs}\n STUDY = {CONFIG[STUDY]}")
-
+    # Main loop
     for i, config in enumerate(
         tqdm(configs, desc="Global progress", unit="config"),
         start=1

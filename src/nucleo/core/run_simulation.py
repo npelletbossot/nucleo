@@ -456,7 +456,7 @@ def sw_nucleo(
         elif algorithm == "two_steps":
             t_forward, x_forward, t_reverse, x_reverse = get_jump_nature(t_matrix, x_matrix)
             t_analysis = np.cumsum(t_forward, axis=1)
-            del t_forward  # libère mémoire
+            del t_forward
             gc.collect()
             x_analysis = x_forward
             del x_forward

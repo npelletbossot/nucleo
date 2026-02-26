@@ -145,10 +145,10 @@ def choose_configuration(config: str) -> dict:
         }
     }
     
-    ACCESS__BASE = {
+    COMPACTION_BASE = {
         "formalism": {**FORMALISMS['alg1_destroy']},
         "geometry":{
-                "s": np.array([35], dtype=int)
+            "s": np.array([35], dtype=int)
         }, 
         "probas": {
             "mu": np.array([150, 180], dtype=int),
@@ -166,7 +166,7 @@ def choose_configuration(config: str) -> dict:
             "klist": np.array([RATES["klist"]], dtype=float)
         },
         "meta": {
-            "nt": 10,
+            "nt": 10_000,
             "data_return": True,
             "total_return": True
         }
@@ -300,39 +300,39 @@ def choose_configuration(config: str) -> dict:
             
         # ---- ACCESSIBILITY WITH DESTRUCTION ---- #
 
-        "ACCESS_RANDOM": {
-            **ACCESS__BASE,
+        "COMPACTION_RANDOM": {
+            **COMPACTION_BASE,
             "geometry": {
-                **ACCESS__BASE["geometry"],
+                **COMPACTION_BASE["geometry"],
                 "landscape": np.array(["random"]),
                 "l" : np.arange(10, 450 + 10, 10, dtype=int),
                 "bpmin": np.arange(0, 20 + 5, 5, dtype=int),
             },
             "probas": {
-                **ACCESS__BASE["probas"],
+                **COMPACTION_BASE["probas"],
                 "alphad": np.array([0.00], dtype=float)
             },
             "meta": {
-                **ACCESS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__accessrandom"
+                **COMPACTION_BASE["meta"],
+                "path": f"{PROJECT['project_name']}__compactionrandom"
             }
         },
         
-        "ACCESS_PERIODIC": {
-            **ACCESS__BASE,
+        "COMPACTION_PERIODIC": {
+            **COMPACTION_BASE,
             "geometry": {
-                **ACCESS__BASE["geometry"],
+                **COMPACTION_BASE["geometry"],
                 "landscape": np.array(["periodic"]),
                 "l" : np.arange(10, 200 + 10, 10, dtype=int),
                 "bpmin": np.array([0], dtype=int),
             },
             "probas": {
-                **ACCESS__BASE["probas"],
+                **COMPACTION_BASE["probas"],
                 "alphad": np.arange(0.00, 1.00 + 0.10, 0.10, dtype=float),
             },
             "meta": {
-                **ACCESS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__accessperiodic"
+                **COMPACTION_BASE["meta"],
+                "path": f"{PROJECT['project_name']}__compactionperiodic"
             }
         },
         
@@ -403,7 +403,27 @@ def choose_configuration(config: str) -> dict:
 
         # ---- FIGURES ---- #
 
-        "FIGURES": {
+        "FIGURE_1": {
+            **ONESTEP__BASE,
+            "geometry": {
+                "landscape": np.array(['random']),
+                "s": np.array([150], dtype=int),
+                "l": np.array([10], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                **ONESTEP__BASE["probas"],
+                "mu": np.arange(1, 601, 10, dtype=int),
+                "theta": np.arange(1, 101, 10, dtype=int)
+            },
+            "meta": {
+                **ONESTEP__BASE["meta"],
+                "nt": 100,
+                "path": f"{PROJECT['project_name']}__fig1"
+            }
+        },
+
+        "FIGURE_2": {
             **ONESTEP__BASE,
             "geometry": {
                 "landscape": np.array(['homogeneous']),
@@ -419,7 +439,27 @@ def choose_configuration(config: str) -> dict:
             "meta": {
                 **ONESTEP__BASE["meta"],
                 "nt": 10_000,
-                "path": f"{PROJECT['project_name']}__fig"
+                "path": f"{PROJECT['project_name']}__fig2"
+            }
+        },
+
+        "FIGURE_3": {
+            **ONESTEP__BASE,
+            "geometry": {
+                "landscape": np.array(['homogeneous']),
+                "s": np.array([150], dtype=int),
+                "l": np.array([10], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                **ONESTEP__BASE["probas"],
+                "mu": np.array([200]),
+                "theta": np.array([20, 200]),
+            },
+            "meta": {
+                **ONESTEP__BASE["meta"],
+                "nt": 10_000,
+                "path": f"{PROJECT['project_name']}__fig3"
             }
         },
     }

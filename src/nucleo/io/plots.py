@@ -188,7 +188,8 @@ def plot_speed_distribution(
     ax=None,
     color="b",
     label=None,
-    title="homogeneous"
+    title="homogeneous",
+    plot_vertical=False
 ):
 
     if ax is None:
@@ -216,18 +217,19 @@ def plot_speed_distribution(
     )
 
     # --- Mean line (no legend entry) ---
-    ax.axvline(
-        x=v_mean / 2,
-        c=color,
-        ls=':',
-        lw=2,
-        alpha=1,
-        label="_nolegend_"
-    )
+    if plot_vertical:
+        ax.axvline(
+            x=v_mean / 2,
+            c=color,
+            ls=':',
+            lw=2,
+            alpha=1,
+            label="_nolegend_"
+        )
 
     # --- Formatting ---
     ax.grid(True, which='both', alpha=0.3)
-    ax.set_xlabel(r'speeds in ($\sigma k_0$) unit', fontsize=text_size)
+    ax.set_xlabel(r'speeds ($\sigma k_0$)', fontsize=text_size)
     ax.set_ylabel('Distribution', size=text_size)
 
     ax.set_ylim([1e-7, 1e1])
