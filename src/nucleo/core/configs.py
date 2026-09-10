@@ -382,15 +382,6 @@ def choose_configuration(config: str) -> dict:
             }
         },
 
-        "FACT_PASSIVE_MEMORY": {
-            **TWOSTEPS__BASE,
-            "formalism": {**FORMALISMS["alg2_passive_memory"]},
-            "meta": {
-                **TWOSTEPS__BASE["meta"],
-                "path": f"{PROJECT['project_name']}__passmemo"
-            }
-        },
-
         "FACT_ACTIVE_FULL": {
             **TWOSTEPS__BASE,
             "formalism": {**FORMALISMS["alg2_active_full"]},
