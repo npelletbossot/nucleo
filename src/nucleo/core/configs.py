@@ -205,14 +205,14 @@ def choose_configuration(config: str) -> dict:
             "beta": np.array([PROBAS["beta"]], dtype=float),
             "alphac": np.array([PROBAS["alphac"]], dtype=float),
             "alphad": np.array([PROBAS["alphad"]], dtype=float),
-            "alphar": np.arange(0.00, 1.00 + 0.10, 0.20, dtype=float),
+            "alphar": np.array([PROBAS["alphar"]], dtype=float),
         },
         "rates": {
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
             "rrest": np.array([RATES["rrest"]], dtype=float),
-            "krel": np.array([1.00], dtype=float),
-            "Kp": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
-            "Kz": np.array([0.00, 0.50, 1.00], dtype=float),
+            "krel": np.array([RATES["krel"]], dtype=float),
+            "Kp": np.array([RATES["Kp"]], dtype=float),
+            "Kz": np.array([RATES["Kz"]], dtype=float),
         },
         "meta": {
             "nt": 10_000,
@@ -237,7 +237,7 @@ def choose_configuration(config: str) -> dict:
             "beta": np.array([PROBAS["beta"]], dtype=float),
             "alphac": np.array([PROBAS["alphac"]], dtype=float),
             "alphad": np.array([PROBAS["alphad"]], dtype=float),
-            "alphar": np.array([PROBAS["alphar"]], dtype=float),
+            "alphar": np.arange(0.00, 1.00 + 0.10, 0.20, dtype=float),
         },
         "rates": {
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
@@ -263,7 +263,7 @@ def choose_configuration(config: str) -> dict:
         },
         "probas": {
             "mu": np.array([150, 300], dtype=int),
-            "theta": np.array([10, 50,100], dtype=int),
+            "theta": np.array([10, 50, 100], dtype=int),
             "alphao": np.array([PROBAS["alphao"]], dtype=float),
             "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
             "beta": np.array([PROBAS["beta"]], dtype=float),
@@ -274,9 +274,9 @@ def choose_configuration(config: str) -> dict:
         "rates": {
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
             "rrest": np.array([RATES["rrest"]], dtype=float),
-            "krel": np.array([RATES["krel"]], dtype=float),
-            "Kp": np.array([RATES["Kp"]], dtype=float),
-            "Kz": np.array([RATES["Kz"]], dtype=float),
+            "krel": np.array([1.00], dtype=float),
+            "Kp": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
+            "Kz": np.array([0.00, 0.50, 1.00], dtype=float),
         },
         "meta": {
             "nt": 100,
@@ -479,11 +479,7 @@ def choose_configuration(config: str) -> dict:
                 **TIME,
                 "dt": 1
             }
-        },
-
-        # ---- MANUSCRIPT ---- #
-
-        
+        },        
 
         # ---- FIGURES ---- #
 
