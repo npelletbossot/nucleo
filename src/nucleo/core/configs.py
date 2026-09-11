@@ -115,7 +115,7 @@ def choose_configuration(config: str) -> dict:
         "alphaf": 1.00,     # Probability of binding if linker
         "alphao": 0.00,     # Probability of binding if obstacle
         "beta": 0.00,       # Probability of in vitro condensin to unbind and leaving DNA
-        "alphac": 0.60,     # Probability of in vitro condensin to extrude and beeing accepted
+        "alphac": 0.67,     # Probability of in vitro condensin to extrude and beeing accepted
         "alphad": 0.00,     # Probability of nucleosome to drop out
         "alphar": 0.00      # Probability of binding while FACT is there
     }
@@ -253,6 +253,37 @@ def choose_configuration(config: str) -> dict:
         }
     }
 
+    FACT__BASE = {
+        "formalism": {**FORMALISMS['alg2']},
+        "geometry": {
+            "land": np.array(['periodic', 'random']),
+            "s": np.array([35], dtype=int),
+            "l": np.array([10, 35, 100], dtype=int),
+            "bpmin": np.array([0], dtype=int)
+        },
+        "probas": {
+            "mu": np.array([150, 300], dtype=int),
+            "theta": np.array([10, 50,100], dtype=int),
+            "alphao": np.array([PROBAS["alphao"]], dtype=float),
+            "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
+            "beta": np.array([PROBAS["beta"]], dtype=float),
+            "alphac": np.array([PROBAS["alphac"]], dtype=float),
+            "alphad": np.array([PROBAS["alphad"]], dtype=float),
+            "alphar": np.array([PROBAS["alphar"]], dtype=float),
+        },
+        "rates": {
+            "rcapt": np.array([RATES["rcapt"]], dtype=float),
+            "rrest": np.array([RATES["rrest"]], dtype=float),
+            "krel": np.array([RATES["krel"]], dtype=float),
+            "Kp": np.array([RATES["Kp"]], dtype=float),
+            "Kz": np.array([RATES["Kz"]], dtype=float),
+        },
+        "meta": {
+            "nt": 100,
+            "data_return": True,
+            "total_return": True
+        }
+    }
     # ──────────────────────────────────
     # Presets for study configurations
     # ──────────────────────────────────
@@ -374,28 +405,28 @@ def choose_configuration(config: str) -> dict:
         # ---- DYNAMIC ---- #
         
         "FACT_PASSIVE_FULL": {
-            **TWOSTEPS__BASE,
+            **FACT__BASE,
             "formalism": {**FORMALISMS["alg2_passive_full"]},
             "meta": {
-                **TWOSTEPS__BASE["meta"],
+                **FACT__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__passfull"
             }
         },
 
         "FACT_ACTIVE_FULL": {
-            **TWOSTEPS__BASE,
+            **FACT__BASE,
             "formalism": {**FORMALISMS["alg2_active_full"]},
             "meta": {
-                **TWOSTEPS__BASE["meta"],
+                **FACT__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__actifull"
             }
         },
 
         "FACT_ACTIVE_MEMORY": {
-            **TWOSTEPS__BASE,
+            **FACT__BASE,
             "formalism": {**FORMALISMS["alg2_active_memory"]},
             "meta": {
-                **TWOSTEPS__BASE["meta"],
+                **FACT__BASE["meta"],
                 "path": f"{PROJECT['project_name']}__actimemo"
             }
         },
@@ -449,6 +480,10 @@ def choose_configuration(config: str) -> dict:
                 "dt": 1
             }
         },
+
+        # ---- MANUSCRIPT ---- #
+
+        
 
         # ---- FIGURES ---- #
 
