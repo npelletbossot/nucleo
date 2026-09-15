@@ -426,18 +426,9 @@ def calculate_dwell_times(
 def get_jump_nature(
     t_matrix: np.ndarray,
     x_matrix: np.ndarray,
-    total_return: bool = False
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
-    # Formalism 1
     t_forward_all, x_forward_all = [], []
-    t_reverse_all, x_reverse_all = [], []
-    
-    # Formalism 2
-    if total_return:
-        t_try_all, x_try_all = [], []
-        t_rejected_all, x_rejected_all = [], []
-        t_accepted_all, x_accepted_all = [], []
     
     # Loop parameters
     n_traj, n_steps = x_matrix.shape
@@ -447,73 +438,25 @@ def get_jump_nature(
         # Each Trajectory
         t_traj = t_matrix[i]
         x_traj = x_matrix[i]
-        
-        # Formalism 1
-        t_forward, x_forward = [0.0], [0] 
-        t_reverse, x_reverse = [0.0], [0]
-        
-        # Formalism 2
-        if total_return:
-            t_try, x_try = [0.0], [0] 
-            t_rejected, x_rejected = [0.0], [0]
-            t_accepted, x_accepted = [0.0], [0]
-        
-        for j in range(len(t_traj) - 1):
-            
-            dx = x_traj[j+1] - x_traj[j]
-            
-            if dx < 0:
-                t_reverse.append(t_traj[j+1] - t_traj[j-1])  
-                x_reverse.append(x_traj[j])
-                if total_return:
-                    t_rejected.append(t_traj[j+1] - t_traj[j])                
 
-            elif dx == 0:
-                t_forward.append(t_traj[j+1] - t_traj[j-1])      
-                x_forward.append(x_traj[j+1])
-                if total_return:
-                    t_accepted.append(t_traj[j+1] - t_traj[j])              
-            
-            elif dx > 0:
-                if total_return:
-                    t_try.append(t_traj[j+1] - t_traj[j])
-                    x_try.append(x_traj[j+1])
-                
-        if total_return:       
-            x_rejected = x_reverse
-            x_accepted = x_forward
-            
+        # Masks
+        mask_1 = np.where(np.diff(x_traj) == 0)[0]
+        mask_1 = mask_1[mask_1 + 2 < n_steps]
+        mask_2 = mask_1 + 2
+
+        # dt and x (not same formalism !)
+        t_forward = t_traj[mask_2] - t_traj[mask_1]
+        x_forward = x_traj[mask_1]
+
+        # Add (0, 0) at the beginning
+        t_forward = np.insert(t_forward, 0, 0.0)
+        x_forward = np.insert(x_forward, 0, 0)
+
+        # Big arrays
         t_forward_all.append(t_forward)
         x_forward_all.append(x_forward)
-        t_reverse_all.append(t_reverse)        
-        x_reverse_all.append(x_reverse)
         
-        if total_return:
-            t_try_all.append(t_forward)
-            x_try_all.append(x_forward)
-            t_rejected_all.append(t_rejected) 
-            x_rejected_all.append(x_rejected) 
-            t_accepted_all.append(t_accepted) 
-            x_accepted_all.append(x_accepted) 
-        
-    if not total_return:
-        return (
-            listoflist_into_matrix(t_forward_all),
-            listoflist_into_matrix(x_forward_all),
-            listoflist_into_matrix(t_reverse_all),
-            listoflist_into_matrix(x_reverse_all),
-        )
-        
-    else:
-        return (
-            listoflist_into_matrix(t_forward_all),
-            listoflist_into_matrix(x_forward_all),
-            listoflist_into_matrix(t_reverse_all),
-            listoflist_into_matrix(x_reverse_all),
-            listoflist_into_matrix(t_try_all),
-            listoflist_into_matrix(x_try_all),
-            listoflist_into_matrix(t_rejected_all),
-            listoflist_into_matrix(x_rejected_all),
-            listoflist_into_matrix(t_accepted_all),
-            listoflist_into_matrix(x_accepted_all),
-        )
+    return (
+        listoflist_into_matrix(t_forward_all),
+        listoflist_into_matrix(x_forward_all)
+    )

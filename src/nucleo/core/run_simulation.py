@@ -487,7 +487,7 @@ def sw_nucleo(
         
         # Forward Jumps for Gillespie Two Steps
         elif algo == "2S":
-            t_forward, x_forward, _, _ = get_jump_nature(t_matrix, x_matrix)
+            t_forward, x_forward = get_jump_nature(t_matrix, x_matrix)
             t_analysis = np.cumsum(t_forward, axis=1)
             x_analysis = x_forward
 

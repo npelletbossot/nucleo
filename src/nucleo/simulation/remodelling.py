@@ -54,51 +54,6 @@ def fact_passive(Kp: float) -> bool:
     return (r_fact < PF)
 
 
-# def fact_active(kU: float, kBp: float, Kz: float, Kp: float, t_rest: float) -> bool:
-#     """
-#     Determine whether FACT-mediated chromatin remodelling occurs
-#     during a rest period using an active mean-field approximation.
-
-#     This function models FACT as a two-state binding process (bound/unbound),
-#     but integrates the binding dynamics analytically over the rest time t_rest
-#     rather than simulating individual stochastic trajectories.
-
-#     The probability of remodelling during t_rest is given by:
-
-#         PF = Kz * exp(-(kBp + kU) * t_rest)
-#            + Kp * [1 - exp(-(kBp + kU) * t_rest)]
-
-#     where the exponential term describes relaxation toward the steady-state
-#     FACT occupancy with characteristic time (kBp + kU)^(-1).
-
-#     This approach neglects intra-rest temporal fluctuations and memory effects,
-#     and is equivalent to averaging over all possible FACT trajectories during
-#     the rest interval.
-
-#     Parameters
-#     ----------
-#     kU : float
-#         FACT unbinding rate (F → NF).
-#     kBp : float
-#         FACT binding rate (NF → F).
-#     Kz : float
-#         Initial probability of FACT being bound at the start of the rest period.
-#     Kp : float
-#         Equilibrium probability of FACT being bound.
-#     t_rest : float
-#         Duration of the rest period during which remodelling may occur.
-
-#     Returns
-#     -------
-#     bool
-#         True if chromatin remodelling occurs during the rest period,
-#         False otherwise.
-#     """
-#     r_fact = np.random.rand()
-#     PF = Kz * np.exp(-(kBp + kU) * t_rest) + Kp * (1 - np.exp(-(kBp + kU) * t_rest))        
-#     return (r_fact < PF)+
-
-
 def fact_active(k_rel: float, Kp: float, Kz: float, t_rest: float) -> bool:
     """
     Determine whether FACT-mediated chromatin remodelling occurs
@@ -115,9 +70,9 @@ def fact_active(k_rel: float, Kp: float, Kz: float, t_rest: float) -> bool:
     k_rel : float
         Total FACT relaxation rate (kBp + kU), i.e. inverse of the
         characteristic binding/unbinding timescale.
-    Kz : float
-        Initial probability of FACT being bound at the start of the rest period.
     Kp : float
+        Initial probability of FACT being bound at the start of the rest period.
+    Kz : float
         Equilibrium probability of FACT being bound.
     t_rest : float
         Duration of the rest period.
@@ -166,18 +121,13 @@ def remodelling(
     krel, Kp, Kz, t_rest, 
 ):
     
-    factmodes = ["passfull", "passmemo", "actifull", "actimemo"]
+    factmodes = ["passfull", "actifull", "actimemo"]
     if factmode not in factmodes:
         raise ValueError(f"You set factmode={factmode} which is not in {factmodes}")
                 
     if factmode == "passfull":
         if fact_passive(Kp):
             r_capt = alphar
-        
-    elif factmode == "passmemo":
-        if fact_passive(Kp):
-            alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar)
-            r_capt = alpha_array[x]
 
     elif factmode == "actifull":
         if fact_active(krel, Kp, Kz, t_rest):

@@ -216,12 +216,13 @@ def main(STUDY):
     
     # All valuable configurations
     CONFIG = {
-        "NUCLEO": ["NU", "BP", "LSLOW", "LSHIGH"],
+        "NUCLEO"    : ["NU", "BP", "LSLOW", "LSHIGH"],
         "COMPACTION": ["COMPACTION_RANDOM", "COMPACTION_PERIODIC"],
-        "RYU": ["TWO_STEPS"],
-        "FACT": ["FACT_PASSIVE_FULL", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
-        "FIGURES": ["FIGURE_1", "FIGURE_2", "FIGURE_3"],
-        "TESTS": ["TEST_1S", "TEST_2S"]
+        "RYU"       : ["TWO_STEPS"],
+        "FACT"      : ["FACT_PASSIVE_FULL", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
+        "FIGURES"   : ["FIGURE_1", "FIGURE_2", "FIGURE_3"],
+        "TESTS"     : ["TEST_1S", "TEST_2S"],
+        "WORK"      :["WORK"]
     }
 
     all_values = [v for values in CONFIG.values() for v in values]

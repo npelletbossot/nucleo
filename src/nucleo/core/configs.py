@@ -479,7 +479,42 @@ def choose_configuration(config: str) -> dict:
                 **TIME,
                 "dt": 1
             }
-        },        
+        },     
+
+        "WORK": {
+            **TEST__BASE,
+            "formalism": {**FORMALISMS['alg2']},
+        "geometry": {
+            "land": np.array(['periodic', 'random']),
+            "s": np.array([35], dtype=int),
+            "l": np.array([10], dtype=int),
+            "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                **TEST__BASE["probas"],
+                "mu": np.array([150], dtype=int),
+                "theta": np.array([100], dtype=int),
+                "alphac": np.array([0.67], dtype=float),
+                "alphar": np.array([1], dtype=float),
+            },
+            "rates": {
+                **TEST__BASE["rates"],
+                "Kp": np.array([1.00], dtype=float),
+                "Kz": np.array([1.00], dtype=float),
+                "rcapt": np.array([2.00], dtype=float),
+                "rrest": np.array([2.00], dtype=float),
+            },
+            "meta": {
+                **TEST__BASE["meta"],
+                "nt": 10000,
+                "path": f"{PROJECT['project_name']}__WORK"
+            },
+            "time": {
+                **TIME,
+                "dt": 1
+            }
+        },     
+           
 
         # ---- FIGURES ---- #
 

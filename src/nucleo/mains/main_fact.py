@@ -25,12 +25,13 @@ import multiprocessing
 #     "FACT": ["FACT_PASSIVE_FULL", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
 #     "FIGURES": ["FIGURE_1", "FIGURE_2", "FIGURE_3"],
 #     "TEST": ["TEST"]
+#      "WORK"
 # }
 
 if __name__ == "__main__":
     multiprocessing.set_start_method("spawn", force=True)
     main(
-        STUDY = "FACT"
+        STUDY = "WORK"
 )
 
 
