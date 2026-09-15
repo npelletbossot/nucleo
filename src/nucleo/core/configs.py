@@ -257,13 +257,17 @@ def choose_configuration(config: str) -> dict:
         "formalism": {**FORMALISMS['alg2']},
         "geometry": {
             "land": np.array(['periodic', 'random']),
+            # "s": np.array([150, 35], dtype=int),
             "s": np.array([35], dtype=int),
-            "l": np.array([10, 35, 100], dtype=int),
+            # "l": np.array([10, 35, 100], dtype=int),
+            "l": np.array([10], dtype=int),
             "bpmin": np.array([0], dtype=int)
         },
         "probas": {
-            "mu": np.array([150, 300], dtype=int),
-            "theta": np.array([10, 50, 100], dtype=int),
+            # "mu": np.array([150, 300], dtype=int),
+            "mu": np.array([150], dtype=int),
+            # "theta": np.array([10, 50, 100], dtype=int),
+            "theta": np.array([100], dtype=int),
             "alphao": np.array([PROBAS["alphao"]], dtype=float),
             "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
             "beta": np.array([PROBAS["beta"]], dtype=float),
@@ -279,11 +283,12 @@ def choose_configuration(config: str) -> dict:
             "Kz": np.array([0.00, 0.50, 1.00], dtype=float),
         },
         "meta": {
-            "nt": 10_000,
+            "nt": 100,
             "data_return": True,
             "total_return": True
         }
     }
+
     # ──────────────────────────────────
     # Presets for study configurations
     # ──────────────────────────────────
