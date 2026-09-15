@@ -527,24 +527,7 @@ def sw_nucleo(
                     
     except Exception as e:
         print(f"Analysis 4.2 : Speeds in Base Pairs")
-         
 
-    # ------------------- Tests ------------------- #
-
-    # # Test.1 : reconstitute_mean_trajectory
-    # test_1 = results_mean
-    # test_2 = reconstitute_mean_trajectory(t_matrix, x_matrix, tmax, dt)
-    # print(
-    #     f"reconstitute_mean_trajectory:\n"
-    #     f"{test_1}\n{test_2}\n\n"
-    # )
-
-    # # Test.2 : x_forward
-    # print(x_matrix)
-
-    # Test.3 : results_c
-    # print(f"TEST : {results_c}\n{results_mean * c_mean}\n\n")
-    
     
     # ------------------- Data ------------------- #
     

@@ -121,8 +121,8 @@ def choose_configuration(config: str) -> dict:
     }
 
     RATES = {
-        "rcapt": 2.0,   # Rate of capturing (1/6)
-        "rrest": 2.0,   # Rate of resting (1/6)
+        "rcapt": 2.0,       # Rate of capturing (1/6)
+        "rrest": 2.0,       # Rate of resting (1/6)
         # "kB" : 0.50,        # Rate of FACT Binding
         # "kU": 0.50,         # Rate of FACT Unbinding
         "krel" : 0.0,       # = kBp + kU         : New formalism -> Checking that even with =1.0 it doesn't affect if non called          
@@ -273,13 +273,13 @@ def choose_configuration(config: str) -> dict:
         },
         "rates": {
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
-            "rrest": np.array([RATES["rrest"]], dtype=float),
+            "rrest": np.array([2.00, 0.20, 0.10], dtype=float),
             "krel": np.array([1.00], dtype=float),
             "Kp": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
             "Kz": np.array([0.00, 0.50, 1.00], dtype=float),
         },
         "meta": {
-            "nt": 100,
+            "nt": 10_000,
             "data_return": True,
             "total_return": True
         }
@@ -438,7 +438,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS['alg1']},
             "probas": {
                 **TEST__BASE["probas"],
-                "alphac": np.array([0.60, 1.00], dtype=float),
+                "alphac": np.array([0.67, 1.00], dtype=float),
             },
             "rates": {
                 **TEST__BASE["rates"],
@@ -462,7 +462,7 @@ def choose_configuration(config: str) -> dict:
             "formalism": {**FORMALISMS['alg2']},
             "probas": {
                 **TEST__BASE["probas"],
-                "alphac": np.array([0.60, 1.00], dtype=float),
+                "alphac": np.array([0.67, 1.00], dtype=float),
             },
             "rates": {
                 **TEST__BASE["rates"],
@@ -506,7 +506,7 @@ def choose_configuration(config: str) -> dict:
             },
             "meta": {
                 **TEST__BASE["meta"],
-                "nt": 10000,
+                "nt": 10_000,
                 "path": f"{PROJECT['project_name']}__WORK"
             },
             "time": {
