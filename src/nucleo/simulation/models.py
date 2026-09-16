@@ -178,7 +178,8 @@ def folding(landscape:np.ndarray, first_origin:int) -> int:
 
 def gillespie_algo_one_step(
     nt: int, tmax: float, dt: float,
-    alpha_matrix: np.ndarray, beta: float, 
+    alpha_matrix: np.ndarray, alpha_matrix_c: np.ndarray, 
+    beta: float, 
     Lmax: int, lenght: int, origin: int, 
     p: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -206,8 +207,11 @@ def gillespie_algo_one_step(
     # --- Starting values --- #
     beta_matrix = np.tile(np.full(lenght, beta), (nt, 1))
 
-    results = np.empty((nt, int(tmax/dt)))
+    results     = np.empty((nt, int(tmax/dt)))
+    results_c   = np.empty((nt, int(tmax/dt)))
+
     results.fill(np.nan)
+    results_c.fill(np.nan)
 
     t_matrix = np.empty(nt, dtype=object)
     x_matrix = np.empty(nt, dtype=object)
@@ -219,13 +223,16 @@ def gillespie_algo_one_step(
         t = 0
         # x = 0
         x = folding(alpha_matrix[_], origin)    # Initial calculation
-        prev_x = np.copy(x)                     # Copy for later use (filling the matrix)
+        px = np.copy(x)                     # Copy for later use (filling the matrix)
         ox = np.copy(x)                         # Initial point on the chromatin (used to reset trajectories to start at zero)
         i0 = 0                                  # Initial index
+        pxc = alpha_matrix_c[x]
+        oxc = alpha_matrix_c[x]
         i = 0                                   # Current index
 
         # Initial calibration
         results[_][0] = x                       # Store the initial time
+        results_c[_][0] = alpha_matrix_c[x]     # 
         t_list = [t]                            # List to track time points
         x_list = [x-ox]                         # List to track recalibrated positions
 
@@ -261,13 +268,15 @@ def gillespie_algo_one_step(
             # Unhooking or not
             if r0<(beta_matrix[_][x]/r_tot) :
                 i = int(np.floor(t/dt))                                     # Last time
-                results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = prev_x     # Last value
+                results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = px     # Last value
+                results_c[_][i0:int(min(np.floor(tmax/dt),i)+1)] = pxc      # Last value
                 break
 
             # Not beeing in a disturbed area
             if x >= (Lmax - origin) :
                 i = int(np.floor(t/dt))                                     # Last time
                 results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = np.nan     # No value
+                results_c[_][i0:int(min(np.floor(tmax/dt),i)+1)] = np.nan     # No value
                 # print('Loop extrusion arrival at the end of the chain.')
                 break
 
@@ -289,9 +298,11 @@ def gillespie_algo_one_step(
 
             # Filling 
             i = int(np.floor(t/dt))
-            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(prev_x-ox)
+            results[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(px-ox)
+            results_c[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(pxc-oxc)
             i0 = i+1
-            prev_x = np.copy(x)
+            px = np.copy(x)
+            pxc = np.copy(alpha_matrix_c[x])
 
         # All datas
         t_matrix[_] = t_list
@@ -477,6 +488,7 @@ def gillespie_algo_two_steps(
                 i = int(np.floor(t/dt))
                 j = int(min(np.floor(tmax/dt),i)+1)
                 results[n][i0:j] = int(px - ox)
+                results_c[n][i0:j] = int(pxc - oxc)
                 break
 
             # --- Jumping : Destination --- #
