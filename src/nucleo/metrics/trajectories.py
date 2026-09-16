@@ -30,24 +30,32 @@ def reconstitute_mean_trajectory(
     tmax: int,
     dt: float,
 ) -> tuple[np.ndarray, np.ndarray]:
+
+    # Temporal grid
     bins  = np.arange(dt, tmax + dt, dt, dtype=float)
     n = len(bins)
     sum_x = np.zeros(n)
     count = np.zeros(n, dtype=np.int32)
 
+    # Looping over trajectories with croissant times
     for t_row, x_row in zip(t_matrix, x_matrix):
+
+        # Keeping only valid values and t < tmax ofr the results matrix
         valid = np.isfinite(t_row) & np.isfinite(x_row) & (t_row < tmax)
         t_v = t_row[valid]
         x_v = x_row[valid]
-
         if t_v.size == 0:
             continue
 
+        # Ordering by time (supposed to be already the case)
         order = np.argsort(t_v)
         t_v   = t_v[order]
         x_v   = x_v[order]
+
+        # For each bin value, returns the right insertion index in t_v
+        # that is, the number of elements in t_v that are less than or equal to that bin value.
         idx = np.searchsorted(t_v, bins, side="right") - 1
-        hit = idx >= 0
+        hit = (idx >= 0)
         sum_x[hit] += x_v[idx[hit]]
         count[hit] += 1
 

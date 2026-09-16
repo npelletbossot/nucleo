@@ -30,20 +30,6 @@ def choose_configuration(config: str) -> dict:
     PROJECT = {
         "project_name": "nucleo"
     }
-    
-    BASE_1S = {
-        "algo": "1S",
-        "bound_l": 0,
-        "bound_m": 5,
-        "bound_h": 95,
-    }
-
-    BASE_2S = {
-        "algo": "2S",
-        "bound_l": 10,
-        "bound_m": 20,
-        "bound_h": 90,
-    }
 
     FORMALISMS = {}
 
@@ -86,7 +72,6 @@ def choose_configuration(config: str) -> dict:
 
     MODES = {
         "passive_full": "passfull",
-        "passive_memory": "passmemo",
         "active_full": "actifull",
         "active_memory": "actimemo",
     }
