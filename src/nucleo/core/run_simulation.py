@@ -54,7 +54,11 @@ from nucleo.metrics.speeds import (
 
 from nucleo.metrics.twosteps import get_jump_nature
 
-from nucleo.metrics.compaction import clc_compaction_positions
+from nucleo.metrics.compaction import (
+    clc_compaction_landscape,
+    clc_compaction_positions
+)
+
 
 # 1.2.4 : Writing
 from nucleo.io.writing import inspect_data_types, writing_parquet
@@ -325,12 +329,6 @@ def sw_nucleo(
     bint    = int(1e+1)
 
 
-    # ------------------- Tests ------------------- #
-    # print(f"bound_l = {bound_l}")
-    # print(f"bound_m = {bound_m}")
-    # print(f"bound_h = {bound_h}")
-
-
     # ------------------- Input 1 : Chromatin ------------------- #
     
     try:
@@ -349,6 +347,10 @@ def sw_nucleo(
             last_point = Lmax
             for i in range(len(alpha_matrix)):
                 alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], alphad, alphaf, alphao, first_point, last_point)
+
+        # Chromatin generation : Compaction
+        alpha_matrix_c = clc_compaction_landscape(alpha_matrix)
+
                 
     except Exception as e:
         print(f"Error in Input 1 : Chromatin : {e}")
@@ -377,9 +379,10 @@ def sw_nucleo(
             
         # Gillespie Two-Steps
         elif algo == "2S":
-            results, t_matrix, x_matrix = gillespie_algo_two_steps(
+            t_matrix, x_matrix, results, results_c = gillespie_algo_two_steps(
                 fact, mode,
-                alpha_matrix, p,
+                alpha_matrix, alpha_matrix_c,
+                p,
                 s, 
                 alphao, beta,
                 rcapt, rrest, 
@@ -508,17 +511,17 @@ def sw_nucleo(
 
     try:
 
-        # ------- [Base Pairs][vc_*]
+        # # ------- [Base Pairs][vc_*]
 
-        # Conversion
-        x_matrix_c = clc_compaction_positions(
-                alpha_matrix, x_analysis, c_linker, c_nucleo
-            )
+        # # Conversion
+        # x_matrix_c = clc_compaction_positions(
+        #         alpha_matrix, x_analysis, c_linker, c_nucleo
+        #     )
 
-        # Trajectories
-        results_c = reconstitute_mean_trajectory(
-            t_analysis, x_matrix_c, tmax, dt
-        )
+        # # Trajectories
+        # results_c = reconstitute_mean_trajectory(
+        #     t_analysis, x_matrix_c, tmax, dt
+        # )
 
         # Linear speeds
         _, _, _, vc_mean, vc_med = clc_results(
@@ -633,6 +636,7 @@ def sw_nucleo(
                 't_matrix'     : t_matrix,
                 'x_matrix'     : x_matrix,
                 'results'      : results,
+                'results_c'    : results_c,
             })
         
         if total_return:

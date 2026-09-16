@@ -304,6 +304,7 @@ def gillespie_algo_two_steps(
     fact: bool,
     mode: str,
     alpha_matrix: np.ndarray,
+    alpha_matrix_c: np.ndarray,
     p: np.ndarray,
     s: int,
     alphao: float,
@@ -429,11 +430,14 @@ def gillespie_algo_two_steps(
     np.random.seed(None)
     
     # --- Starting matrices --- #
-    beta_matrix = np.tile(np.full(len(L)*bps, beta), (nt, 1))
-    results = np.empty((nt, int(tmax/dt)))
+    beta_matrix     = np.tile(np.full(len(L)*bps, beta), (nt, 1))
+    t_matrix        = np.empty(nt, dtype=object)    # All times
+    x_matrix        = np.empty(nt, dtype=object)    # All positions
+    results         = np.empty((nt, int(tmax/dt)))  # Sites
+    results_c       = np.empty((nt, int(tmax/dt)))  # Base Pairs
     results.fill(np.nan)
-    t_matrix = np.empty(nt, dtype=object)
-    x_matrix = np.empty(nt, dtype=object)
+    results_c.fill(np.nan)
+
     
     # --- FACT Conditions for Homogen Landscapes --- #
     if np.all(alpha_matrix == alpha_matrix[0, 0]):
@@ -445,17 +449,19 @@ def gillespie_algo_two_steps(
     for n in range(0,nt) :
         
         # Landscape and Obstacles
-        alpha_array = alpha_matrix[n]
+        alpha_array     = alpha_matrix[n]
+        alpha_array_c   = alpha_matrix_c[n]
         if not homogen:
             pos_obs     = find_blocks(alpha_array, alphao)
             start_obs   = pos_obs[:, 0]
             end_obs     = pos_obs[:, 1]
             
         # Initialization of starting values
-        t, t_capt, t_rest = 0, 0, 0         # First times
-        x = folding(alpha_array, origin)    # Initial calculation
-        px, ox  = np.copy(x), np.copy(x)    # Previous_x and Origin_x
-        i0, i   = 0, 0                      # Ranks of filling results
+        t, t_capt, t_rest = 0, 0, 0                     # First times
+        x = folding(alpha_array, origin)                # Initial calculation
+        px, ox  = np.copy(x), np.copy(x)                # Previous_x and Origin_x
+        pxc, oxc = alpha_array_c[x], alpha_array_c[x]   # Base Pairs
+        i0, i   = 0, 0                                  # Ranks of filling results
 
         # Initial calibration
         results[n][0] = x - ox  # Store the initial position
@@ -476,6 +482,7 @@ def gillespie_algo_two_steps(
             # --- Jumping : Destination --- #
             x_jump  = int(np.random.choice(L, p=p))
             x       += x_jump
+            xc      = alpha_array_c[x]
             r0_capt = np.random.rand()
             r_capt  = alpha_array[x]
             
@@ -511,7 +518,8 @@ def gillespie_algo_two_steps(
             x_list.append(x-ox)
             i = int(np.floor(t/dt)) 
             j = int(min(np.floor(tmax/dt),i)+1)
-            results[n][i0:j] = int(px - ox)
+            results[n][i0:j]    = int(px - ox)
+            results_c[n][i0:j]  = int(pxc - oxc)
             i0 = np.copy(i) + 1
             
             # --- Resting : Time Condition --- #
@@ -522,7 +530,8 @@ def gillespie_algo_two_steps(
             # --- Resting : Second Acquisition 2.1 --- #
             i = int(np.floor(t/dt)) 
             j = int(min(np.floor(tmax/dt),i)+1)
-            results[n][i0:j] = int(x - ox)
+            results[n][i0:j]    = int(x - ox)
+            results_c[n][i0:j]  = int(xc - oxc)
             i0 = np.copy(i) + 1
                   
             # --- Capturing : Stochasticity --- #
@@ -535,12 +544,13 @@ def gillespie_algo_two_steps(
             # --- Capturing : Second Acquisition 2.2 --- #
             t_list.append(t)
             x_list.append(x-ox)
-            px = np.copy(x)
+            px  = np.copy(x)
+            pxc = np.copy(alpha_array_c[x])
                         
         # --- Data Update --- #
         t_matrix[n] = t_list
         x_matrix[n] = x_list
 
     # --- Return --- #
-    return results, t_matrix, x_matrix
+    return t_matrix, x_matrix, results, results_c
 
