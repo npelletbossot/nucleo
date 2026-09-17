@@ -271,7 +271,7 @@ def choose_configuration(config: str) -> dict:
             "Kz": np.array([0.00, 0.50, 1.00], dtype=float),
         },
         "meta": {
-            "nt": 10,
+            "nt": 10_000,
             "data_return": True,
             "total_return": True
         }
