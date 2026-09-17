@@ -246,14 +246,14 @@ def choose_configuration(config: str) -> dict:
             "land": np.array(['periodic', 'random']),
             # "s": np.array([150, 35], dtype=int),
             "s": np.array([35], dtype=int),
-            # "l": np.array([10, 35, 100], dtype=int),
-            "l": np.array([10], dtype=int),
+            "l": np.array([10, 35, 100], dtype=int),
+            # "l": np.array([10], dtype=int),
             "bpmin": np.array([0], dtype=int)
         },
         "probas": {
-            # "mu": np.array([150, 300], dtype=int),
-            "mu": np.array([150], dtype=int),
-            # "theta": np.array([10, 50, 100], dtype=int),
+            "mu": np.array([150, 300], dtype=int),
+            # "mu": np.array([150], dtype=int),
+            "theta": np.array([10, 50, 100], dtype=int),
             "theta": np.array([100], dtype=int),
             "alphao": np.array([PROBAS["alphao"]], dtype=float),
             "alphaf": np.array([PROBAS["alphaf"]], dtype=float),
@@ -264,14 +264,14 @@ def choose_configuration(config: str) -> dict:
         },
         "rates": {
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
-            "rrest": np.array([RATES["rrest"]], dtype=float),
-            # "rrest": np.array([2.00, 0.20, 0.10], dtype=float),
+            # "rrest": np.array([RATES["rrest"]], dtype=float),
+            "rrest": np.array([2.00, 0.20, 0.10], dtype=float),
             "krel": np.array([1.00], dtype=float),
             "Kp": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
             "Kz": np.array([0.00, 0.50, 1.00], dtype=float),
         },
         "meta": {
-            "nt": 100,
+            "nt": 10_000,
             "data_return": True,
             "total_return": True
         }
