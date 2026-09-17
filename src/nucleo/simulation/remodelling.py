@@ -112,30 +112,14 @@ def remodelling_obstacle(
     return np.array(alpha_array)
     
     
-def remodelling(
-    factmode,
-    alpha_array, s,
-    x, r_capt,
-    pos_obs, start_obs, end_obs,
-    alphar,
-    krel, Kp, Kz, t_rest, 
-):
-    
-    factmodes = ["passfull", "actifull", "actimemo"]
-    if factmode not in factmodes:
-        raise ValueError(f"You set factmode={factmode} which is not in {factmodes}")
-                
-    if factmode == "passfull":
-        if fact_passive(Kp):
-            r_capt = alphar
+# def remodelling(
+#     factmode,
+#     alpha_array, s,
+#     x, r_capt,
+#     pos_obs, start_obs, end_obs,
+#     alphar,
+#     krel, Kp, Kz, t_rest, 
+# ):
 
-    elif factmode == "actifull":
-        if fact_active(krel, Kp, Kz, t_rest):
-            r_capt = alphar
-
-    elif factmode == "actimemo":
-        if fact_active(krel, Kp, Kz, t_rest):
-            alpha_array = remodelling_obstacle(s, alpha_array, x, pos_obs, start_obs, end_obs, alphar)
-            r_capt = alpha_array[x]    
             
-    return(r_capt, alpha_array)
+#     return(r_capt, alpha_array)

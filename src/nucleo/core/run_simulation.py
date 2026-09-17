@@ -370,7 +370,7 @@ def sw_nucleo(
         
         # Gillespie One-Step
         if algo == "1S":
-            results, t_matrix, x_matrix = gillespie_algo_one_step(
+            t_matrix, x_matrix, results, results_c = gillespie_algo_one_step(
                 nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
             )
             
@@ -379,10 +379,10 @@ def sw_nucleo(
             t_matrix, x_matrix, results, results_c = gillespie_algo_two_steps(
                 fact, mode,
                 alpha_matrix, alpha_matrix_c,
-                p,
-                s, 
-                alphao, beta,
+                p, s, 
+                alphaf, alphao, beta,
                 rcapt, rrest, 
+                c_linker, c_nucleo,
                 alphac, alphar, 
                 krel, Kp, Kz, 
                 L, origin, bps,
@@ -510,17 +510,10 @@ def sw_nucleo(
 
         # ------- [Base Pairs][vc_*]
 
-        # # Conversion
-        # x_matrix_c = clc_compaction_positions(
-        #         alpha_matrix_c, x_analysis, c_linker, c_nucleo
-        #     )
-
         # Linear speeds
         _, _, _, vc_mean, vc_med = clc_results(
             results_c, dt, alpha0, bound_m, bound_h
         )
-
-        print(vc_mean)
 
         # # Instantaneous Speeds (In Base Pairs ?)
         # dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
