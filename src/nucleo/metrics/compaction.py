@@ -123,16 +123,21 @@ def clc_bp_speeds(
 # 2.2 Second Method
 
 
-def clc_compaction_landscape(alpha_matrix: np.ndarray) -> np.ndarray:
-    """
-    Cumulative sum of alpha along the genome axis.
-    Used to compute sum(alpha, x0→x1) = C[x1] - C[x0] in O(1).
-    """
-    return np.cumsum(alpha_matrix, axis=1)
+def clc_compaction_landscape(
+        x: np.ndarray, 
+        alphaf: float, 
+        alphao: float, 
+        c_linker: float, 
+        c_nucleo: float
+) -> np.ndarray:
+    x = np.asarray(x)
+    compaction = np.where(x == alphao, c_nucleo,
+                  np.where(x == alphaf, c_linker, np.nan))
+    return compaction
 
 
 def clc_compaction_positions(
-    alpha_matrix: np.ndarray,
+    alpha_matrix_c: np.ndarray,
     x_matrix: np.ndarray,
     c_linker: float,
     c_nucleo: float,
@@ -141,7 +146,6 @@ def clc_compaction_positions(
     x_bp[i, j] = cumulative sum of delta_bp from 0 to j
     """
     n_i, n_j = x_matrix.shape
-    alpha_matrix_c = clc_compaction_landscape(alpha_matrix)
     x_bp = np.full((n_i, n_j), np.nan)
 
     for i in range(n_i):
@@ -160,20 +164,3 @@ def clc_compaction_positions(
             x_bp[i, j + 1] = cumul
 
     return x_bp
-
-
-# def clc_compaction_statistics(
-#         alpha_matrix: np.ndarray, t_matrix: np.ndarray, x_matrix: np.ndarray,
-#         c_linker: float, c_nucleo: float
-#     ):
-
-#     alpha_matrix_c = clc_compaction_landscape(alpha_matrix)
-#     vc_array = clc_compaction_speeds(alpha_matrix_c, t_matrix, x_matrix, c_linker, c_nucleo)
-
-#     vc_mean = np.nanmean(vc_array)
-#     vc_med  = np.nanmedian(vc_array)
-
-#     vc_points, vc_distrib = clc_distrib(data=vc_array, first_bin=0, last_bin=1000, bin_width=1)
-#     vc_mp   = vc_points[np.where(vc_distrib == np.max(vc_distrib))]
-
-#     return vc_points, vc_distrib, vc_mean, vc_med, vc_mp

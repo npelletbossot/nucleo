@@ -253,6 +253,7 @@ def sw_nucleo(
     alphac: float, alphad: float, alphar: float, 
     krel: float, Kp: float, Kz: float,
     Lmin: int, Lmax: int, bps: int, origin: int,
+    c_linker: float, c_nucleo: float,
     tmax: float, dt: float,
     bound_l: int, bound_m: int, bound_h: int,
     nt: int, path: str,
@@ -293,10 +294,6 @@ def sw_nucleo(
     """
 
     # ------------------- Initialization ------------------- #
-    
-    # Compactions
-    c_linker = 10 / 10
-    c_nucleo = 150 / 35
 
     # Title & Folder    
     title = (
@@ -349,7 +346,7 @@ def sw_nucleo(
                 alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], alphad, alphaf, alphao, first_point, last_point)
 
         # Chromatin generation : Compaction
-        alpha_matrix_c = clc_compaction_landscape(alpha_matrix)
+        alpha_matrix_c = clc_compaction_landscape(alpha_matrix, alphaf, alphao, c_linker, c_nucleo)
 
                 
     except Exception as e:
@@ -511,22 +508,26 @@ def sw_nucleo(
 
     try:
 
-        # # ------- [Base Pairs][vc_*]
+        # ------- [Base Pairs][vc_*]
 
         # # Conversion
         # x_matrix_c = clc_compaction_positions(
-        #         alpha_matrix, x_analysis, c_linker, c_nucleo
+        #         alpha_matrix_c, x_analysis, c_linker, c_nucleo
         #     )
-
-        # # Trajectories
-        # results_c = reconstitute_mean_trajectory(
-        #     t_analysis, x_matrix_c, tmax, dt
-        # )
 
         # Linear speeds
         _, _, _, vc_mean, vc_med = clc_results(
             results_c, dt, alpha0, bound_m, bound_h
         )
+
+        print(vc_mean)
+
+        # # Instantaneous Speeds (In Base Pairs ?)
+        # dx_points, dx_distrib, dx_mean, dx_med, dx_mp, \
+        # dt_points, dt_distrib, dt_mean, dt_med, dt_mp, \
+        # vi_points, vi_distrib, vi_mean, vi_med, vi_mp = clc_inst_speeds(
+        #     t_analysis, x_analysis
+        # )
                     
     except Exception as e:
         print(f"Analysis 4.2 : Speeds in Base Pairs")
@@ -780,6 +781,7 @@ def process_run(params: dict, formalism: dict, chromatin: dict, time: dict, meta
         params["krel"], params["Kp"], params["Kz"],
         
         chromatin["Lmin"], chromatin["Lmax"], chromatin["bps"], chromatin["origin"],
+        chromatin["c_linker"], chromatin["c_nucleo"],
         time["tmax"], time["dt"],
         formalism["bound_l"], formalism["bound_m"], formalism["bound_h"],
 

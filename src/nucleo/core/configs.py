@@ -88,7 +88,9 @@ def choose_configuration(config: str) -> dict:
         "Lmin": 0,          # First point of chromatin (included !)
         "Lmax": 70_000,     # Last point of chromatin (excluded !)
         "bps": 1,           # Based pair step 1 per 1
-        "origin": 10_000    # Falling point of condensin on chromatin 
+        "origin": 10_000,   # Falling point of condensin on chromatin 
+        "c_linker": 10/10,  # Compaction of linker
+        "c_nucleo": 150/35  # Compaction of linker
     }
 
     TIME = {
@@ -262,7 +264,8 @@ def choose_configuration(config: str) -> dict:
         },
         "rates": {
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
-            "rrest": np.array([2.00, 0.20, 0.10], dtype=float),
+            "rrest": np.array([RATES["rrest"]], dtype=float),
+            # "rrest": np.array([2.00, 0.20, 0.10], dtype=float),
             "krel": np.array([1.00], dtype=float),
             "Kp": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
             "Kz": np.array([0.00, 0.50, 1.00], dtype=float),

@@ -204,6 +204,7 @@ def gillespie_algo_one_step(
     # --- Random Seed --- #
     np.random.seed(None)
 
+
     # --- Starting values --- #
     beta_matrix = np.tile(np.full(lenght, beta), (nt, 1))
 
@@ -216,6 +217,11 @@ def gillespie_algo_one_step(
     t_matrix = np.empty(nt, dtype=object)
     x_matrix = np.empty(nt, dtype=object)
 
+
+    # --- Cumulative Values of Compaction --- #
+    AMC_cum = np.cumsum(alpha_matrix_c, axis=1)
+
+
     # --- Loop on trajectories --- #
     for _ in range(0,nt) :
 
@@ -223,16 +229,16 @@ def gillespie_algo_one_step(
         t = 0
         # x = 0
         x = folding(alpha_matrix[_], origin)    # Initial calculation
-        px = np.copy(x)                     # Copy for later use (filling the matrix)
+        px = np.copy(x)                         # Copy for later use (filling the matrix)
         ox = np.copy(x)                         # Initial point on the chromatin (used to reset trajectories to start at zero)
         i0 = 0                                  # Initial index
-        pxc = alpha_matrix_c[x]
-        oxc = alpha_matrix_c[x]
+        pxc = AMC_cum[x]
+        oxc = AMC_cum[x]
         i = 0                                   # Current index
 
         # Initial calibration
         results[_][0] = x                       # Store the initial time
-        results_c[_][0] = alpha_matrix_c[x]     # 
+        results_c[_][0] = alpha_matrix_c[x]     # Initial compaction
         t_list = [t]                            # List to track time points
         x_list = [x-ox]                         # List to track recalibrated positions
 
@@ -302,7 +308,7 @@ def gillespie_algo_one_step(
             results_c[_][i0:int(min(np.floor(tmax/dt),i)+1)] = int(pxc-oxc)
             i0 = i+1
             px = np.copy(x)
-            pxc = np.copy(alpha_matrix_c[x])
+            pxc = np.copy(AMC_cum[x])
 
         # All datas
         t_matrix[_] = t_list
@@ -441,6 +447,7 @@ def gillespie_algo_two_steps(
     np.random.seed(None)
     
     # --- Starting matrices --- #
+    AMC_cum         = np.cumsum(alpha_matrix_c, axis=1)
     beta_matrix     = np.tile(np.full(len(L)*bps, beta), (nt, 1))
     t_matrix        = np.empty(nt, dtype=object)    # All times
     x_matrix        = np.empty(nt, dtype=object)    # All positions
@@ -448,7 +455,6 @@ def gillespie_algo_two_steps(
     results_c       = np.empty((nt, int(tmax/dt)))  # Base Pairs
     results.fill(np.nan)
     results_c.fill(np.nan)
-
     
     # --- FACT Conditions for Homogen Landscapes --- #
     if np.all(alpha_matrix == alpha_matrix[0, 0]):
@@ -461,23 +467,27 @@ def gillespie_algo_two_steps(
         
         # Landscape and Obstacles
         alpha_array     = alpha_matrix[n]
-        alpha_array_c   = alpha_matrix_c[n]
+        AMC_cum_n       = AMC_cum[n]
+
+        # Finfing blocks
         if not homogen:
             pos_obs     = find_blocks(alpha_array, alphao)
             start_obs   = pos_obs[:, 0]
             end_obs     = pos_obs[:, 1]
             
         # Initialization of starting values
-        t, t_capt, t_rest = 0, 0, 0                     # First times
-        x = folding(alpha_array, origin)                # Initial calculation
-        px, ox  = np.copy(x), np.copy(x)                # Previous_x and Origin_x
-        pxc, oxc = alpha_array_c[x], alpha_array_c[x]   # Base Pairs
-        i0, i   = 0, 0                                  # Ranks of filling results
+        t, t_capt, t_rest   = 0, 0, 0                       # First times
+        x = folding(alpha_array, origin)                    # Initial calculation
+        px, ox              = np.copy(x), np.copy(x)        # Previous_x and Origin_x
+        xc                  = AMC_cum_n[x]
+        pxc, oxc            = AMC_cum_n[x], AMC_cum_n[x]    # Base Pairs
+        i0, i               = 0, 0                          # Ranks of filling results
 
         # Initial calibration
-        results[n][0] = x - ox  # Store the initial position
-        t_list = [t]            # List to track time points
-        x_list = [x-ox]         # List to track recalibrated positions
+        results[n][0]   = px - ox   # Store the initial position
+        results_c[n][0] = pxc - oxc # Store the initial position
+        t_list          = [t]       # List to track time points
+        x_list          = [x-ox]    # List to track recalibrated positions
 
         # --- Loop Over Time --- #
         while (t<tmax) :
@@ -494,7 +504,7 @@ def gillespie_algo_two_steps(
             # --- Jumping : Destination --- #
             x_jump  = int(np.random.choice(L, p=p))
             x       += x_jump
-            xc      = alpha_array_c[x]
+            xc      = AMC_cum_n[x]
             r0_capt = np.random.rand()
             r_capt  = alpha_array[x]
             
@@ -522,7 +532,7 @@ def gillespie_algo_two_steps(
             
             # --- Capturing : Time Condition --- #
             if np.isinf(t_capt) == True:
-                t = 1e308
+                t_capt = 1e308
             t += t_capt
 
             # --- Capturing : First Acquisition --- #
@@ -551,13 +561,14 @@ def gillespie_algo_two_steps(
                 LE = True
             else : 
                 LE = False
-                x = np.copy(px)
+                x   = np.copy(px)
+                xc  = np.copy(pxc)
 
             # --- Capturing : Second Acquisition 2.2 --- #
             t_list.append(t)
             x_list.append(x-ox)
             px  = np.copy(x)
-            pxc = np.copy(alpha_array_c[x])
+            pxc = np.copy(xc)
                         
         # --- Data Update --- #
         t_matrix[n] = t_list
