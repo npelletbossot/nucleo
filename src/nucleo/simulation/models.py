@@ -551,8 +551,9 @@ def gillespie_algo_two_steps(
 
                         # -- Base Pairs
                         AMC_cum_n = np.cumsum(clc_compaction_landscape(
-                                    alpha_array, alphaf, alphao, c_linker, c_nucleo) 
-                                    )
+                                    alpha_array, alphaf, alphao, c_linker, c_nucleo
+                                    ) 
+                                )
                         xc = AMC_cum_n[x]
 
 
