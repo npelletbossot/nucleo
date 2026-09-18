@@ -260,7 +260,8 @@ def choose_configuration(config: str) -> dict:
             "beta": np.array([PROBAS["beta"]], dtype=float),
             "alphac": np.array([PROBAS["alphac"]], dtype=float),
             "alphad": np.array([PROBAS["alphad"]], dtype=float),
-            "alphar": np.array([PROBAS["alphar"]], dtype=float),
+            # "alphar": np.array([PROBAS["alphar"]], dtype=float),
+            "alphar": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
         },
         "rates": {
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
