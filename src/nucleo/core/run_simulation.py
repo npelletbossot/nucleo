@@ -371,7 +371,7 @@ def sw_nucleo(
         # Gillespie One-Step
         if algo == "1S":
             t_matrix, x_matrix, results, results_c = gillespie_algo_one_step(
-                nt, tmax, dt, alpha_matrix, beta, Lmax, lenght, origin, p
+                nt, tmax, dt, alpha_matrix, alpha_matrix_c, beta, Lmax, lenght, origin, p
             )
             
         # Gillespie Two-Steps

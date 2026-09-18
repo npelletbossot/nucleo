@@ -261,7 +261,7 @@ def plot_fitting_summary(times, positions, v_mean,
     axes[0, 1].plot(times[1:], xt_over_t, marker='o', alpha=0.5, label='x(t)/t', c='g')
     axes[0, 1].axvline(x=bound_low, ls=':')
     axes[0, 1].axvline(x=bound_high, ls='--')
-    axes[0, 1].axhline(y=vf, c='r', ls=':', label = rf"$v_f = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$")
+    axes[0, 1].axhline(y=vf, c='r', ls=':', label=rf"$v_{{\mathrm{{init}}}} = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$")
     axes[0, 1].set_title("x(t)/t - Cartesian")
     axes[0, 1].set_xlabel(r"Time $t~(1/k_0)$")
     axes[0, 1].set_ylabel("x(t)/t")
@@ -272,7 +272,7 @@ def plot_fitting_summary(times, positions, v_mean,
     axes[1, 1].plot(times[1:], xt_over_t, marker='o', alpha=0.5, label='x(t)/t', c='g')
     axes[1, 1].axvline(x=bound_low, ls=':')
     axes[1, 1].axvline(x=bound_high, ls='--')
-    axes[1, 1].axhline(y=vf, c='r', ls=':', label = rf"$v_f = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$")
+    axes[1, 1].axhline(y=vf, c='r', ls=':', label=rf"$v_{{\mathrm{{init}}}} = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$")
     axes[1, 1].set_title("x(t)/t - Log-Log")
     axes[1, 1].set_xlabel(r"Time $t~(1/k_0)$")
     axes[1, 1].set_ylabel("x(t)/t")
@@ -305,7 +305,7 @@ def plot_fitting_summary(times, positions, v_mean,
 
     # --- Subplot 7: Final result - Cartesian ---
     axes[0, 3].plot(times_to_plot, pos_to_plot, marker='o', alpha=0.5, label='data', c='b')
-    axes[0, 3].plot(times[:bound_low], times[:bound_low] * vf, label = rf"$v_f = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$", c='r', marker='x')
+    axes[0, 3].plot(times[:bound_low], times[:bound_low] * vf, label=rf"$v_{{\mathrm{{init}}}} = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$", c='r', marker='x')
     axes[0, 3].plot(times[bound_high:], Cf * np.power(times[bound_high:], wf), label = rf"$w_f = {np.round(wf, rf)} ± {np.round(wf_std, rf)}$", c='r', marker='+')
     axes[0, 3].axvline(x=bound_low, ls=':')
     axes[0, 3].axvline(x=bound_high, ls='--')
@@ -317,7 +317,7 @@ def plot_fitting_summary(times, positions, v_mean,
 
     # --- Subplot 8: Final result - Log-Log ---
     axes[1, 3].plot(times_to_plot, pos_to_plot, marker='o', alpha=0.5, label='data', c='b')
-    axes[1, 3].plot(times[:bound_low], vf * times[:bound_low], label = rf"$v_f = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$", c='r', marker='x')
+    axes[1, 3].plot(times[:bound_low], vf * times[:bound_low], label=rf"$v_{{\mathrm{{init}}}} = {np.round(vf, rf)} ± {np.round(vf_std, rf)}$", c='r', marker='x')
     axes[1, 3].plot(times[bound_high:], Cf * np.power(times[bound_high:], wf), label = rf"$w_f = {np.round(wf, rf)} ± {np.round(wf_std, rf)}$", c='r', marker='+')
     axes[1, 3].axvline(x=bound_low, ls=':')
     axes[1, 3].axvline(x=bound_high, ls='--')

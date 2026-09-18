@@ -23,12 +23,12 @@ import multiprocessing
 #     "COMPACTION": ["COMPACTION_RANDOM", "COMPACTION_PERIODIC"],
 #     "RYU": ["TWO_STEPS"],
 #     "FACT": ["FACT_PASSIVE_FULL", "FACT_PASSIVE_MEMORY", "FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
-#     "FIGURES": ["FIGURE_1", "FIGURE_2", "FIGURE_3"],
+#     "FIGURES": ["FIGURE_1", "FIGURE_2", "FIGURE_3", "FIGURE_4"],
 #     "TEST": ["TEST"]
 # }
 
 if __name__ == "__main__":
     multiprocessing.set_start_method("spawn", force=True)
     main(
-        STUDY = "FIGURES"
+        STUDY = "FIGURE_4"
 )
