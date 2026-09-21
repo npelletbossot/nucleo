@@ -44,7 +44,8 @@ def plot_single_heatmap(
     type_of_data="raw",
     plot_log2=False,
     dashed_line=True,
-    title=True
+    title=True,
+    xlim=500
 ):
     """
     Plot a single heatmap inside a given axis.
@@ -95,13 +96,13 @@ def plot_single_heatmap(
     if plot_log2:
         title_bar_mini = "log₂ ("
     else:
-        title_bar_mini = ""
+        title_bar_mini = "("
 
     if type_of_data not in ["raw", "norm_mu", "norm_th"]:
         raise ValueError(f"type_of_data not in : ['raw', 'norm_mu', 'norm_th'] got {type_of_data}")
 
     elif type_of_data == "raw":
-        title_bar = title_bar_mini + "v"
+        title_bar = title_bar_mini + "v)"
         if plot_log2:
             vmin, vmax = -2, 10
         else:
@@ -214,8 +215,8 @@ def plot_single_heatmap(
     ax.set_xlabel("$\\mu(\\sigma)$")
     ax.set_ylabel("$\\theta(\\sigma)$")
 
-    ax.set_xlim(100, 600)       
-    ax.set_xticks(np.arange(100, 600+1, 100))
+    ax.set_xlim(100, xlim)       
+    ax.set_xticks(np.arange(100, xlim+1, 100))
     ax.set_yticks(np.arange(20, 100+1, 20))
 
     return c
@@ -278,6 +279,7 @@ def plot_one_heatmap_from_df(
     plot_log2=False,
     dashed_line=True,
     title=True,
+    xlim=500
 ):
     """
     Plot UNE heatmap (une config, un speed_col) à partir du DataFrame long.
@@ -322,9 +324,13 @@ def plot_one_heatmap_from_df(
         plot_log2=plot_log2,
         dashed_line=dashed_line,
         title=title,
+        xlim=xlim
     )
 
     return ax, c
+
+
+# ------------------------------------------------------------------------ MULTIPLE HEATMAPS
 
 
 def plot_all_heatmaps(
