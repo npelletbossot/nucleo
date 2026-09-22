@@ -272,7 +272,7 @@ def choose_configuration(config: str) -> dict:
             "Kz": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
         },
         "meta": {
-            "nt": 10,
+            "nt": 10_000,
             "data_return": True,
             "total_return": True
         }
