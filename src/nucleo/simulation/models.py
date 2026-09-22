@@ -551,11 +551,10 @@ def gillespie_algo_two_steps(
 
                         # -- Base Pairs
                         AMC_cum_n = np.cumsum(clc_compaction_landscape(
-                                    alpha_array, alphaf, alphao, c_linker, c_nucleo
+                                    alpha_array, c_linker, c_nucleo
                                     ) 
                                 )
                         xc = AMC_cum_n[x]
-
 
             # --- Capturing : Time Condition --- #
             if np.isinf(t_capt) == True:
@@ -580,7 +579,7 @@ def gillespie_algo_two_steps(
             i = int(np.floor(t/dt)) 
             j = int(min(np.floor(tmax/dt),i)+1)
             results[n][i0:j]    = int(x - ox)
-            results_c[n][i0:j]  = int(xc - oxc)
+            results_c[n][i0:j]  = int(xc - oxc) # SUREMENT ICI LE PROBLEME
             i0 = np.copy(i) + 1
                   
             # --- Capturing : Stochasticity --- #

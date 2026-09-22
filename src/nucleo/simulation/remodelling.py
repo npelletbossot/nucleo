@@ -111,15 +111,3 @@ def remodelling_obstacle(
                     
     return np.array(alpha_array)
     
-    
-# def remodelling(
-#     factmode,
-#     alpha_array, s,
-#     x, r_capt,
-#     pos_obs, start_obs, end_obs,
-#     alphar,
-#     krel, Kp, Kz, t_rest, 
-# ):
-
-            
-#     return(r_capt, alpha_array)

@@ -192,17 +192,17 @@ def checking_inputs(
                     f"Invalid {name}={val}: must be a float strictly > 0."
                 )
     
-        # --- krel ( = kBp + kU) ---
-        if krel < 0:
-            raise ValueError(
-                f"Invalid krel={krel}: must be a float > or = to 0."
-            )
-        # --- Kp and Kz (probabilities) ---
-        kcheck = np.asarray([Kp, Kz])
-        if not np.all((0.0 <= kcheck) & (kcheck <= 1.0)):
-            raise ValueError(
-                f"Invalid Kp/Kz values: must be in [0, 1]. Got {kcheck}."
-            )
+        # # --- krel ( = kBp + kU) ---
+        # if krel < 0:
+        #     raise ValueError(
+        #         f"Invalid krel={krel}: must be a float > or = to 0."
+        #     )
+        # # --- Kp and Kz (probabilities) ---
+        # kcheck = np.asarray([Kp, Kz])
+        # if not np.all((0.0 <= kcheck) & (kcheck <= 1.0)):
+        #     raise ValueError(
+        #         f"Invalid Kp/Kz values: must be in [0, 1]. Got {kcheck}."
+        #     )
 
         # Chromatin
         if Lmin != 0:
@@ -346,7 +346,7 @@ def sw_nucleo(
                 alpha_matrix[i] = destroy_obstacles(alpha_matrix[i], alphad, alphaf, alphao, first_point, last_point)
 
         # Chromatin generation : Compaction
-        alpha_matrix_c = clc_compaction_landscape(alpha_matrix, alphaf, alphao, c_linker, c_nucleo)
+        alpha_matrix_c = clc_compaction_landscape(alpha_matrix, c_linker, c_nucleo)
 
                 
     except Exception as e:

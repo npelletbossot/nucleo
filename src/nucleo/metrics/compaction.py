@@ -124,15 +124,11 @@ def clc_bp_speeds(
 
 
 def clc_compaction_landscape(
-        x: np.ndarray, 
-        alphaf: float, 
-        alphao: float, 
+        alpha_matrix: np.ndarray,  
         c_linker: float, 
         c_nucleo: float
 ) -> np.ndarray:
-    x = np.asarray(x)
-    compaction = np.where(x == alphao, c_nucleo,
-                  np.where(x == alphaf, c_linker, np.nan))
+    compaction = c_linker * alpha_matrix + c_nucleo * (1 - alpha_matrix)
     return compaction
 
 
