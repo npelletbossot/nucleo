@@ -547,14 +547,17 @@ def gillespie_algo_two_steps(
                         alpha_array = remodelling_obstacle(
                             s, alpha_array, x, pos_obs, start_obs, end_obs, alphar
                             )
+                        
                         r_capt = alpha_array[x]
+                        # New acceptance due to remodelling
 
                         # -- Base Pairs
                         AMC_cum_n = np.cumsum(clc_compaction_landscape(
                                     alpha_array, c_linker, c_nucleo
                                     ) 
                                 )
-                        xc = AMC_cum_n[x]
+                        # xc = AMC_cum_n[x] 
+                        # # Base Pairs integration at the next jump
 
             # --- Capturing : Time Condition --- #
             if np.isinf(t_capt) == True:
