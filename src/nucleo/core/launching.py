@@ -220,7 +220,7 @@ def main(STUDY):
         "COMPACTION": ["COMPACTION_RANDOM", "COMPACTION_PERIODIC"],
         "RYU"       : ["TWO_STEPS"],
         "FACT"      : ["FACT_ACTIVE_FULL", "FACT_ACTIVE_MEMORY"],
-        "FIGURES"   : ["FIGURE_1", "FIGURE_2", "FIGURE_3", "FIGURE_4"],
+        "FIGURES"   : ["FIGURE_1", "FIGURE_2", "FIGURE_3", "FIGURE_4", "SUPFIG"],
         "TESTS"     : ["TEST_1S", "TEST_2S"],
         "WORK"      : ["WORK"]
     }
