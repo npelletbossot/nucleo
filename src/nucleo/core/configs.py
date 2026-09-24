@@ -575,7 +575,7 @@ def choose_configuration(config: str) -> dict:
         "FIGURE_4": {
             **ONESTEP__BASE,
             "geometry": {
-                "land": np.array(['random']),
+                "land": np.array(['random', 'periodic', 'homogen']),
                 "s": np.array([150], dtype=int),
                 "l": np.array([10], dtype=int),
                 "bpmin": np.array([0], dtype=int)
