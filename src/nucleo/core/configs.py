@@ -267,12 +267,12 @@ def choose_configuration(config: str) -> dict:
             "rcapt": np.array([RATES["rcapt"]], dtype=float),
             "rrest": np.array([RATES["rrest"]], dtype=float),
             "krel": np.logspace(-1, 1, 4, dtype=float),
-            "Kp": np.logspace(-1, 0, 3, dtype=float),
+            "Kp": np.logspace(-1,-1/2, 3, dtype=float),
             # "Kp": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
             "Kz": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
         },
         "meta": {
-            "nt": 10,
+            "nt": 10_000,
             "data_return": True,
             "total_return": True
         }

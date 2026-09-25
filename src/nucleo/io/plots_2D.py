@@ -102,7 +102,7 @@ def plot_single_heatmap(
         raise ValueError(f"type_of_data not in : ['raw', 'norm_mu', 'norm_th'] got {type_of_data}")
 
     elif type_of_data == "raw":
-        title_bar = title_bar_mini + "v)"
+        title_bar = title_bar_mini + f"{speed_col_label(speed_col)})"
         if plot_log2:
             vmin, vmax = -2, 10
         else:
