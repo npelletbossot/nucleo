@@ -592,6 +592,27 @@ def choose_configuration(config: str) -> dict:
             }
         },
 
+
+        "FIGURE_5": {
+            **ONESTEP__BASE,
+            "geometry": {
+                "land": np.array(['random']),
+                "s": np.array([150], dtype=int),
+                "l": np.array([10, 20, 50, 100, 150], dtype=int),
+                "bpmin": np.array([0, 5, 10, 15], dtype=int)
+            },
+            "probas": {
+                **ONESTEP__BASE["probas"],
+                "mu": np.array([150]),
+                "theta": np.array([100]),
+            },
+            "meta": {
+                **ONESTEP__BASE["meta"],
+                "nt": 10_000,
+                "path": f"{PROJECT['project_name']}__fig5"
+            }
+        },
+
         "SUPFIG": {
             **ONESTEP__BASE,
             "geometry": {
