@@ -268,7 +268,7 @@ def choose_configuration(config: str) -> dict:
             "rrest": np.array([RATES["rrest"]], dtype=float),
             "krel": np.logspace(-1, 1, 4, dtype=float),
             # "Kp": np.logspace(-1,-1/2, 3, dtype=float),
-            "Kp": np.array([0.1, 0.3, 0.6, 1], dtype=int),
+            "Kp": np.array([0.1, 0.2, 0.3, 0.6], dtype=int),
             # "Kp": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
             "Kz": np.arange(0.0, 1.0 + 0.10, 0.10, dtype=float),
         },
