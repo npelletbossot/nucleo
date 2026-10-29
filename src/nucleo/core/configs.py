@@ -635,6 +635,27 @@ def choose_configuration(config: str) -> dict:
         },
 
 
+        "FIGPRES": {
+            **ONESTEP__BASE,
+            "geometry": {
+                "land": np.array(['random', 'periodic', 'homogen']),
+                "s": np.array([150], dtype=int),
+                "l": np.array([10], dtype=int),
+                "bpmin": np.array([0], dtype=int)
+            },
+            "probas": {
+                **ONESTEP__BASE["probas"],
+                "mu": np.array([150]),
+                "theta": np.array([100]),
+            },
+            "meta": {
+                **ONESTEP__BASE["meta"],
+                "nt": 10_000,
+                "path": f"{PROJECT['project_name']}__figpres"
+            }
+        },
+
+
     }
     
     # ---- RETURN ---- #
